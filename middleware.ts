@@ -1,0 +1,81 @@
+import { NextResponse, type NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
+
+// Routes yang tidak memerlukan authentication
+const publicRoutes = ['/', '/login', '/register', '/auth/callback']
+
+// Routes berdasarkan role
+const roleRoutes = {
+  user: ['/dashboard', '/roadmap', '/vision', '/consult', '/onboarding'],
+  doctor: ['/doctor'],
+  admin: ['/admin'],
+}
+
+export async function middleware(request: NextRequest) {
+  const { user, supabaseResponse, supabase } = await updateSession(request)
+  const pathname = request.nextUrl.pathname
+
+  // Skip public routes
+  if (publicRoutes.some(route => pathname === route || pathname.startsWith('/auth'))) {
+    return supabaseResponse
+  }
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  // Get user role from profiles table
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  const role = profile?.role || 'user'
+
+  // Check route access based on role
+  const isAdminRoute = pathname.startsWith('/admin')
+  const isDoctorRoute = pathname.startsWith('/doctor')
+  const isUserRoute = roleRoutes.user.some(route => pathname.startsWith(route))
+
+  // Redirect if user doesn't have access
+  if (isAdminRoute && role !== 'admin') {
+    const url = request.nextUrl.clone()
+    url.pathname = role === 'doctor' ? '/doctor/dashboard' : '/dashboard'
+    return NextResponse.redirect(url)
+  }
+
+  if (isDoctorRoute && role !== 'doctor' && role !== 'admin') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
+
+  // Check if doctor is verified
+  if (isDoctorRoute && role === 'doctor') {
+    const { data: doctorProfile } = await supabase
+      .from('doctor_profiles')
+      .select('is_verified')
+      .eq('user_id', user.id)
+      .single()
+
+    if (!doctorProfile?.is_verified) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/doctor/pending'
+      if (pathname !== '/doctor/pending') {
+        return NextResponse.redirect(url)
+      }
+    }
+  }
+
+  return supabaseResponse
+}
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}
