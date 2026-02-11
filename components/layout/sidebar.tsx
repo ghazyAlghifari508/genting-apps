@@ -23,7 +23,7 @@ const navItems = [
   { icon: Route, label: 'Roadmap', href: '/roadmap' },
   { icon: Camera, label: 'GENTING Vision', href: '/vision' },
   { icon: BookOpen, label: 'Education Hub', href: '/education' },
-  { icon: Stethoscope, label: 'Konsultasi', href: '/consult' },
+  { icon: Stethoscope, label: 'Konsultasi', href: '/konsultasi-dokter' },
   { icon: MessageCircle, label: 'Chat', href: '/chat' },
 ]
 

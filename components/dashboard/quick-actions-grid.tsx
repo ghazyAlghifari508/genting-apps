@@ -39,7 +39,7 @@ const quickActions: QuickAction[] = [
     icon: Stethoscope,
     title: 'Konsultasi Spesialis',
     desc: 'Chat Dokter Profesional',
-    href: '/consult',
+    href: '/konsultasi-dokter',
     color: 'bg-cerulean/10 text-cerulean'
   },
 ]

@@ -15,6 +15,9 @@
   --background: var(--genting-floral);
   --foreground: 34 40 45;
   
+  --popover: 255 255 255;
+  --popover-foreground: 34 40 45;
+  
   /* Card glassmorphism */
   --card: 255 255 255 / 0.8;
   --card-foreground: 34 40 45;
@@ -60,6 +63,9 @@
   --background: 15 25 30;
   --foreground: 240 250 255;
   
+  --popover: 20 35 45;
+  --popover-foreground: 240 250 255;
+  
   --card: 20 35 45 / 0.9;
   --card-foreground: 240 250 255;
   
@@ -78,6 +84,8 @@
   --color-foreground: rgb(var(--foreground));
   --color-card: rgb(var(--card));
   --color-card-foreground: rgb(var(--card-foreground));
+  --color-popover: rgb(var(--popover));
+  --color-popover-foreground: rgb(var(--popover-foreground));
   --color-primary: rgb(var(--primary));
   --color-primary-foreground: rgb(var(--primary-foreground));
   --color-secondary: rgb(var(--secondary));

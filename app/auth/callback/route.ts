@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       if (profile?.role === 'admin') {
         return NextResponse.redirect(`${origin}/admin/dashboard`)
       } else if (profile?.role === 'doctor') {
-        return NextResponse.redirect(`${origin}/doctor/dashboard`)
+        return NextResponse.redirect(`${origin}/dashboard/doctor`)
       }
       
       return NextResponse.redirect(`${origin}${next}`)

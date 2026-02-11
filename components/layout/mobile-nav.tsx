@@ -16,7 +16,7 @@ const navItems = [
   { icon: Route, label: 'Roadmap', href: '/roadmap' },
   { icon: Camera, label: 'Vision', href: '/vision', primary: true },
   { icon: BookOpen, label: 'Edukasi', href: '/education' },
-  { icon: Stethoscope, label: 'Dokter', href: '/consult' },
+  { icon: Stethoscope, label: 'Dokter', href: '/konsultasi-dokter' },
 ]
 
 export function MobileNav() {

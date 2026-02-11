@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useAuth } from '@/hooks/useAuth'
 import { usePathname, useRouter } from 'next/navigation'
 import { 
   Leaf, 
@@ -17,6 +18,8 @@ import {
   User
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { DoctorRegistrationButton } from '@/components/layout/DoctorRegistrationButton'
+import { useUserRole } from '@/hooks/useUserRole'
 import { createClient } from '@/lib/supabase/client'
 import {
   DropdownMenu,
@@ -26,14 +29,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DoctorApplicationModal } from '@/components/doctor-application-modal'
 
 const dashboardNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
   { icon: Route, label: 'Roadmap', href: '/roadmap' },
   { icon: Camera, label: 'Vision', href: '/vision' },
   { icon: BookOpen, label: 'Education', href: '/education' },
-  { icon: Stethoscope, label: 'Konsultasi', href: '/consult' },
+  { icon: Stethoscope, label: 'Konsultasi', href: '/konsultasi-dokter' },
 ]
 
 const landingNavItems = [
@@ -45,39 +47,27 @@ export function TopNavbar() {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
-  const [user, setUser] = useState<any>(null)
-  const [showDocModal, setShowDocModal] = useState(false)
+  const { user } = useAuth()
+  const { role } = useUserRole()
+  const [scrolled, setScrolled] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsMounted(true)
-    const getUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        setUser(user)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    getUser()
-  }, [supabase])
+  }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/login')
   }
 
-  const userRole = user?.user_metadata?.role || 'user'
-  
   // Deterministic check for dashboard area to prevent flickering
   const isDashboardArea = pathname.startsWith('/dashboard') || 
                           pathname.startsWith('/roadmap') || 
                           pathname.startsWith('/vision') || 
-                          pathname.startsWith('/consult') ||
+                          pathname.startsWith('/konsultasi-dokter') ||
                           pathname.startsWith('/education') ||
                           pathname.startsWith('/profile') ||
-                          pathname.startsWith('/doctor') ||
                           pathname.startsWith('/admin')
 
   const activeNavItems = (user || isDashboardArea) ? dashboardNavItems : landingNavItems
@@ -119,19 +109,14 @@ export function TopNavbar() {
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-8 shrink-0 ml-8">
             {user ? (
               <>
-                {userRole === 'user' && (
-                  <Button 
-                    onClick={() => setShowDocModal(true)}
-                    variant="outline"
-                    className="hidden md:flex items-center gap-2 border-cerulean/20 bg-cerulean/5 text-cerulean hover:bg-cerulean hover:text-white rounded-xl font-bold transition-all border-2"
-                  >
-                    <Stethoscope className="w-4 h-4" />
-                    Jadi Dokter
-                  </Button>
-                )}
+                <div className="hidden md:block">
+                  <DoctorRegistrationButton isLoggedIn={!!user} userRole={role} />
+                </div>
+                
+
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -149,7 +134,7 @@ export function TopNavbar() {
                     <DropdownMenuLabel className="font-bold text-slate-900 px-3 py-2">
                       <div className="flex flex-col">
                         <span className="text-sm truncate">{user?.user_metadata?.full_name || 'Bunda GENTING'}</span>
-                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{userRole === 'doctor' ? 'Dokter Terverifikasi' : 'Ibu Hamil'}</span>
+                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{role === 'doctor' ? 'Dokter Terverifikasi' : 'Ibu Hamil'}</span>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-slate-100 mx-1" />
@@ -158,15 +143,7 @@ export function TopNavbar() {
                       Profil Saya
                     </DropdownMenuItem>
                     
-                    {userRole === 'user' && (
-                      <DropdownMenuItem 
-                        onClick={() => setShowDocModal(true)} 
-                        className="md:hidden rounded-xl px-3 py-2.5 cursor-pointer font-bold text-sm text-cerulean focus:bg-cerulean/5 focus:text-cerulean"
-                      >
-                        <Stethoscope className="mr-2 h-4 w-4" />
-                        Jadi Dokter
-                      </DropdownMenuItem>
-                    )}
+
 
                     <DropdownMenuItem onClick={() => router.push('/settings')} className="rounded-xl px-3 py-2.5 cursor-pointer font-bold text-sm text-slate-600 focus:bg-cerulean/5 focus:text-cerulean">
                       <Settings className="mr-2 h-4 w-4" />
@@ -180,7 +157,7 @@ export function TopNavbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
-            ) : (isMounted && !isLoading) ? (
+            ) : (isMounted) ? (
               <Link href="/login">
                 <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 h-12 font-bold shadow-lg shadow-slate-900/10">
                   Masuk
@@ -191,13 +168,7 @@ export function TopNavbar() {
         </div>
       </div>
       
-      {/* Mobile Doc Apply Button */}
-      {userRole === 'user' && (
-        <DoctorApplicationModal 
-          isOpen={showDocModal} 
-          onClose={() => setShowDocModal(false)} 
-        />
-      )}
+
     </nav>
   )
 }

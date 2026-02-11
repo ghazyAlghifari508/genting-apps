@@ -6,8 +6,8 @@ const publicRoutes = ['/', '/login', '/register', '/auth/callback']
 
 // Routes berdasarkan role
 const roleRoutes = {
-  user: ['/dashboard', '/roadmap', '/vision', '/consult', '/onboarding'],
-  doctor: ['/doctor'],
+  user: ['/dashboard', '/roadmap', '/vision', '/konsultasi-dokter', '/onboarding', '/booking', '/payment', '/consultations', '/consultation-history', '/doctors'],
+  doctor: ['/dashboard/doctor'],
   admin: ['/admin'],
 }
 
@@ -53,13 +53,13 @@ export async function middleware(request: NextRequest) {
 
   // Check route access based on role
   const isAdminRoute = pathname.startsWith('/admin')
-  const isDoctorRoute = pathname.startsWith('/doctor')
+  const isDoctorRoute = pathname.startsWith('/dashboard/doctor')
   const isUserRoute = roleRoutes.user.some(route => pathname.startsWith(route))
 
   // Redirect if user doesn't have access
   if (isAdminRoute && role !== 'admin') {
     const url = request.nextUrl.clone()
-    url.pathname = role === 'doctor' ? '/doctor/dashboard' : '/dashboard'
+    url.pathname = role === 'doctor' ? '/dashboard/doctor' : '/dashboard'
     return NextResponse.redirect(url)
   }
 
@@ -72,15 +72,15 @@ export async function middleware(request: NextRequest) {
   // Check if doctor is verified
   if (isDoctorRoute && role === 'doctor') {
     const { data: doctorProfile } = await supabase
-      .from('doctor_profiles')
+      .from('doctors')
       .select('is_verified')
       .eq('user_id', user.id)
       .single()
 
     if (!doctorProfile?.is_verified) {
       const url = request.nextUrl.clone()
-      url.pathname = '/doctor/pending'
-      if (pathname !== '/doctor/pending') {
+      url.pathname = '/dashboard/doctor/pending'
+      if (pathname !== '/dashboard/doctor/pending') {
         return NextResponse.redirect(url)
       }
     }
