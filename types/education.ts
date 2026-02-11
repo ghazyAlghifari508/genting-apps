@@ -20,13 +20,20 @@ export interface EducationContent {
 }
 
 export interface UserProfile {
-  id: string;
-  user_id: string;
-  status: UserStatus;
+  id: string; // auth.uid()
+  username?: string;
+  full_name?: string;
+  avatar_url?: string;
+  role: 'user' | 'doctor' | 'admin';
+  status?: UserStatus;
   pregnancy_month?: number;
   child_birth_date?: string;
   current_day: number;
   onboarding_completed: boolean;
+  pregnancy_week?: number;
+  current_weight?: number;
+  height?: number;
+  due_date?: string;
   created_at: string;
   updated_at: string;
 }

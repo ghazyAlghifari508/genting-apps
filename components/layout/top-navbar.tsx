@@ -34,7 +34,6 @@ const dashboardNavItems = [
   { icon: Camera, label: 'Vision', href: '/vision' },
   { icon: BookOpen, label: 'Education', href: '/education' },
   { icon: Stethoscope, label: 'Konsultasi', href: '/consult' },
-  { icon: MessageCircle, label: 'Chat', href: '/chat' },
 ]
 
 const landingNavItems = [
@@ -49,12 +48,17 @@ export function TopNavbar() {
   const [user, setUser] = useState<any>(null)
   const [showDocModal, setShowDocModal] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsMounted(true)
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
+      } finally {
+        setIsLoading(false)
+      }
     }
     getUser()
   }, [supabase])
@@ -65,14 +69,26 @@ export function TopNavbar() {
   }
 
   const userRole = user?.user_metadata?.role || 'user'
-  const activeNavItems = user ? dashboardNavItems : landingNavItems
+  
+  // Deterministic check for dashboard area to prevent flickering
+  const isDashboardArea = pathname.startsWith('/dashboard') || 
+                          pathname.startsWith('/roadmap') || 
+                          pathname.startsWith('/vision') || 
+                          pathname.startsWith('/consult') ||
+                          pathname.startsWith('/education') ||
+                          pathname.startsWith('/profile') ||
+                          pathname.startsWith('/doctor') ||
+                          pathname.startsWith('/admin')
+
+  const activeNavItems = (user || isDashboardArea) ? dashboardNavItems : landingNavItems
+  const logoHref = (user || isDashboardArea) ? "/dashboard" : "/"
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-floral/80 backdrop-blur-md border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 group shrink-0">
+          <Link href={logoHref} className="flex items-center gap-2 group shrink-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cerulean to-sea-green flex items-center justify-center shadow-lg shadow-cerulean/20 transition-transform group-hover:scale-110">
               <Leaf className="w-6 h-6 text-white" />
             </div>
@@ -164,7 +180,7 @@ export function TopNavbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
-            ) : isMounted ? (
+            ) : (isMounted && !isLoading) ? (
               <Link href="/login">
                 <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 h-12 font-bold shadow-lg shadow-slate-900/10">
                   Masuk

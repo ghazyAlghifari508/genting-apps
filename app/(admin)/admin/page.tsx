@@ -18,6 +18,7 @@ import {
   Loader2
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { LoadingScreen } from '@/components/ui/loading-screen'
 import { useRouter } from 'next/navigation'
 import {
   LineChart,
@@ -196,11 +197,7 @@ export default function AdminDashboardPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen gradient-bg flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-lavender border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <LoadingScreen message="Memuat Dashboard Admin..." fullScreen />;
   }
 
   return (

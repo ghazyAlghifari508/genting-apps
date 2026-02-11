@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { LoadingScreen } from '@/components/ui/loading-screen'
 import { DoctorNavbar } from '@/components/doctor/doctor-navbar'
 import { DoctorStatsGrid } from '@/components/doctor/doctor-stats-grid'
 import { ClientList } from '@/components/doctor/client-list'
@@ -103,11 +104,7 @@ export default function DoctorDashboardPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen gradient-bg flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-lavender border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <LoadingScreen message="Memuat Dashboard Dokter..." fullScreen />;
   }
 
   return (

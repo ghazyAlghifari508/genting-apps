@@ -37,25 +37,14 @@ export async function GET(request: Request) {
         }
       }
       
-      // Get user role to determine redirect
+      // Get user profile for role-based redirect
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
-
-      // Check if user needs onboarding
-      const { data: pregnancyData } = await supabase
-        .from('pregnancy_data')
-        .select('id')
-        .eq('user_id', user.id)
-        .single()
-
-      if (profile?.role === 'user' && !pregnancyData) {
-        return NextResponse.redirect(`${origin}/onboarding`)
-      }
-
-      // Redirect based on role
+      
+      // If not isRegister, or profile already exists, just proceed based on role
       if (profile?.role === 'admin') {
         return NextResponse.redirect(`${origin}/admin/dashboard`)
       } else if (profile?.role === 'doctor') {

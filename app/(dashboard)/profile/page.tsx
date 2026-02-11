@@ -14,13 +14,16 @@ import {
   AlertCircle,
   TrendingUp,
   MapPin,
-  ChevronRight
+  ChevronRight,
+  Baby
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
+import { LoadingScreen } from '@/components/ui/loading-screen'
+import { cn } from '@/lib/utils'
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(false)
@@ -78,6 +81,10 @@ export default function ProfilePage() {
           current_weight: profile.current_weight,
           height: profile.height,
           due_date: profile.due_date,
+          child_name: profile.child_name,
+          child_birth_date: profile.child_birth_date,
+          child_weight: profile.child_weight,
+          child_height: profile.child_height,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id)
@@ -130,11 +137,7 @@ export default function ProfilePage() {
   }
 
   if (initialLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-10 h-10 animate-spin text-cerulean" />
-      </div>
-    )
+    return <LoadingScreen message="Memuat Profil Bunda..." />;
   }
 
   return (
@@ -154,8 +157,11 @@ export default function ProfilePage() {
             <h3 className="font-bold text-lg text-slate-800">{profile?.full_name || profile?.username}</h3>
             <p className="text-sm text-slate-500 mb-4">{user?.email}</p>
             <div className="flex justify-center gap-2">
-              <span className="px-3 py-1 bg-cerulean/10 text-cerulean rounded-full text-xs font-bold uppercase tracking-wider">
-                Ibu Hamil
+              <span className={cn(
+                "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
+                profile?.status === 'hamil' ? "bg-cerulean/10 text-cerulean" : "bg-sea-green/10 text-sea-green"
+              )}>
+                {profile?.status === 'hamil' ? 'Ibu Hamil' : 'Ibu Balita'}
               </span>
             </div>
           </Card>
@@ -222,65 +228,116 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="sm:col-span-2 pt-4 border-t border-slate-100">
-                  <h4 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-sea-green" />
-                    Data Kehamilan 
-                    <span className="text-[10px] font-normal text-slate-400 uppercase tracking-widest ml-2 px-2 py-0.5 bg-slate-100 rounded">Pribadi</span>
-                  </h4>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700">Usia Kandungan (Minggu)</label>
-                      <div className="relative group">
-                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                {profile?.status === 'hamil' ? (
+                  <div className="sm:col-span-2 pt-4 border-t border-slate-100">
+                    <h4 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-sea-green" />
+                      Data Kehamilan 
+                      <span className="text-[10px] font-normal text-slate-400 uppercase tracking-widest ml-2 px-2 py-0.5 bg-slate-100 rounded">Ibu Hamil</span>
+                    </h4>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700">Usia Kandungan (Minggu)</label>
+                        <div className="relative group">
+                          <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input 
+                            type="number"
+                            className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all"
+                            placeholder="Contoh: 12"
+                            value={profile?.pregnancy_week || ''}
+                            onChange={(e) => setProfile({...profile, pregnancy_week: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700">Perkiraan Lahir (HPL)</label>
                         <input 
-                          type="number"
-                          className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all"
-                          placeholder="Contoh: 12"
-                          value={profile?.pregnancy_week || ''}
-                          onChange={(e) => setProfile({...profile, pregnancy_week: e.target.value})}
+                          type="date"
+                          className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all font-sans"
+                          value={profile?.due_date || ''}
+                          onChange={(e) => setProfile({...profile, due_date: e.target.value})}
                         />
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700">Perkiraan Lahir (HPL)</label>
-                      <input 
-                        type="date"
-                        className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all font-sans"
-                        value={profile?.due_date || ''}
-                        onChange={(e) => setProfile({...profile, due_date: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700">Berat Badan (kg)</label>
-                      <div className="relative group">
-                        <Scale className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input 
-                          type="number"
-                          step="0.1"
-                          className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all"
-                          placeholder="65.5"
-                          value={profile?.current_weight || ''}
-                          onChange={(e) => setProfile({...profile, current_weight: e.target.value})}
-                        />
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700">Berat Badan (kg)</label>
+                        <div className="relative group">
+                          <Scale className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input 
+                            type="number"
+                            step="0.1"
+                            className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all"
+                            placeholder="65.5"
+                            value={profile?.current_weight || ''}
+                            onChange={(e) => setProfile({...profile, current_weight: e.target.value})}
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700">Tinggi Badan (cm)</label>
-                      <div className="relative group">
-                        <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input 
-                          type="number"
-                          step="0.1"
-                          className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all"
-                          placeholder="160"
-                          value={profile?.height || ''}
-                          onChange={(e) => setProfile({...profile, height: e.target.value})}
-                        />
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700">Tinggi Badan (cm)</label>
+                        <div className="relative group">
+                          <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input 
+                            type="number"
+                            step="0.1"
+                            className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all"
+                            placeholder="160"
+                            value={profile?.height || ''}
+                            onChange={(e) => setProfile({...profile, height: e.target.value})}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="sm:col-span-2 pt-4 border-t border-slate-100">
+                    <h4 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                       <Baby className="w-5 h-5 text-sea-green" />
+                       Data Si Kecil
+                       <span className="text-[10px] font-normal text-slate-400 uppercase tracking-widest ml-2 px-2 py-0.5 bg-slate-100 rounded">Ibu Balita</span>
+                    </h4>
+                    <div className="grid grid-cols-2 gap-6">
+                       <div className="sm:col-span-2 space-y-2">
+                          <label className="text-sm font-bold text-slate-700">Nama Si Kecil</label>
+                          <input 
+                            type="text"
+                            className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all"
+                            placeholder="Nama panggilan..."
+                            value={profile?.child_name || ''}
+                            onChange={(e) => setProfile({...profile, child_name: e.target.value})}
+                          />
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-sm font-bold text-slate-700">Tanggal Lahir</label>
+                          <input 
+                            type="date"
+                            className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all"
+                            value={profile?.child_birth_date || ''}
+                            onChange={(e) => setProfile({...profile, child_birth_date: e.target.value})}
+                          />
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-sm font-bold text-slate-700">Berat Si Kecil (kg)</label>
+                          <input 
+                            type="number"
+                            step="0.1"
+                            className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all"
+                            value={profile?.child_weight || ''}
+                            onChange={(e) => setProfile({...profile, child_weight: e.target.value})}
+                          />
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-sm font-bold text-slate-700">Tinggi Si Kecil (cm)</label>
+                          <input 
+                            type="number"
+                            step="0.1"
+                            className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-sea-green/50 transition-all"
+                            value={profile?.child_height || ''}
+                            onChange={(e) => setProfile({...profile, child_height: e.target.value})}
+                          />
+                       </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mt-8 flex justify-end">

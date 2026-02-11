@@ -15,6 +15,13 @@ export async function middleware(request: NextRequest) {
   const { user, supabaseResponse, supabase } = await updateSession(request)
   const pathname = request.nextUrl.pathname
 
+  // Redirect authenticated users from landing page to dashboard
+  if (pathname === '/' && user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
+
   // Skip public routes
   if (publicRoutes.some(route => pathname === route || pathname.startsWith('/auth'))) {
     return supabaseResponse
@@ -27,14 +34,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Get user role from profiles table
+  // Get user profile from profiles table
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, onboarding_completed')
     .eq('id', user.id)
     .single()
 
   const role = profile?.role || 'user'
+  const onboardingCompleted = profile?.onboarding_completed || false
+
+  // Prevent users who have completed onboarding from accessing /onboarding
+  if (pathname.startsWith('/onboarding') && onboardingCompleted) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
 
   // Check route access based on role
   const isAdminRoute = pathname.startsWith('/admin')

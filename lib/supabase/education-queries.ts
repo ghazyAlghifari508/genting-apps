@@ -5,19 +5,19 @@ const supabase = createClient();
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
   const { data, error } = await supabase
-    .from('user_profile')
+    .from('profiles')
     .select('*')
-    .eq('user_id', userId)
+    .eq('id', userId)
     .single();
 
   if (error) return null;
   return data;
 }
 
-export async function upsertUserProfile(profile: Partial<UserProfile> & { user_id: string }) {
+export async function upsertUserProfile(profile: Partial<UserProfile> & { id: string }) {
   const { data, error } = await supabase
-    .from('user_profile')
-    .upsert(profile, { onConflict: 'user_id' })
+    .from('profiles')
+    .upsert(profile, { onConflict: 'id' })
     .select()
     .single();
 

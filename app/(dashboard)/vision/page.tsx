@@ -28,6 +28,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import Script from 'next/script'
+import { LoadingScreen } from '@/components/ui/loading-screen'
 import { useToast } from '@/components/ui/use-toast'
 import { CanvasRevealEffect } from '@/components/ui/canvas-reveal-effect'
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input'
@@ -55,8 +57,17 @@ export default function VisionPage() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true) // Added initialLoading state
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
+
+  useEffect(() => {
+    // Simulate initial loading, replace with actual data fetching if needed
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 1000); // Adjust time as needed
+    return () => clearTimeout(timer);
+  }, []);
 
   const placeholders = [
     "Apa ini aman untuk ibu hamil?",
@@ -119,6 +130,10 @@ export default function VisionPage() {
       setUploading(false)
       setTimeout(() => setScanning(false), 1500)
     }
+  }
+
+  if (initialLoading) {
+    return <LoadingScreen message="Memuat Profil Bunda..." />;
   }
 
   return (

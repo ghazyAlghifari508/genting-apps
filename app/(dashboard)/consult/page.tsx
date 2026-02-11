@@ -23,6 +23,7 @@ import {
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import Script from 'next/script'
+import { LoadingScreen } from '@/components/ui/loading-screen'
 
 interface Doctor {
   id: string
@@ -144,11 +145,7 @@ export default function ConsultPage() {
   })
 
   if (loading) {
-    return (
-      <div className="h-[60vh] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-cerulean border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <LoadingScreen message="Mencari Dokter Terbaik..." />;
   }
 
   return (

@@ -2,28 +2,25 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from '@/components/ui/button'
 import {
   Dumbbell,
   Salad,
-  ChevronRight,
-  Loader2,
-  Sparkles,
-  Clock,
-  Calendar,
-  CheckCircle2,
   Circle,
   PlayCircle,
-  Route,
+  CheckCircle2,
+  Sparkles,
   Flame,
-  Star,
   Filter,
-  BarChart3
+  BarChart3,
+  Route
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { MagicCard } from '@/components/ui/magic-card'
 import { ActivityDetailModal } from '@/components/roadmap/activity-detail-modal'
 import { RoadmapProgress } from '@/components/roadmap/roadmap-progress'
+import { LoadingScreen } from '@/components/ui/loading-screen'
+
+import { RoadmapHeader } from '@/components/roadmap/RoadmapHeader'
+import { ActivityCard } from '@/components/roadmap/ActivityCard'
 
 interface Activity {
   id: string
@@ -87,7 +84,6 @@ export default function RoadmapPage() {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
-        // Get pregnancy info
         const { data: profile } = await supabase
           .from('profiles')
           .select('pregnancy_week, due_date')
@@ -104,13 +100,11 @@ export default function RoadmapPage() {
         }
         setPregnancyWeek(week)
 
-        // Calculate trimester
         let tri = 1
         if (week > 26) tri = 3
         else if (week > 12) tri = 2
         setTrimester(tri)
 
-        // Load activities
         const { data: acts, error: actsError } = await supabase
           .from('roadmap_activities')
           .select('*')
@@ -119,7 +113,6 @@ export default function RoadmapPage() {
         if (actsError) throw actsError
         setActivities(acts || [])
 
-        // Load user progress
         const { data: prog, error: progError } = await supabase
           .from('user_roadmap_progress')
           .select('*')
@@ -128,12 +121,7 @@ export default function RoadmapPage() {
         if (progError) throw progError
         setProgress(prog || [])
       } catch (error: any) {
-        console.error('Error loading roadmap data:', {
-          message: error?.message,
-          details: error?.details,
-          hint: error?.hint,
-          code: error?.code
-        })
+        console.error('Error loading roadmap data:', error)
       } finally {
         setLoading(false)
       }
@@ -217,7 +205,6 @@ export default function RoadmapPage() {
         if (data) setProgress(prev => [...prev, data])
       }
 
-      // Close modal immediately if completed
       if (newStatus === 'completed') {
         setIsModalOpen(false)
         setSelectedActivity(null)
@@ -230,57 +217,17 @@ export default function RoadmapPage() {
   }
 
   if (loading) {
-    return (
-      <div className="h-[60vh] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-cerulean border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-bold text-slate-400">Memuat roadmap...</p>
-        </div>
-      </div>
-    )
+    return <LoadingScreen message="Menyiapkan Roadmap Bunda..." />
   }
 
   return (
     <div className="max-w-6xl mx-auto space-y-10 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header */}
-      <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
-        <div>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-cerulean/10 flex items-center justify-center">
-              <Route className="w-5 h-5 text-cerulean" />
-            </div>
-            <span className="text-[10px] font-black text-cerulean uppercase tracking-widest">
-              Panduan Anti-Stunting
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 mb-2">
-            Roadmap <span className="gradient-text">Bunda</span>
-          </h1>
-          <p className="text-slate-500 font-bold text-base max-w-xl">
-            Ikuti aktivitas harian yang dirancang khusus untuk Trimester {trimester} 
-            {pregnancyWeek > 0 && ` (Minggu ke-${pregnancyWeek})`} Anda.
-          </p>
-        </div>
+      <RoadmapHeader 
+        trimester={trimester}
+        pregnancyWeek={pregnancyWeek}
+        onTrimesterChange={setTrimester}
+      />
 
-        {/* Trimester Badge */}
-        <div className="flex items-center gap-3">
-          {[1, 2, 3].map((t) => (
-            <button
-              key={t}
-              onClick={() => setTrimester(t)}
-              className={`px-5 py-2.5 rounded-2xl text-sm font-black transition-all ${
-                trimester === t
-                  ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10'
-                  : 'bg-white/50 text-slate-400 hover:bg-white hover:text-slate-600 border border-white/50'
-              }`}
-            >
-              TM {t}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Category Toggle + View Mode */}
       <section className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
         <div className="flex bg-white/60 backdrop-blur-md p-1.5 rounded-2xl border border-white/50 shadow-sm">
           <button
@@ -343,7 +290,6 @@ export default function RoadmapPage() {
         </div>
       </section>
 
-      {/* Main Content */}
       <AnimatePresence mode="wait">
         {viewMode === 'activities' ? (
           <motion.section
@@ -358,84 +304,19 @@ export default function RoadmapPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredActivities.map((activity, index) => {
                   const status = getActivityStatus(activity.id)
-                  const statusInfo = statusConfig[status]
-                  const difficulty = difficultyConfig[activity.difficulty_level]
-
                   return (
-                    <motion.div
+                    <ActivityCard 
                       key={activity.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.08 }}
-                    >
-                      <div
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setSelectedActivity(activity)
-                          setIsModalOpen(true)
-                        }}
-                      >
-                      <MagicCard
-                        className={`p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl border-white group ${
-                          status === 'completed' ? 'opacity-75' : ''
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                              category === 'exercise' ? 'bg-cerulean/10' : 'bg-sea-green/10'
-                            }`}>
-                              {category === 'exercise' 
-                                ? <Dumbbell className={`w-7 h-7 ${category === 'exercise' ? 'text-cerulean' : 'text-sea-green'}`} />
-                                : <Salad className="w-7 h-7 text-sea-green" />
-                              }
-                            </div>
-                            <div>
-                              <h3 className={`text-lg font-black text-slate-900 ${status === 'completed' ? 'line-through' : ''}`}>
-                                {activity.activity_name}
-                              </h3>
-                              <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${difficulty.bg} ${difficulty.color}`}>
-                                {difficulty.label}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${statusInfo.bg}`}>
-                            <statusInfo.icon className={`w-3.5 h-3.5 ${statusInfo.color}`} />
-                            <span className={`text-[10px] font-black ${statusInfo.color}`}>{statusInfo.label}</span>
-                          </div>
-                        </div>
-
-                        <p className="text-sm text-slate-500 font-medium leading-relaxed mb-4 line-clamp-2">
-                          {activity.description}
-                        </p>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-xs text-slate-400 font-bold">
-                            {activity.duration_minutes > 0 && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5" />
-                                {activity.duration_minutes}m
-                              </span>
-                            )}
-                            {activity.frequency_per_week > 0 && (
-                              <span className="flex items-center gap-1">
-                                <Calendar className="w-3.5 h-3.5" />
-                                {activity.frequency_per_week}x/mg
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-black text-cerulean flex items-center gap-1">
-                              <Sparkles className="w-3.5 h-3.5" />
-                              +{activity.xp_reward} XP
-                            </span>
-                            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-cerulean group-hover:translate-x-1 transition-all" />
-                          </div>
-                        </div>
-                      </MagicCard>
-                      </div>
-                    </motion.div>
+                      activity={activity}
+                      index={index}
+                      status={status}
+                      statusInfo={statusConfig[status]}
+                      difficulty={difficultyConfig[activity.difficulty_level]}
+                      onClick={() => {
+                        setSelectedActivity(activity)
+                        setIsModalOpen(true)
+                      }}
+                    />
                   )
                 })}
               </div>
@@ -446,14 +327,8 @@ export default function RoadmapPage() {
                 </div>
                 <h3 className="text-2xl font-black text-slate-900 mb-4">Belum Ada Aktivitas</h3>
                 <p className="text-slate-500 font-bold mb-6 leading-relaxed">
-                  Data roadmap belum dimuat. Silakan salin dan jalankan isi file <code className="text-cerulean bg-cerulean/5 px-2 py-1 rounded">supabase/roadmap.sql</code> di SQL Editor Supabase Anda untuk memuat data aktivitas.
+                  Data roadmap belum dimuat.
                 </p>
-                <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl text-left">
-                  <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Penting</p>
-                  <p className="text-xs text-amber-700 font-bold leading-relaxed">
-                    Fitur Roadmap memerlukan tabel database khusus. Jika Anda melihat pesan ini, kemungkinan tabel tersebut belum dibuat atau masih kosong.
-                  </p>
-                </div>
               </div>
             )}
           </motion.section>
@@ -476,7 +351,6 @@ export default function RoadmapPage() {
         )}
       </AnimatePresence>
 
-      {/* Floating Bottom Stats */}
       {viewMode === 'activities' && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
@@ -519,7 +393,6 @@ export default function RoadmapPage() {
         </motion.div>
       )}
 
-      {/* Activity Detail Modal */}
       <ActivityDetailModal
         activity={selectedActivity}
         isOpen={isModalOpen}

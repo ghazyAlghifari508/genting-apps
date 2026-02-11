@@ -2,13 +2,15 @@
 -- GENTING: ROADMAP KEHAMILAN & PENCEGAHAN STUNTING
 -- ============================================
 
--- 0. Clean start
-DROP TABLE IF EXISTS user_roadmap_progress CASCADE;
-DROP TABLE IF EXISTS roadmap_activities CASCADE;
+-- 0. CLEAN START (Optional: Uncomment if you want to wipe and restart)
+-- DROP TABLE IF EXISTS public.user_roadmap_progress CASCADE;
+-- DROP TABLE IF EXISTS public.roadmap_activities CASCADE;
 
--- 1. Table: Roadmap Activities (Master data)
--- ============================================
-CREATE TABLE roadmap_activities (
+-- 1. EXTENSIONS
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 2. TABLE: Roadmap Activities
+CREATE TABLE IF NOT EXISTS public.roadmap_activities (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     activity_name TEXT NOT NULL,
     category TEXT NOT NULL CHECK (category IN ('exercise', 'nutrition')),
@@ -28,12 +30,11 @@ CREATE TABLE roadmap_activities (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. Table: User Roadmap Progress
--- ============================================
-CREATE TABLE user_roadmap_progress (
+-- 3. TABLE: User Roadmap Progress
+CREATE TABLE IF NOT EXISTS public.user_roadmap_progress (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
-    activity_id UUID REFERENCES roadmap_activities(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    activity_id UUID REFERENCES public.roadmap_activities(id) ON DELETE CASCADE NOT NULL,
     status TEXT NOT NULL DEFAULT 'not_started' CHECK (status IN ('not_started', 'in_progress', 'completed')),
     completion_date TIMESTAMPTZ,
     notes TEXT,
@@ -45,36 +46,38 @@ CREATE TABLE user_roadmap_progress (
 );
 
 -- Indexes
-CREATE INDEX idx_roadmap_category ON roadmap_activities(category);
-CREATE INDEX idx_roadmap_trimester ON roadmap_activities(min_trimester, max_trimester);
-CREATE INDEX idx_roadmap_difficulty ON roadmap_activities(difficulty_level);
-CREATE INDEX idx_user_roadmap_user ON user_roadmap_progress(user_id);
-CREATE INDEX idx_user_roadmap_status ON user_roadmap_progress(status);
+CREATE INDEX idx_roadmap_category ON public.roadmap_activities(category);
+CREATE INDEX idx_roadmap_trimester ON public.roadmap_activities(min_trimester, max_trimester);
+CREATE INDEX idx_roadmap_difficulty ON public.roadmap_activities(difficulty_level);
+CREATE INDEX idx_user_roadmap_user ON public.user_roadmap_progress(user_id);
+CREATE INDEX idx_user_roadmap_status ON public.user_roadmap_progress(status);
 
--- Enable RLS
-ALTER TABLE roadmap_activities ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_roadmap_progress ENABLE ROW LEVEL SECURITY;
+-- 4. SET UP RLS
+ALTER TABLE public.roadmap_activities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_roadmap_progress ENABLE ROW LEVEL SECURITY;
 
--- Policies: Activities readable by everyone
-CREATE POLICY "Public read roadmap_activities" ON roadmap_activities FOR SELECT USING (TRUE);
+-- Policies: Activities
+DROP POLICY IF EXISTS "Public read roadmap_activities" ON public.roadmap_activities;
+CREATE POLICY "Public read roadmap_activities" ON public.roadmap_activities FOR SELECT USING (TRUE);
 
--- Policies: Users can manage their own progress
-CREATE POLICY "Users view own progress" ON user_roadmap_progress FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users insert own progress" ON user_roadmap_progress FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users update own progress" ON user_roadmap_progress FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users delete own progress" ON user_roadmap_progress FOR DELETE USING (auth.uid() = user_id);
+-- Policies: User Progress
+DROP POLICY IF EXISTS "Users view own progress" ON public.user_roadmap_progress;
+CREATE POLICY "Users view own progress" ON public.user_roadmap_progress FOR SELECT USING (auth.uid() = user_id::UUID);
+DROP POLICY IF EXISTS "Users insert own progress" ON public.user_roadmap_progress;
+CREATE POLICY "Users insert own progress" ON public.user_roadmap_progress FOR INSERT WITH CHECK (auth.uid() = user_id::UUID);
+DROP POLICY IF EXISTS "Users update own progress" ON public.user_roadmap_progress;
+CREATE POLICY "Users update own progress" ON public.user_roadmap_progress FOR UPDATE USING (auth.uid() = user_id::UUID);
+DROP POLICY IF EXISTS "Users delete own progress" ON public.user_roadmap_progress;
+CREATE POLICY "Users delete own progress" ON public.user_roadmap_progress FOR DELETE USING (auth.uid() = user_id::UUID);
 
+-- 5. SEED DATA
 -- ============================================
--- SEED DATA: 18 Activities (9 Exercise + 9 Nutrition)
--- ============================================
 
--- === OLAHRAGA TRIMESTER 1 ===
-INSERT INTO roadmap_activities (activity_name, category, description, benefits, difficulty_level, min_trimester, max_trimester, duration_minutes, frequency_per_week, instructions, tips, warnings, xp_reward, icon_name) VALUES
-('Jalan Kaki Pagi', 'exercise', 'Jalan kaki santai di pagi hari selama 20-30 menit untuk menjaga stamina dan melancarkan peredaran darah.', '["Melancarkan peredaran darah", "Menjaga berat badan ideal", "Meningkatkan mood dan energi", "Membantu perkembangan otak janin"]'::jsonb, 1, 1, 3, 30, 5, '["Gunakan sepatu yang nyaman dan mendukung", "Pilih jalur yang datar dan aman", "Jalan dengan kecepatan sedang, bukan cepat", "Hindari jalan di cuaca panas terik", "Bawa air minum selama berjalan"]'::jsonb, 'Mulai dari 15 menit jika baru pertama kali, tingkatkan bertahap. Ajak suami atau keluarga untuk menemani.', 'Hentikan jika merasa pusing, sesak napas, atau ada kontraksi. Hindari permukaan licin atau tidak rata.', 10, 'Footprints'),
-
-('Senam Kegel', 'exercise', 'Latihan otot dasar panggul (kegel) untuk mempersiapkan proses persalinan dan mencegah inkontinensia.', '["Memperkuat otot dasar panggul", "Mempersiapkan persalinan normal", "Mencegah inkontinensia urin", "Mempercepat pemulihan pasca melahirkan"]'::jsonb, 1, 1, 3, 10, 7, '["Duduk atau berbaring dengan nyaman", "Kencangkan otot dasar panggul (seperti menahan kencing)", "Tahan selama 5-10 detik, lalu lepaskan", "Ulangi 10-15 kali per set", "Lakukan 3 set per sesi"]'::jsonb, 'Bisa dilakukan kapan saja dan di mana saja. Cobalah saat duduk di kursi atau sebelum tidur.', 'Jangan menahan napas saat melakukan kegel. Pastikan otot perut dan paha tetap rileks.', 10, 'Zap'),
-
-('Stretching Ringan', 'exercise', 'Peregangan tubuh ringan untuk mengurangi ketegangan otot dan meningkatkan fleksibilitas selama trimester pertama.', '["Mengurangi nyeri punggung", "Meningkatkan fleksibilitas", "Mengurangi stres dan kecemasan", "Membantu tidur lebih nyenyak"]'::jsonb, 1, 1, 3, 15, 5, '["Peregangan leher: miringkan kepala ke kiri dan kanan perlahan", "Peregangan bahu: putar bahu ke depan dan belakang", "Peregangan punggung: cat-cow stretch sambil berlutut", "Peregangan kaki: duduk dan sentuh ujung kaki perlahan", "Tahan setiap posisi 15-20 detik"]'::jsonb, 'Lakukan di pagi hari setelah bangun tidur untuk hasil terbaik. Gunakan matras yoga untuk kenyamanan.', 'Jangan melakukan stretching yang berlebihan. Hindari posisi yang menekan perut.', 10, 'StretchHorizontal');
+INSERT INTO public.roadmap_activities (activity_name, category, description, benefits, difficulty_level, min_trimester, max_trimester, duration_minutes, frequency_per_week, instructions, tips, warnings, xp_reward, icon_name) 
+VALUES
+('Jalan Kaki Pagi', 'exercise', 'Jalan kaki santai di pagi hari.', '["Melancarkan darah"]'::jsonb, 1, 1, 3, 30, 5, '["Gunakan sepatu nyaman"]'::jsonb, 'Mulai 15 menit.', 'Hentikan jika pusing.', 10, 'Footprints'),
+('Asam Folat Boost', 'nutrition', 'Memastikan asupan asam folat.', '["Mencegah cacat tabung saraf"]'::jsonb, 1, 1, 2, 0, 7, '["Konsumsi suplemen"]'::jsonb, 'Mulai sebelum hamil.', 'Jangan melebihi dosis.', 10, 'Pill')
+ON CONFLICT DO NOTHING;
 
 -- === OLAHRAGA TRIMESTER 2 ===
 INSERT INTO roadmap_activities (activity_name, category, description, benefits, difficulty_level, min_trimester, max_trimester, duration_minutes, frequency_per_week, instructions, tips, warnings, xp_reward, icon_name) VALUES

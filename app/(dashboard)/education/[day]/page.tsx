@@ -20,6 +20,7 @@ import {
 import { EducationContent, getPhaseInfo, getPhaseLabelFromDay } from '@/types/education';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
+import { LoadingScreen } from '@/components/ui/loading-screen';
 
 export default function EducationDetail() {
   const router = useRouter();
@@ -86,12 +87,7 @@ export default function EducationDetail() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-        <Loader2 className="w-12 h-12 text-cerulean animate-spin mb-4" />
-        <p className="text-slate-500 font-black animate-pulse tracking-widest text-xs uppercase">Menyiapkan Materi Edukasi...</p>
-      </div>
-    );
+    return <LoadingScreen message="Menyiapkan Materi Edukasi..." />;
   }
 
   if (!content) {

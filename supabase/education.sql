@@ -1,19 +1,19 @@
 -- ============================================
--- GENTING: 1000 HARI EDUKASI - FRESH INSTALL
+-- GENTING: 1000 HARI EDUKASI
 -- ============================================
 
--- 0. Clean start (Drop existing to avoid constraint mismatches)
--- IMPORTANT: This will delete your current education data!
-DROP TABLE IF EXISTS user_achievements CASCADE;
-DROP TABLE IF EXISTS user_progress CASCADE;
-DROP TABLE IF EXISTS user_profile CASCADE;
-DROP TABLE IF EXISTS education_contents CASCADE;
+-- 0. CLEAN START (Optional: Uncomment if you want to wipe and restart)
+-- DROP TABLE IF EXISTS public.user_achievements CASCADE;
+-- DROP TABLE IF EXISTS public.user_progress CASCADE;
+-- DROP TABLE IF EXISTS public.education_contents CASCADE;
 
--- 1. Table: Education Contents (1000 artikel edukasi)
--- ============================================
-CREATE TABLE education_contents (
+-- 1. EXTENSIONS
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 2. TABLE: Education Contents
+CREATE TABLE IF NOT EXISTS public.education_contents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    day INTEGER NOT NULL,
+    day INTEGER NOT NULL UNIQUE,
     phase TEXT NOT NULL CHECK (phase IN ('kehamilan', 'bayi_0_3', 'bayi_3_12', 'anak_1_2')),
     month INTEGER NOT NULL CHECK (month >= 1 AND month <= 34),
     title TEXT NOT NULL,
@@ -26,70 +26,52 @@ CREATE TABLE education_contents (
     related_days INTEGER[] DEFAULT ARRAY[]::INTEGER[],
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    -- Explicitly define UNIQUE constraint on day
-    CONSTRAINT education_contents_day_key UNIQUE (day),
     CONSTRAINT education_contents_day_range CHECK (day >= 1 AND day <= 1000)
 );
 
--- Indexes for performance
-CREATE INDEX idx_edu_day ON education_contents(day);
-CREATE INDEX idx_edu_phase ON education_contents(phase);
-CREATE INDEX idx_edu_category ON education_contents(category);
+CREATE INDEX IF NOT EXISTS idx_edu_day ON public.education_contents(day);
+CREATE INDEX IF NOT EXISTS idx_edu_phase ON public.education_contents(phase);
+CREATE INDEX IF NOT EXISTS idx_edu_category ON public.education_contents(category);
 
--- 2. Table: User Profile (Info user untuk personalisasi)
--- ============================================
-CREATE TABLE user_profile (
+-- 3. TABLE: User Progress
+CREATE TABLE IF NOT EXISTS public.user_progress (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id TEXT UNIQUE NOT NULL,
-    status TEXT CHECK (status IN ('hamil', 'punya_anak')),
-    pregnancy_month INTEGER CHECK (pregnancy_month >= 1 AND pregnancy_month <= 9),
-    child_birth_date DATE,
-    current_day INTEGER DEFAULT 1,
-    onboarding_completed BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 3. Table: User Progress (Track artikel yang sudah dibaca)
--- ============================================
-CREATE TABLE user_progress (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id TEXT NOT NULL,
-    day INTEGER NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    day INTEGER NOT NULL REFERENCES public.education_contents(day) ON DELETE CASCADE,
     is_read BOOLEAN DEFAULT FALSE,
     read_at TIMESTAMPTZ,
     is_favorite BOOLEAN DEFAULT FALSE,
     favorited_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(user_id, day),
-    -- Foreign key referencing the UNIQUE day column
-    CONSTRAINT fk_education_day FOREIGN KEY (day) REFERENCES education_contents(day) ON DELETE CASCADE
+    UNIQUE(user_id, day)
 );
 
--- 4. Table: User Achievements
--- ============================================
-CREATE TABLE user_achievements (
+-- 4. TABLE: User Achievements
+CREATE TABLE IF NOT EXISTS public.user_achievements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id TEXT NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     achievement_type TEXT NOT NULL,
     unlocked_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(user_id, achievement_type)
 );
 
--- Enable RLS
-ALTER TABLE education_contents ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_profile ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
+-- 5. SET UP RLS
+ALTER TABLE public.education_contents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_achievements ENABLE ROW LEVEL SECURITY;
 
 -- Policies
-CREATE POLICY "Public read education_contents" ON education_contents FOR SELECT USING (TRUE);
-CREATE POLICY "User view profile" ON user_profile FOR SELECT USING (TRUE);
-CREATE POLICY "User insert profile" ON user_profile FOR INSERT WITH CHECK (TRUE);
-CREATE POLICY "User update profile" ON user_profile FOR UPDATE USING (TRUE);
-CREATE POLICY "User progress all" ON user_progress FOR ALL USING (TRUE);
+DROP POLICY IF EXISTS "Public read education_contents" ON public.education_contents;
+CREATE POLICY "Public read education_contents" ON public.education_contents FOR SELECT USING (TRUE);
 
--- Function: Stats
-CREATE OR REPLACE FUNCTION get_user_progress_stats(p_user_id TEXT)
+DROP POLICY IF EXISTS "Users can manage own progress" ON public.user_progress;
+CREATE POLICY "Users can manage own progress" ON public.user_progress FOR ALL USING (auth.uid() = user_id::UUID);
+
+DROP POLICY IF EXISTS "Users can view own achievements" ON public.user_achievements;
+CREATE POLICY "Users can view own achievements" ON public.user_achievements FOR SELECT USING (auth.uid() = user_id::UUID);
+
+-- 6. FUNCTION: Stats
+CREATE OR REPLACE FUNCTION get_user_progress_stats(p_user_id UUID)
 RETURNS TABLE(
     total_read INTEGER,
     total_favorite INTEGER,
@@ -105,7 +87,7 @@ BEGIN
         ROUND((COUNT(*) FILTER (WHERE is_read = TRUE)::NUMERIC / 1000.0) * 100, 2) as progress_percentage,
         0 as current_streak,
         0 as longest_streak
-    FROM user_progress
-    WHERE user_id = p_user_id;
+    FROM public.user_progress
+    WHERE user_id::UUID = p_user_id;
 END;
 $$ LANGUAGE plpgsql;

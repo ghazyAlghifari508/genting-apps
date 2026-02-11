@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { TopNavbar } from '@/components/layout/top-navbar'
 import { MobileNav } from '@/components/layout/mobile-nav'
+import { AiChatFloating } from '@/components/ai-chat-floating'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
         <MobileNav />
+        <AiChatFloating />
         
         {/* Modern Background Accents */}
         <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">

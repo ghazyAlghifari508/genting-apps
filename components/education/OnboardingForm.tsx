@@ -20,7 +20,14 @@ interface OnboardingFormProps {
   onComplete: (data: {
     status: UserStatus;
     pregnancyMonth?: number;
+    pregnancyWeek?: number;
+    dueDate?: Date;
+    weight?: number;
+    height?: number;
+    childName?: string;
     childBirthDate?: Date;
+    childWeight?: number;
+    childHeight?: number;
     currentDay: number;
   }) => void;
 }
@@ -30,7 +37,14 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState<UserStatus | null>(null);
   const [pregnancyMonth, setPregnancyMonth] = useState<number | undefined>();
+  const [pregnancyWeek, setPregnancyWeek] = useState<string>('');
+  const [dueDate, setDueDate] = useState<Date | undefined>();
+  const [weight, setWeight] = useState<string>('');
+  const [height, setHeight] = useState<string>('');
+  const [childName, setChildName] = useState<string>('');
   const [childBirthDate, setChildBirthDate] = useState<Date | undefined>();
+  const [childWeight, setChildWeight] = useState<string>('');
+  const [childHeight, setChildHeight] = useState<string>('');
 
   const totalSteps = 3;
 
@@ -54,7 +68,14 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
     onComplete({
       status,
       pregnancyMonth,
+      pregnancyWeek: pregnancyWeek ? parseInt(pregnancyWeek) : undefined,
+      dueDate,
+      weight: weight ? parseFloat(weight) : undefined,
+      height: height ? parseFloat(height) : undefined,
+      childName,
       childBirthDate,
+      childWeight: childWeight ? parseFloat(childWeight) : undefined,
+      childHeight: childHeight ? parseFloat(childHeight) : undefined,
       currentDay
     });
   };
@@ -64,8 +85,12 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
       case 1:
         return status !== null;
       case 2:
-        if (status === 'hamil') return pregnancyMonth !== undefined;
-        if (status === 'punya_anak') return childBirthDate !== undefined;
+        if (status === 'hamil') {
+          return pregnancyMonth !== undefined && pregnancyWeek !== '' && dueDate !== undefined;
+        }
+        if (status === 'punya_anak') {
+          return childName !== '' && childBirthDate !== undefined;
+        }
         return false;
       case 3:
         return true;
@@ -81,7 +106,7 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg border-none shadow-2xl shadow-slate-200/50 rounded-[2.5rem] overflow-hidden">
+      <Card className="w-full max-w-lg border-none shadow-2xl shadow-slate-200/50 rounded-[2.5rem] relative">
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-cerulean via-sea-green to-cerulean" />
         
         <CardHeader className="text-center pt-10 pb-6">
@@ -128,7 +153,8 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
           </div>
         </CardHeader>
         
-        <CardContent className="space-y-8 px-10 pb-12">
+        <CardContent className="space-y-8 px-10 pb-12 min-h-[520px] flex flex-col justify-between">
+          <div className="flex-1">
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div
@@ -152,7 +178,7 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
                     className={cn(
                       "flex items-center gap-5 p-6 rounded-3xl border-2 cursor-pointer transition-all duration-300",
                       status === 'hamil' 
-                        ? "border-cerulean bg-cerulean/5 shadow-inner" 
+                        ? "border-cerulean bg-cerulean/5" 
                         : "border-slate-50 bg-slate-50/50 hover:border-slate-200"
                     )}
                   >
@@ -169,7 +195,13 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
                         Memulai persiapan menyambut buah hati
                       </p>
                     </div>
-                    {status === 'hamil' && <div className="w-6 h-6 rounded-full bg-cerulean flex items-center justify-center"><Check className="w-4 h-4 text-white" /></div>}
+                    <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                      {status === 'hamil' && (
+                        <div className="w-6 h-6 rounded-full bg-cerulean flex items-center justify-center">
+                          <Check className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                    </div>
                   </label>
                   
                   <label
@@ -177,7 +209,7 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
                     className={cn(
                       "flex items-center gap-5 p-6 rounded-3xl border-2 cursor-pointer transition-all duration-300",
                       status === 'punya_anak' 
-                        ? "border-sea-green bg-sea-green/5 shadow-inner" 
+                        ? "border-sea-green bg-sea-green/5" 
                         : "border-slate-50 bg-slate-50/50 hover:border-slate-200"
                     )}
                   >
@@ -194,7 +226,13 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
                         Anak berusia antara 0 hingga 2 tahun
                       </p>
                     </div>
-                    {status === 'punya_anak' && <div className="w-6 h-6 rounded-full bg-sea-green flex items-center justify-center"><Check className="w-4 h-4 text-white" /></div>}
+                    <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                      {status === 'punya_anak' && (
+                        <div className="w-6 h-6 rounded-full bg-sea-green flex items-center justify-center">
+                          <Check className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                    </div>
                   </label>
                 </RadioGroup>
               </motion.div>
@@ -209,75 +247,167 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
                 className="space-y-8"
               >
                 {status === 'hamil' ? (
-                  <div className="space-y-6">
-                    <div className="text-center">
-                      <h3 className="font-bold text-xl text-slate-800">Usia Kehamilan</h3>
-                      <p className="text-sm font-medium text-slate-400 mt-2">
-                        Pilih bulan kehamilan Bunda saat ini
+                  <div className="space-y-4">
+                    <div className="text-center mb-2">
+                      <h3 className="font-bold text-xl text-slate-800">Detail Kehamilan</h3>
+                      <p className="text-sm font-medium text-slate-400 mt-1">
+                        Bantu kami memantau kesehatan Bunda & janin
                       </p>
                     </div>
                     
-                    <Select
-                      value={pregnancyMonth?.toString()}
-                      onValueChange={(value) => setPregnancyMonth(parseInt(value))}
-                    >
-                      <SelectTrigger className="w-full h-16 rounded-2xl border-slate-100 bg-slate-50 px-6 font-bold text-slate-900 focus:ring-cerulean">
-                        <SelectValue placeholder="Pilih bulan kehamilan" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-2xl border-slate-100 p-2">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((month) => (
-                          <SelectItem key={month} value={month.toString()} className="rounded-xl py-3 font-bold text-slate-700 focus:bg-cerulean/5 focus:text-cerulean">
-                            <div className="flex items-center justify-between w-full gap-4">
-                              <span>Bulan ke-{month}</span>
-                              <span className="text-[10px] font-black uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                                {month <= 3 ? 'Trimester 1' : month <= 6 ? 'Trimester 2' : 'Trimester 3'}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Bulan Kehamilan</Label>
+                        <Select
+                          value={pregnancyMonth?.toString()}
+                          onValueChange={(value) => setPregnancyMonth(parseInt(value))}
+                        >
+                          <SelectTrigger className="w-full h-12 rounded-xl border-slate-100 bg-slate-50 px-4 font-bold text-slate-900 focus:ring-cerulean">
+                            <SelectValue placeholder="Bulan..." />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl border-slate-100">
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((month) => (
+                              <SelectItem key={month} value={month.toString()} className="rounded-lg py-2 font-bold text-slate-700">
+                                Bulan {month}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Minggu (Opsional)</Label>
+                        <input 
+                          type="number"
+                          placeholder="Minggu ke-"
+                          className="w-full h-12 rounded-xl border-2 border-slate-50 bg-slate-50/50 px-4 outline-none focus:border-cerulean/50 font-bold"
+                          value={pregnancyWeek}
+                          onChange={(e) => setPregnancyWeek(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Perkiraan Lahir (HPL)</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full h-12 rounded-xl border-slate-100 bg-slate-50 justify-start px-4 font-bold text-slate-900 hover:bg-slate-50",
+                              !dueDate && "text-slate-400"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4 text-cerulean" />
+                            {dueDate ? format(dueDate, "PPP", { locale: idLocale }) : "Pilih tanggal"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 border-none shadow-2xl rounded-3xl" align="center">
+                          <Calendar
+                            mode="single"
+                            selected={dueDate}
+                            onSelect={setDueDate}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Berat Badan (kg)</Label>
+                        <input 
+                          type="number"
+                          step="0.1"
+                          placeholder="Contoh: 60"
+                          className="w-full h-12 rounded-xl border-2 border-slate-50 bg-slate-50/50 px-4 outline-none focus:border-cerulean/50 font-bold"
+                          value={weight}
+                          onChange={(e) => setWeight(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Tinggi (cm)</Label>
+                        <input 
+                          type="number"
+                          placeholder="160"
+                          className="w-full h-12 rounded-xl border-2 border-slate-50 bg-slate-50/50 px-4 outline-none focus:border-cerulean/50 font-bold"
+                          value={height}
+                          onChange={(e) => setHeight(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  <div className="space-y-6">
-                    <div className="text-center">
-                      <h3 className="font-bold text-xl text-slate-800">Tanggal Lahir Si Kecil</h3>
-                      <p className="text-sm font-medium text-slate-400 mt-2">
-                        Agar panduan MPASI & vaksinasi tepat sasaran
+                  <div className="space-y-4">
+                    <div className="text-center mb-2">
+                      <h3 className="font-bold text-xl text-slate-800">Detail Si Kecil</h3>
+                      <p className="text-sm font-medium text-slate-400 mt-1">
+                        Bantu kami memantau tumbuh kembang si kecil
                       </p>
                     </div>
                     
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full h-16 rounded-2xl border-slate-100 bg-slate-50 justify-start px-6 font-bold text-slate-900 hover:bg-slate-50 transition-all",
-                            !childBirthDate && "text-slate-400"
-                          )}
-                        >
-                          <CalendarIcon className="mr-3 h-5 w-5 text-cerulean" />
-                          {childBirthDate ? (
-                            format(childBirthDate, "PPP", { locale: idLocale })
-                          ) : (
-                            "Pilih tanggal lahir"
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 border-none shadow-2xl rounded-3xl overflow-hidden" align="center">
-                        <Calendar
-                          mode="single"
-                          selected={childBirthDate}
-                          onSelect={setChildBirthDate}
-                          disabled={(date) =>
-                            date > new Date() || 
-                            date < new Date(new Date().setFullYear(new Date().getFullYear() - 2))
-                          }
-                          initialFocus
-                          className="p-4"
+                    <div className="space-y-2">
+                      <Label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Nama Si Kecil</Label>
+                      <input 
+                        type="text"
+                        placeholder="Nama panggilan..."
+                        className="w-full h-12 rounded-xl border-2 border-slate-50 bg-slate-50/50 px-4 outline-none focus:border-sea-green/50 font-bold"
+                        value={childName}
+                        onChange={(e) => setChildName(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Tanggal Lahir</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full h-12 rounded-xl border-slate-100 bg-slate-50 justify-start px-4 font-bold text-slate-900 hover:bg-slate-50",
+                              !childBirthDate && "text-slate-400"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4 text-sea-green" />
+                            {childBirthDate ? format(childBirthDate, "PPP", { locale: idLocale }) : "Pilih tanggal"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 border-none shadow-2xl rounded-3xl" align="center">
+                          <Calendar
+                            mode="single"
+                            selected={childBirthDate}
+                            onSelect={setChildBirthDate}
+                            disabled={(date) => date > new Date() || date < new Date(new Date().setFullYear(new Date().getFullYear() - 2))}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Berat Lahir/Saat Ini (kg)</Label>
+                        <input 
+                          type="number"
+                          step="0.1"
+                          placeholder="3.2"
+                          className="w-full h-12 rounded-xl border-2 border-slate-50 bg-slate-50/50 px-4 outline-none focus:border-sea-green/50 font-bold"
+                          value={childWeight}
+                          onChange={(e) => setChildWeight(e.target.value)}
                         />
-                      </PopoverContent>
-                    </Popover>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Tinggi (cm)</Label>
+                        <input 
+                          type="number"
+                          placeholder="50"
+                          className="w-full h-12 rounded-xl border-2 border-slate-50 bg-slate-50/50 px-4 outline-none focus:border-sea-green/50 font-bold"
+                          value={childHeight}
+                          onChange={(e) => setChildHeight(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
               </motion.div>
@@ -331,13 +461,15 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
             )}
           </AnimatePresence>
 
+          </div>
+
           {/* Improved Navigation */}
           <div className="flex gap-4 pt-6">
             {step > 1 && (
               <Button
                 variant="ghost"
                 onClick={handleBack}
-                className="flex-1 h-16 rounded-2xl font-black text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all border border-slate-100"
+                className="flex-1 h-14 rounded-2xl font-black text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all border border-slate-100"
               >
                 <ArrowLeft className="w-5 h-5 mr-2" />
                 KEMBALI
@@ -348,7 +480,7 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
               onClick={step < 3 ? handleNext : handleComplete}
               disabled={!canProceed()}
               className={cn(
-                "flex-[2] h-16 rounded-2xl font-black transition-all duration-300 group shadow-xl",
+                "flex-[2] h-14 rounded-2xl font-black transition-all duration-300 group shadow-xl",
                 step === 3 ? "bg-slate-900 text-white shadow-slate-200" : "bg-cerulean text-white shadow-cerulean/20"
               )}
             >

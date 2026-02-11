@@ -29,6 +29,7 @@ import { BabyJourneyCard } from '@/components/dashboard/baby-journey-card'
 import { QuickActionsGrid } from '@/components/dashboard/quick-actions-grid'
 import { AgendaSection } from '@/components/dashboard/agenda-section'
 import { MagicCard } from '@/components/ui/magic-card'
+import { LoadingScreen } from '@/components/ui/loading-screen'
 
 interface UserData {
   fullName: string
@@ -124,11 +125,7 @@ export default function DashboardPage() {
   const babySize = getBabySize(userData.weekNumber)
 
   if (loading) {
-    return (
-      <div className="h-[60vh] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-cerulean border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <LoadingScreen message="Memuat Dashboard..." />;
   }
 
   return (

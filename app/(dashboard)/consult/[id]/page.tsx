@@ -17,6 +17,7 @@ import {
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
+import { LoadingScreen } from '@/components/ui/loading-screen'
 
 interface Message {
   id: string
@@ -158,11 +159,7 @@ export default function ConsultChatPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen gradient-bg flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-lavender border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <LoadingScreen message="Menghubungkan ke Dokter..." fullScreen />;
   }
 
   if (!payment) {
