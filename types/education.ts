@@ -1,6 +1,6 @@
 export type Phase = 'kehamilan' | 'bayi_0_3' | 'bayi_3_12' | 'anak_1_2';
 export type UserStatus = 'hamil' | 'punya_anak';
-export type Category = 'nutrisi' | 'kesehatan' | 'stimulasi' | 'perkembangan' | 'aktivitas';
+export type Category = 'nutrisi' | 'kesehatan' | 'stimulasi' | 'perkembangan' | 'aktivitas' | 'imunisasi';
 
 export interface EducationContent {
   id: string;
@@ -13,8 +13,8 @@ export interface EducationContent {
   tips: string[];
   category: Category;
   thumbnail_url?: string;
-  tags: string[];
-  related_days: number[];
+  tags?: string[];
+  related_days?: number[];
   created_at: string;
   updated_at: string;
 }
@@ -36,6 +36,12 @@ export interface UserProfile {
   due_date?: string;
   created_at: string;
   updated_at: string;
+  child_name?: string;
+  child_weight?: number;
+  child_height?: number;
+  pregnancy_start_date?: string;
+  xp_points?: number;
+  trimester?: number;
 }
 
 export interface UserProgress {
@@ -60,7 +66,7 @@ export const PHASES: PhaseDetail[] = [
   {
     id: 'kehamilan',
     label: 'Fase Kehamilan',
-    color: 'bg-rose-500',
+    color: 'bg-doccure-teal',
     dayRange: [1, 270],
     description: 'Periode 9 bulan kehamilan yang krusial untuk perkembangan organ.'
   },

@@ -44,6 +44,27 @@ export interface ConsultationMessage {
   message: string
   message_type: string
   file_url?: string
+  is_read?: boolean
   created_at: string
   updated_at: string
+}
+
+export interface ConsultationConversation {
+  consultation_id: string
+  user: {
+    full_name: string | null
+    avatar_url?: string | null
+  } | null
+  lastMessage: ConsultationMessage
+}
+
+export interface DoctorEarningRecord {
+  id: string
+  ended_at: string | null
+  total_cost: number | null
+  payment_status: PaymentStatus
+  status: ConsultationStatus
+  user: {
+    full_name: string | null
+  } | null
 }

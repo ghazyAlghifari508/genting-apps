@@ -1,47 +1,64 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { getUserRole } from '@/lib/userRoleService'
+import { useState, useEffect } from 'react'
+import { useAuth } from './useAuth'
+import { supabase } from '@/lib/supabase'
 
 export function useUserRole() {
-  const [role, setRole] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const { user, loading: authLoading } = useAuth()
+  const [dbRole, setDbRole] = useState<{ userId: string; role: string } | null>(null)
+
+  // Depend on user?.id (stable primitive) instead of the entire user object.
+  // This is critical: if we use `user` as a dependency, every TOKEN_REFRESHED
+  // event creates a new object reference and triggers an unnecessary DB fetch.
+  const userId = user?.id
 
   useEffect(() => {
+    if (authLoading || !userId) return
+
+    // Already fetched role for this exact user – skip
+    if (dbRole?.userId === userId) return
+
     let mounted = true
 
     const fetchRole = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          if (mounted) { setRole(null); setLoading(false) }
-          return
-        }
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single()
 
-        // Try getting role from metadata first (faster)
-        // const metaRole = user.user_metadata?.role
-        // if (metaRole) {
-        //   if (mounted) setRole(metaRole)
-        // }
+      if (data && !error) {
+        if (mounted) setDbRole({ userId, role: data.role })
+        return
+      }
 
-        // Fetch from DB to be sure
-        const dbRole = await getUserRole(user.id)
-        if (mounted) {
-          setRole(dbRole)
-          setLoading(false)
-        }
-      } catch (error) {
-        // Silently handle error
-        if (mounted) setLoading(false)
+      // Fallback to metadata
+      const metadataRole = user?.user_metadata?.role
+      if (mounted) {
+        setDbRole({
+          userId,
+          role: typeof metadataRole === 'string' ? metadataRole : 'user',
+        })
       }
     }
 
     fetchRole()
 
-    return () => { mounted = false }
-  }, [supabase])
+    return () => {
+      mounted = false
+    }
+  }, [userId, authLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const role = user
+    ? dbRole?.userId === user.id
+      ? dbRole.role
+      : typeof user.user_metadata?.role === 'string'
+        ? user.user_metadata.role
+        : 'user'
+    : null
+
+  const loading = authLoading || (!!user && dbRole?.userId !== user.id)
 
   return { role, loading }
 }

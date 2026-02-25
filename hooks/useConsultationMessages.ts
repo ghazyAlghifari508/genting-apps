@@ -1,46 +1,73 @@
-'use client'
-
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { getConsultationMessages } from '@/services/consultationService'
+import { supabase } from '@/lib/supabase'
 import type { ConsultationMessage } from '@/types/consultation'
 
 export function useConsultationMessages(consultationId: string) {
   const [messages, setMessages] = useState<ConsultationMessage[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
 
   useEffect(() => {
+    // 1. Initial fetch
     const fetchMessages = async () => {
-      const { data } = await supabase
-        .from('consultation_messages')
-        .select('*')
-        .eq('consultation_id', consultationId)
-        .order('created_at', { ascending: true })
-
-      setMessages(data || [])
-      setLoading(false)
+      try {
+        const data = await getConsultationMessages(consultationId)
+        setMessages(data || [])
+      } catch (error) {
+        console.error('Error fetching messages:', error)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchMessages()
 
+    // 2. Real-time subscription
+    // IMPORTANT: Make sure 'Realtime' is enabled for consultation_messages in Supabase dashboard
     const channel = supabase
-      .channel(`consultation:${consultationId}`)
+      .channel(`chat:${consultationId}`)
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'consultation_messages',
-          filter: `consultation_id=eq.${consultationId}`,
+          filter: `consultation_id=eq.${consultationId}`
         },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new as ConsultationMessage])
+          console.log('[useConsultationMessages] Realtime event:', payload.eventType, payload.new)
+          if (payload.eventType === 'INSERT') {
+            const newMsg = payload.new as ConsultationMessage
+            setMessages((prev) => {
+              if (prev.find(m => m.id === newMsg.id)) return prev
+              return [...prev, newMsg]
+            })
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedMsg = payload.new as ConsultationMessage
+            setMessages((prev) => prev.map(msg => msg.id === updatedMsg.id ? updatedMsg : msg))
+          } else if (payload.eventType === 'DELETE') {
+            setMessages((prev) => prev.filter(msg => msg.id === payload.old.id))
+          }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log(`[useConsultationMessages] Subscription status: ${status}`)
+      })
 
-    return () => { supabase.removeChannel(channel) }
-  }, [consultationId, supabase])
+    return () => { 
+      console.log('[useConsultationMessages] Cleaning up subscription')
+      supabase.removeChannel(channel)
+    }
+  }, [consultationId])
 
-  return { messages, loading }
+  const addMessage = (msg: ConsultationMessage) => {
+    setMessages((prev) => {
+      // Prevent duplicates if Realtime already inserted it
+      if (prev.find(m => m.id === msg.id)) return prev;
+      return [...prev, msg];
+    });
+  }
+
+  return { messages, loading, addMessage }
 }
+

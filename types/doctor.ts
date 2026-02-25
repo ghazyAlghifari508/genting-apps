@@ -54,3 +54,27 @@ export const SPECIALIZATIONS = [
 export type Specialization = typeof SPECIALIZATIONS[number]
 
 export const DAY_NAMES = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as const
+
+export type RegistrationStatus = 'pending' | 'approved' | 'rejected' | 'reviewing'
+
+export interface DoctorRegistration {
+  id: string
+  user_id: string
+  status: RegistrationStatus
+  submitted_at: string
+  reviewed_at: string | null
+  reviewed_by: string | null
+  rejection_reason: string | null
+  admin_notes: string | null
+  full_name: string
+  phone: string | null
+  bio: string | null
+  profile_photo_url: string | null
+  specialization: string
+  license_number: string
+  certification_url: string | null
+  years_of_experience: number | null
+  hourly_rate: number
+  created_at: string
+  updated_at: string
+}

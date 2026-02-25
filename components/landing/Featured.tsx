@@ -1,88 +1,77 @@
-import { motion } from "framer-motion";
-import { BarChart3, Apple, Baby, Hospital, MapPin, CalendarCheck } from "lucide-react";
+'use client'
 
-const features = [
-  {
-    icon: BarChart3,
-    title: "Monitoring Pertumbuhan",
-    desc: "Pantau tinggi badan dan berat badan anak secara berkala dengan grafik interaktif yang mudah dipahami.",
-    color: "bg-primary/10 text-primary group-hover:bg-primary",
-  },
-  {
-    icon: Apple,
-    title: "Panduan Nutrisi",
-    desc: "Rekomendasi menu gizi seimbang sesuai usia anak berdasarkan standar WHO dan Kemenkes.",
-    color: "bg-destructive/10 text-destructive group-hover:bg-destructive",
-  },
-  {
-    icon: Baby,
-    title: "Profiling Anak",
-    desc: "Data lengkap tumbuh kembang anak terintegrasi dalam satu dashboard yang komprehensif.",
-    color: "bg-secondary/10 text-secondary group-hover:bg-secondary",
-  },
-  {
-    icon: Hospital,
-    title: "Konsultasi Ahli",
-    desc: "Terhubung langsung dengan dokter anak dan ahli gizi untuk konsultasi kesehatan.",
-    color: "bg-accent/10 text-accent-foreground group-hover:bg-accent",
-  },
-  {
-    icon: MapPin,
-    title: "Pemetaan Wilayah",
-    desc: "Identifikasi daerah rawan stunting dan alokasi sumber daya secara tepat sasaran.",
-    color: "bg-primary/10 text-primary group-hover:bg-primary",
-  },
-  {
-    icon: CalendarCheck,
-    title: "Reminder Imunisasi",
-    desc: "Notifikasi otomatis jadwal imunisasi dan kunjungan posyandu tepat waktu.",
-    color: "bg-secondary/10 text-secondary group-hover:bg-secondary",
-  },
-];
+import { motion } from 'framer-motion'
+import { Stethoscope, Activity, BookOpen } from 'lucide-react'
 
-const FeaturesSection = () => {
+export default function Featured() {
+  const services = [
+    {
+      icon: Stethoscope,
+      title: 'Konsultasi Dokter',
+      description: 'Konsultasi langsung dengan dokter spesialis anak untuk tumbuh kembang optimal.',
+      gradient: 'from-[#0F6856]/80 to-[#0F6856]/40'
+    },
+    {
+      icon: Activity,
+      title: 'Pantau Tumbuh Kembang',
+      description: 'Pantau tinggi badan, berat badan, dan lingkar kepala anak secara berkala.',
+      gradient: 'from-[#0F6856]/80 to-[#0F6856]/40'
+    },
+    {
+      icon: BookOpen,
+      title: 'Edukasi Kesehatan',
+      description: 'Konten edukatif tentang nutrisi, imunisasi, dan pencegahan stunting.',
+      gradient: 'from-[#0F6856]/80 to-[#0F6856]/40'
+    }
+  ]
+
   return (
-    <section id="fitur" className="py-20 lg:py-28 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
-            Fitur Unggulan
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
-            Solusi Lengkap Anti-Stunting
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Genting menyediakan berbagai fitur canggih untuk membantu orang tua dan tenaga kesehatan 
-            dalam memantau dan mencegah stunting pada anak.
-          </p>
-        </motion.div>
+    <section className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <div className="text-center max-w-2xl mx-auto mb-14">
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((f, i) => (
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+            Layanan Profesional untuk{' '}
+            <span className="italic text-[#0F6856] underline decoration-[#E8C84A] underline-offset-4">
+              Pencegahan Stunting
+            </span>
+          </h2>
+        </div>
+
+        {/* 3 Service Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {services.map((service, index) => (
             <motion.div
-              key={i}
+              key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className="group bg-card rounded-2xl border border-border p-6 hover:shadow-lg transition-all hover:-translate-y-1 cursor-default"
+              transition={{ duration: 0.5, delay: index * 0.15 }}
+              className="group relative rounded-2xl overflow-hidden h-[320px] cursor-pointer"
             >
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-colors ${f.color} group-hover:text-primary-foreground`}>
-                <f.icon className="w-7 h-7" />
+              {/* Background color */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#0F6856]/10 to-[#0FA88F]/10" />
+              
+              {/* Icon centered */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-15">
+                <service.icon size={140} strokeWidth={1} className="text-[#0F6856]" />
               </div>
-              <h3 className="font-bold text-foreground text-lg mb-2">{f.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              
+              {/* Gradient overlay at bottom */}
+              <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t ${service.gradient} p-6 pt-16`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <service.icon size={20} className="text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">{service.title}</h3>
+                </div>
+                <p className="text-white/80 text-sm leading-relaxed">{service.description}</p>
+              </div>
             </motion.div>
           ))}
         </div>
       </div>
     </section>
-  );
-};
-
-export default FeaturesSection;
+  )
+}

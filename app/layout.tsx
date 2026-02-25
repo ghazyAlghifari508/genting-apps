@@ -1,13 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import Script from "next/script";
-import { BackgroundLines } from "@/components/ui/background-lines";
-import { BackgroundBeams } from "@/components/ui/background-beams";
+import { Toaster } from "@/components/ui/toaster";
 
-const jakarta = Plus_Jakarta_Sans({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-jakarta",
+  variable: "--font-plus-jakarta-sans",
 });
 
 export const metadata: Metadata = {
@@ -33,7 +31,9 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-import { Toaster } from "@/components/ui/toaster";
+export const dynamic = "force-dynamic";
+
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default function RootLayout({
   children,
@@ -41,43 +41,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning className={plusJakartaSans.variable}>
       <head>
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className={`${jakarta.variable} font-sans overflow-x-hidden`}>
-        <BackgroundLines className="bg-floral/50">
-          <main className="relative z-10 w-full min-h-screen">
+      <body className="font-sans overflow-x-hidden">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <main className="relative z-10 w-full min-h-screen transition-colors duration-300">
             {children}
           </main>
-          <BackgroundBeams className="opacity-50" />
-        </BackgroundLines>
-
-        <Toaster />
-
-        {/* Forced SW Purge & Cache Clear for Dev */}
-        <Script
-          id="force-sw-purge"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                  for(let registration of registrations) {
-                    registration.unregister();
-                  }
-                });
-              }
-              if ('caches' in window) {
-                caches.keys().then(function(names) {
-                  for (let name of names) caches.delete(name);
-                });
-              }
-            `,
-          }}
-        />
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -59,7 +59,7 @@ export default function RecentConsultationsWidget({ consultations }: RecentConsu
                 
                 {item.rating > 0 && (
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-100">
-                    <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                    <Star className="w-3.5 h-3.5 text-doccure-yellow fill-current" />
                     <span className="text-xs font-black text-amber-600">{item.rating}</span>
                   </div>
                 )}
@@ -69,7 +69,7 @@ export default function RecentConsultationsWidget({ consultations }: RecentConsu
                 <Button variant="outline" size="sm" className="flex-1 rounded-xl font-bold h-10 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
                   Detail Rekamanan
                 </Button>
-                <Button size="sm" className="w-10 h-10 rounded-xl bg-white border border-slate-200 p-0 text-slate-400 hover:text-cerulean hover:border-cerulean/20 transition-all">
+                <Button size="sm" className="w-10 h-10 rounded-xl bg-white border border-slate-200 p-0 text-slate-400 hover:text-doccure-teal hover:border-doccure-teal/20 transition-all">
                   <ArrowUpRight className="w-4 h-4" />
                 </Button>
               </div>

@@ -15,18 +15,18 @@ export const PaginationUI = React.memo(({ currentPage, totalPages, onPageChange 
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-2 pt-10 pb-6">
+    <div className="flex items-center justify-center gap-2 pt-4 pb-2">
       <Button
         variant="outline"
         size="icon"
         disabled={currentPage === 1}
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-        className="w-12 h-12 rounded-2xl border-slate-100 shadow-sm"
+        className="h-9 w-9 rounded-[6px] border-slate-300"
       >
-        <ChevronLeft className="w-5 h-5 text-slate-600" />
+        <ChevronLeft className="h-4 w-4 text-slate-600" />
       </Button>
       
-      <div className="flex items-center gap-1 mx-2">
+      <div className="mx-1 flex items-center gap-1">
         {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
           let pageNum: number;
           if (totalPages <= 5) pageNum = i + 1;
@@ -40,10 +40,10 @@ export const PaginationUI = React.memo(({ currentPage, totalPages, onPageChange 
               variant={currentPage === pageNum ? "default" : "ghost"}
               onClick={() => onPageChange(pageNum)}
               className={cn(
-                "w-12 h-12 rounded-2xl font-black transition-all",
+                "h-9 w-9 rounded-[6px] text-sm font-semibold transition-colors",
                 currentPage === pageNum 
-                  ? "bg-slate-900 text-white shadow-lg shadow-slate-200" 
-                  : "text-slate-400 hover:text-slate-600"
+                  ? "bg-doccure-teal text-white hover:bg-doccure-dark" 
+                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
               )}
             >
               {pageNum}
@@ -57,9 +57,9 @@ export const PaginationUI = React.memo(({ currentPage, totalPages, onPageChange 
         size="icon"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-        className="w-12 h-12 rounded-2xl border-slate-100 shadow-sm"
+        className="h-9 w-9 rounded-[6px] border-slate-300"
       >
-        <ChevronRight className="w-5 h-5 text-slate-600" />
+        <ChevronRight className="h-4 w-4 text-slate-600" />
       </Button>
     </div>
   )

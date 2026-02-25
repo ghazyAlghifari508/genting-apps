@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 
 export function useConsultationTimer(startedAt?: string, endedAt?: string) {
-  const [elapsed, setElapsed] = useState(0)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const [now, setNow] = useState(() => Date.now())
 
   const formatTime = useCallback((seconds: number) => {
     const h = Math.floor(seconds / 3600)
@@ -15,20 +14,24 @@ export function useConsultationTimer(startedAt?: string, endedAt?: string) {
 
   useEffect(() => {
     if (!startedAt || endedAt) {
-      if (endedAt && startedAt) {
-        setElapsed(Math.floor((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 1000))
-      }
       return
     }
 
-    const tick = () => {
-      setElapsed(Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000))
-    }
-
-    tick()
-    intervalRef.current = setInterval(tick, 1000)
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
+    const intervalId = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(intervalId)
   }, [startedAt, endedAt])
+
+  const elapsed = useMemo(() => {
+    if (!startedAt) return 0
+
+    const startTimestamp = new Date(startedAt).getTime()
+    if (Number.isNaN(startTimestamp)) return 0
+
+    const endTimestamp = endedAt ? new Date(endedAt).getTime() : now
+    if (Number.isNaN(endTimestamp)) return 0
+
+    return Math.max(0, Math.floor((endTimestamp - startTimestamp) / 1000))
+  }, [startedAt, endedAt, now])
 
   return { elapsed, formatted: formatTime(elapsed), isRunning: !!startedAt && !endedAt }
 }

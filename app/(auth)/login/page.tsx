@@ -2,6 +2,7 @@
 
 import { AuthSlider } from '@/components/auth-slider'
 
+
 export default function LoginPage() {
   return (
     <div className="min-h-screen gradient-bg flex items-center justify-center p-4">

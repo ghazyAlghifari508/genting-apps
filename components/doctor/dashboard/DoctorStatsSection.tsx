@@ -5,13 +5,8 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
   TrendingUp, 
-  Users, 
-  Calendar, 
-  Star, 
   ArrowUpRight,
   Settings,
-  User,
-  HelpCircle,
   FileText
 } from 'lucide-react'
 import {
@@ -33,24 +28,30 @@ const data = [
 ]
 
 interface DoctorStatsSectionProps {
-  stats: any
+  stats: {
+    totalEarnings?: number
+    completedConsultations?: number
+    avgRating?: string | number
+    averageRating?: number
+    newPatientsThisMonth?: number
+  } | null
 }
 
 export default function DoctorStatsSection({ stats }: DoctorStatsSectionProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* Analytics Chart */}
-      <Card className="lg:col-span-8 rounded-[2.5rem] p-8 border-white/50 bg-white/70 backdrop-blur-md shadow-xl shadow-slate-200/50 relative overflow-hidden group">
+      <Card className="lg:col-span-8 rounded-[2.5rem] p-8 border-white/50 dark:border-white/10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md shadow-xl shadow-slate-200/50 dark:shadow-none relative overflow-hidden group transition-all duration-300">
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="text-xl font-black tracking-tight text-slate-900">Performa Mingguan</h3>
-              <p className="text-sm text-slate-500 font-medium">Tren pendapatan & konsultasi Anda</p>
+              <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-white transition-colors">Performa Mingguan</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">Tren pendapatan & konsultasi Anda</p>
             </div>
             <div className="flex gap-2">
-               <div className="px-4 py-2 bg-slate-900 rounded-xl text-white text-xs font-black flex items-center gap-2">
+               <div className="px-4 py-2 bg-slate-900 dark:bg-slate-800 rounded-xl text-white text-xs font-black flex items-center gap-2 transition-colors">
                   <TrendingUp className="w-3.5 h-3.5 text-sea-green" />
-                  +12.5%
+                  Statistik Live
                </div>
             </div>
           </div>
@@ -60,8 +61,8 @@ export default function DoctorStatsSection({ stats }: DoctorStatsSectionProps) {
               <AreaChart data={data}>
                 <defs>
                   <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#00AEEF" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#00AEEF" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="rgb(var(--genting-doccure-teal))" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="rgb(var(--genting-doccure-teal))" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <Tooltip 
@@ -70,7 +71,7 @@ export default function DoctorStatsSection({ stats }: DoctorStatsSectionProps) {
                 <Area 
                   type="monotone" 
                   dataKey="val" 
-                  stroke="#00AEEF" 
+                  stroke="rgb(var(--genting-doccure-teal))" 
                   strokeWidth={4}
                   fillOpacity={1} 
                   fill="url(#colorVal)" 
@@ -84,25 +85,25 @@ export default function DoctorStatsSection({ stats }: DoctorStatsSectionProps) {
 
       {/* Quick Stats & Actions */}
       <div className="lg:col-span-4 space-y-6">
-         <Card className="rounded-[2.5rem] p-8 bg-slate-900 border-none shadow-2xl shadow-slate-900/40 relative overflow-hidden group">
+         <Card className="rounded-[2.5rem] p-8 bg-slate-900/90 border border-white/10 shadow-2xl shadow-slate-900/40 relative overflow-hidden group backdrop-blur-md">
             <div className="relative z-10 text-white">
                <h4 className="text-lg font-black mb-6">Ringkasan Bulan Ini</h4>
                <div className="grid grid-cols-2 gap-6">
                   <div>
-                     <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Total Earned</p>
+                     <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Pendapatan</p>
                      <p className="text-xl font-black text-sea-green">Rp {stats?.totalEarnings?.toLocaleString('id-ID') || 0}</p>
                   </div>
                   <div>
                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Total Sesi</p>
-                     <p className="text-xl font-black text-cerulean">{stats?.completedConsultations || 0}</p>
+                     <p className="text-xl font-black text-doccure-teal">{stats?.completedConsultations || 0}</p>
                   </div>
                   <div>
                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Rata-rata Rating</p>
-                     <p className="text-xl font-black text-amber-400">{stats?.avgRating || '0.0'} ⭐</p>
+                     <p className="text-xl font-black text-amber-400">{stats?.averageRating || stats?.avgRating || '0.0'} ⭐</p>
                   </div>
                   <div>
                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Pasien Baru</p>
-                     <p className="text-xl font-black text-rose-400">+5</p>
+                     <p className="text-xl font-black text-doccure-teal">+{stats?.newPatientsThisMonth || 0}</p>
                   </div>
                </div>
                
@@ -112,21 +113,22 @@ export default function DoctorStatsSection({ stats }: DoctorStatsSectionProps) {
                </Button>
             </div>
             
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-cerulean/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-doccure-teal/20 rounded-full blur-3xl" />
+            <div className="absolute -top-10 -left-10 w-32 h-32 bg-sea-green/20 rounded-full blur-2xl" />
          </Card>
 
          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="h-24 rounded-[2rem] border-white/50 bg-white/70 backdrop-blur-md flex flex-col items-center justify-center gap-2 group hover:border-cerulean hover:bg-white transition-all shadow-sm">
-               <div className="w-10 h-10 rounded-xl bg-cerulean/10 flex items-center justify-center text-cerulean group-hover:bg-cerulean group-hover:text-white transition-all">
+            <Button variant="outline" className="h-24 rounded-[2rem] border-white/50 dark:border-white/10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md flex flex-col items-center justify-center gap-2 group hover:border-doccure-teal hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm">
+               <div className="w-10 h-10 rounded-xl bg-doccure-teal/10 flex items-center justify-center text-doccure-teal group-hover:bg-doccure-teal group-hover:text-white transition-all">
                   <Settings className="w-5 h-5" />
                </div>
-               <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">Settings</span>
+               <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">Settings</span>
             </Button>
-            <Button variant="outline" className="h-24 rounded-[2rem] border-white/50 bg-white/70 backdrop-blur-md flex flex-col items-center justify-center gap-2 group hover:border-sea-green hover:bg-white transition-all shadow-sm">
+            <Button variant="outline" className="h-24 rounded-[2rem] border-white/50 dark:border-white/10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md flex flex-col items-center justify-center gap-2 group hover:border-sea-green hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm">
                <div className="w-10 h-10 rounded-xl bg-sea-green/10 flex items-center justify-center text-sea-green group-hover:bg-sea-green group-hover:text-white transition-all">
                   <FileText className="w-5 h-5" />
                </div>
-               <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">Profile</span>
+               <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">Profile</span>
             </Button>
          </div>
       </div>

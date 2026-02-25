@@ -1,99 +1,97 @@
-import { motion } from "framer-motion";
-import { AlertTriangle, Droplets, Apple, Stethoscope, Baby, Clock } from "lucide-react";
+'use client'
 
-const causes = [
-  { icon: Apple, title: "Gizi Buruk", desc: "Asupan nutrisi tidak memadai selama kehamilan dan 2 tahun pertama" },
-  { icon: Droplets, title: "Sanitasi Buruk", desc: "Akses air bersih dan sanitasi yang tidak layak" },
-  { icon: Stethoscope, title: "Infeksi Berulang", desc: "Penyakit infeksi kronis mengganggu penyerapan nutrisi" },
-  { icon: AlertTriangle, title: "Kurang Pengetahuan", desc: "Minimnya edukasi pola asuh dan gizi bagi orang tua" },
-];
+import { motion } from 'framer-motion'
+import { Heart, MessageCircle, Baby, Laptop } from 'lucide-react'
 
-const timeline = [
-  { period: "0–9 Bulan", label: "Masa Kehamilan", desc: "Nutrisi ibu hamil sangat kritis" },
-  { period: "0–6 Bulan", label: "ASI Eksklusif", desc: "Pemberian ASI tanpa tambahan" },
-  { period: "6–24 Bulan", label: "MPASI", desc: "Makanan pendamping berkualitas" },
-  { period: "24+ Bulan", label: "Pertumbuhan", desc: "Pantau tumbuh kembang berkala" },
-];
-
-const WhatIsStunting = () => {
+export default function WhatIsStunting() {
   return (
-    <section id="tentang" className="py-20 lg:py-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-semibold mb-4">
-            Edukasi
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
-            Apa Itu Stunting?
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Stunting adalah kondisi gagal tumbuh pada anak balita akibat kekurangan gizi kronis, 
-            terutama pada <strong className="text-foreground">1.000 hari pertama kehidupan</strong>.
-          </p>
-        </motion.div>
-
-        {/* Timeline */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-16"
-        >
-          <h3 className="text-center font-bold text-foreground mb-8 flex items-center justify-center gap-2">
-            <Clock className="w-5 h-5 text-primary" />
-            1.000 Hari Pertama Kehidupan
-          </h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {timeline.map((t, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative bg-card rounded-2xl border border-border p-5 text-center hover:shadow-md transition-shadow group"
-              >
-                <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-extrabold text-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  {i + 1}
+    <section className="py-20 bg-[#F0F5E9]" id="about">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          
+          {/* Left - Image Area */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="relative"
+          >
+            {/* Main image */}
+            <div className="relative w-full max-w-md mx-auto">
+              <div className="aspect-[4/5] rounded-[2rem] bg-gradient-to-br from-[#0F6856]/15 to-[#E8C84A]/10 overflow-hidden relative">
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-[#0F6856]/20 font-bold text-xl">Ibu & Anak</span>
                 </div>
-                <div className="text-xs font-semibold text-primary mb-1">{t.period}</div>
-                <div className="font-bold text-foreground text-sm mb-1">{t.label}</div>
-                <div className="text-xs text-muted-foreground">{t.desc}</div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+              </div>
+              
+              {/* Yellow circle decoration */}
+              <div className="absolute -top-4 -left-4 w-20 h-20 rounded-full border-[3px] border-[#E8C84A]" />
+              
+              {/* Experience badge */}
+              <div className="absolute -right-4 top-1/3 bg-white rounded-2xl shadow-xl p-4 z-10">
+                <div className="text-3xl font-bold text-[#0F6856]">1000+</div>
+                <div className="text-xs text-muted-foreground font-medium">Hari Pertama<br/>Kehidupan</div>
+              </div>
+            </div>
+          </motion.div>
 
-        {/* Causes */}
-        <div>
-          <h3 className="text-center font-bold text-foreground mb-8">Faktor Penyebab Stunting</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {causes.map((c, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-card rounded-2xl border border-border p-6 hover:shadow-md transition-all hover:-translate-y-1 group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-destructive/10 text-destructive flex items-center justify-center mb-4 group-hover:bg-destructive group-hover:text-destructive-foreground transition-colors">
-                  <c.icon className="w-6 h-6" />
+          {/* Right - Content */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+          >
+
+            
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6 leading-tight">
+              Kami Memahami Setiap Anak itu Unik &{' '}
+              <span className="italic text-[#0F6856] underline decoration-[#E8C84A] underline-offset-4">
+                Perjalanan Kesehatannya.
+              </span>
+            </h2>
+
+            <p className="text-muted-foreground mb-8 leading-relaxed">
+              Stunting adalah kondisi gagal tumbuh pada anak akibat kekurangan gizi kronis. Genting hadir sebagai platform digital yang membantu orang tua memantau, mencegah, dan mengatasi stunting sejak dini.
+            </p>
+
+            {/* Mission card */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 mb-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[#0F6856] flex items-center justify-center flex-shrink-0">
+                  <Heart size={22} className="text-white" />
                 </div>
-                <h4 className="font-bold text-foreground mb-1">{c.title}</h4>
-                <p className="text-sm text-muted-foreground">{c.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+                <div>
+                  <h3 className="font-bold text-foreground mb-1">Misi Kami</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Membantu menciptakan generasi Indonesia yang sehat dan bebas stunting melalui teknologi, edukasi, dan akses ke layanan kesehatan berkualitas.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Bullet points */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+              {[
+                { icon: MessageCircle, text: 'Konsultasi dokter online' },
+                { icon: Baby, text: 'Pantau tumbuh kembang' },
+                { icon: Laptop, text: 'Edukasi interaktif' },
+                { icon: Heart, text: 'Deteksi dini stunting' }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm font-medium text-foreground/80">
+                  <div className="w-2 h-2 rounded-full bg-[#0F6856]" />
+                  {item.text}
+                </div>
+              ))}
+            </div>
+
+            <button className="inline-flex items-center gap-2 text-sm font-bold text-[#0F6856] hover:underline group">
+              Selengkapnya Tentang Genting
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </button>
+          </motion.div>
         </div>
       </div>
     </section>
-  );
-};
-
-export default WhatIsStunting;
+  )
+}

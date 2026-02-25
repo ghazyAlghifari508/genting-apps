@@ -1,32 +1,34 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   Send, 
-  Plus, 
-  Trash2, 
-  MessageSquare, 
   Sparkles, 
   User, 
   Bot, 
-  LayoutPanelLeft, 
   X,
-  MessageCircle,
   PlusCircle,
-  History
+  History,
+  Trash2,
+  MessageSquare,
 } from 'lucide-react';
-import { createBrowserClient } from '@supabase/ssr';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import {
+  getChats,
+  createChat,
+  deleteChat,
+  saveUserMessage,
+  saveAiMessage,
+} from '@/app/actions/chat';
 
-// --- Interfaces ---
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  created_at: string;
 }
 
 interface Chat {
@@ -44,140 +46,129 @@ export function AiChatFloating() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string>('');
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Inisialisasi Supabase
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  // 1. Initialize User & Load History
+  // Initialize user ID and load chats when panel opens
   useEffect(() => {
-    const anonymousId = localStorage.getItem('user_id') || `user-${Date.now()}`;
-    localStorage.setItem('user_id', anonymousId);
-    setUserId(anonymousId);
-    if (isOpen) {
-      loadChats();
-    }
+    const storedUserId = localStorage.getItem('chat_user_id');
+    const currentUserId = storedUserId || `anon-${Date.now()}`;
+    if (!storedUserId) localStorage.setItem('chat_user_id', currentUserId);
+    setUserId(currentUserId);
+    if (isOpen) loadChats(currentUserId);
   }, [isOpen]);
 
-  // 2. Load Messages when Chat selected
-  useEffect(() => {
-    if (selectedChatId) {
-      loadMessages(selectedChatId);
-    } else {
-      setMessages([]);
-    }
-  }, [selectedChatId]);
-
-  // 3. Auto Scroll
+  // Auto scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const loadChats = async () => {
-    const { data, error } = await supabase
-      .from('chats')
-      .select('*')
-      .order('updated_at', { ascending: false });
-    if (!error && data) setChats(data);
-  };
-
-  const loadMessages = async (chatId: string) => {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .eq('chat_id', chatId)
-      .order('created_at', { ascending: true });
-    if (!error && data) setMessages(data);
-  };
-
-  const createNewChat = async () => {
-    const { data, error } = await supabase
-      .from('chats')
-      .insert([{ user_id: userId, title: 'Diskusi Baru' }])
-      .select()
-      .single();
-
-    if (!error && data) {
-      setChats([data, ...chats]);
-      setSelectedChatId(data.id);
-      setShowHistory(false);
+  const loadChats = async (uid: string) => {
+    try {
+      const data = await getChats(uid);
+      setChats(data);
+    } catch (err) {
+      console.error('Failed to load chats:', err);
     }
   };
 
-  const deleteChat = async (e: React.MouseEvent, chatId: string) => {
+  const handleCreateNewChat = async () => {
+    try {
+      const newChat = await createChat(userId, 'Diskusi Baru');
+      if (newChat) {
+        setChats([newChat, ...chats]);
+        setSelectedChatId(newChat.id);
+        setMessages([]);
+        setShowHistory(false);
+      }
+    } catch (err) {
+      console.error('Failed to create chat:', err);
+    }
+  };
+
+  const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
     e.stopPropagation();
-    const { error } = await supabase.from('chats').delete().eq('id', chatId);
-    if (!error) {
+    try {
+      await deleteChat(chatId, userId);
       setChats(chats.filter(c => c.id !== chatId));
-      if (selectedChatId === chatId) setSelectedChatId(null);
+      if (selectedChatId === chatId) {
+        setSelectedChatId(null);
+        setMessages([]);
+      }
+    } catch (err) {
+      console.error('Failed to delete chat:', err);
     }
   };
 
-  const sendMessage = async () => {
-    if (!inputValue.trim() || !selectedChatId) return;
+  const sendMessage = useCallback(async () => {
+    if (!inputValue.trim() || !selectedChatId || isTyping) return;
 
     const userText = inputValue.trim();
     setInputValue('');
     setIsTyping(true);
 
+    const userMsg: Message = { id: `user-${Date.now()}`, role: 'user', content: userText };
+    const aiPlaceholderId = `ai-${Date.now()}`;
+    setMessages(prev => [...prev, userMsg]);
+
     try {
-      // 1. Simpan pesan User ke Supabase
-      const { data: userMsg, error: dbError } = await supabase
-        .from('messages')
-        .insert({ 
-          chat_id: selectedChatId, 
-          role: 'user', 
-          content: userText 
-        })
-        .select()
-        .single();
+      // Save user message to DB
+      await saveUserMessage(selectedChatId, userText);
 
-      if (dbError) throw dbError;
-      setMessages(prev => [...prev, userMsg]);
-
-      // 2. Format History (Gemini pakai 'model' bukan 'assistant')
-      const formattedHistory = messages.map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-      }));
-
-      // 3. Panggil API Route
-      const res = await fetch('/api/ai/chat', {
+      const history = messages.map(m => ({ role: m.role, content: m.content }));
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: userText, 
-          chatHistory: formattedHistory 
-        })
+        body: JSON.stringify({ history, message: userText }),
       });
 
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (!res.ok || !res.body) throw new Error('No response body');
 
-      // 4. Simpan Balasan AI ke Database
-      const { data: aiMsg, error: aiDbError } = await supabase
-        .from('messages')
-        .insert({ 
-          chat_id: selectedChatId, 
-          role: 'assistant', 
-          content: data.response 
-        })
-        .select()
-        .single();
+      // Read SSE stream — update UI word-by-word
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
 
-      if (aiDbError) throw aiDbError;
-      setMessages(prev => [...prev, aiMsg]);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (!line.startsWith('data: ') || line === 'data: [DONE]') continue;
+          try {
+            const json = JSON.parse(line.slice(6));
+            const delta = json.choices?.[0]?.delta?.content || '';
+            if (delta) {
+              fullText += delta;
+              setMessages(prev => {
+                const hasPlaceholder = prev.some(m => m.id === aiPlaceholderId);
+                if (hasPlaceholder) {
+                  return prev.map(m => m.id === aiPlaceholderId ? { ...m, content: fullText } : m);
+                } else {
+                  return [...prev, { id: aiPlaceholderId, role: 'assistant', content: fullText }];
+                }
+              });
+            }
+          } catch { /* skip malformed chunks */ }
+        }
+      }
 
+      // Save complete AI response to DB
+      await saveAiMessage(selectedChatId, fullText);
     } catch (err) {
-      console.error("Kacau nih:", err);
+      console.error('Chat Error:', err);
+      setMessages(prev => {
+        const hasPlaceholder = prev.some(m => m.id === aiPlaceholderId);
+        if (hasPlaceholder) {
+          return prev.map(m => m.id === aiPlaceholderId ? { ...m, content: 'Maaf, terjadi kesalahan koneksi. Silakan coba lagi.' } : m);
+        } else {
+          return [...prev, { id: aiPlaceholderId, role: 'assistant', content: 'Maaf, terjadi kesalahan koneksi. Silakan coba lagi.' }];
+        }
+      });
     } finally {
       setIsTyping(false);
     }
-  };
+  }, [inputValue, selectedChatId, isTyping, messages]);
 
   return (
     <>
@@ -196,7 +187,7 @@ export function AiChatFloating() {
             <motion.div 
                animate={{ scale: [1, 1.2, 1] }}
                transition={{ repeat: Infinity, duration: 2 }}
-               className="absolute -top-1 -right-1 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center border-2 border-white"
+               className="absolute -top-1 -right-1 w-6 h-6 bg-doccure-teal rounded-full flex items-center justify-center border-2 border-white"
             >
               <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
             </motion.div>
@@ -231,7 +222,7 @@ export function AiChatFloating() {
                     </div>
 
                     <Button 
-                      onClick={createNewChat}
+                      onClick={handleCreateNewChat}
                       className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-2xl py-6 font-bold shadow-lg shadow-slate-900/20 mb-6 gap-2"
                     >
                        <PlusCircle className="w-5 h-5" />
@@ -244,19 +235,20 @@ export function AiChatFloating() {
                            key={chat.id}
                            onClick={() => {
                              setSelectedChatId(chat.id);
+                             setMessages([]);
                              setShowHistory(false);
                            }}
                            className={`group flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all ${
-                             selectedChatId === chat.id ? 'bg-rose-50 text-rose-700' : 'hover:bg-slate-50 text-slate-600'
+                             selectedChatId === chat.id ? 'bg-doccure-teal/10 text-doccure-dark' : 'hover:bg-slate-50 text-slate-600'
                            }`}
                          >
                            <div className="flex items-center gap-3 truncate">
-                             <MessageSquare size={18} className={selectedChatId === chat.id ? 'text-rose-500' : 'text-slate-400'} />
+                             <MessageSquare size={18} className={selectedChatId === chat.id ? 'text-doccure-teal' : 'text-slate-400'} />
                              <span className="text-sm font-bold truncate">{chat.title}</span>
                            </div>
                            <button 
-                             onClick={(e) => deleteChat(e, chat.id)}
-                             className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-rose-500"
+                             onClick={(e) => handleDeleteChat(e, chat.id)}
+                             className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-600"
                            >
                              <Trash2 size={16} />
                            </button>
@@ -276,17 +268,19 @@ export function AiChatFloating() {
                   >
                     <History className="w-5 h-5" />
                   </button>
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-violet-600 flex items-center justify-center shadow-lg shadow-rose-200">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-doccure-teal to-doccure-dark flex items-center justify-center shadow-lg shadow-doccure-teal/20">
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h3 className="font-black text-slate-900 leading-tight">Genting AI</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Asisten Kesehatan Bunda</p>
+                    <p className="text-[10px] font-bold text-doccure-teal uppercase tracking-widest">
+                      {isTyping ? 'Sedang mengetik...' : 'Asisten Kesehatan Bunda'}
+                    </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 transition-all text-slate-400"
+                  className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-slate-100 hover:text-slate-600 transition-all text-slate-400"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -297,14 +291,14 @@ export function AiChatFloating() {
                 {!selectedChatId ? (
                   <div className="h-full flex flex-col items-center justify-center text-center space-y-6 px-4">
                     <div className="w-20 h-20 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 flex items-center justify-center animate-bounce">
-                      <Bot size={40} className="text-rose-500" />
+                      <Bot size={40} className="text-doccure-teal" />
                     </div>
                     <div>
                       <h4 className="text-2xl font-black text-slate-900 leading-tight">Halo, Bunda!</h4>
                       <p className="text-slate-400 font-bold text-sm mt-2">Ada yang bisa dibantu hari ini?</p>
                     </div>
                     <Button 
-                      onClick={createNewChat}
+                      onClick={handleCreateNewChat}
                       className="bg-slate-900 hover:bg-slate-800 text-white rounded-2xl px-8 h-12 font-bold shadow-lg shadow-slate-900/10"
                     >
                       Mulai Konsultasi →
@@ -321,29 +315,53 @@ export function AiChatFloating() {
                       >
                         <div className={`flex gap-3 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm ${
-                            msg.role === 'user' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-rose-500'
+                            msg.role === 'user' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-doccure-teal'
                           }`}>
                             {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
                           </div>
-                          <div className={`px-4 py-3 rounded-2xl text-sm font-medium leading-relaxed shadow-sm whitespace-pre-wrap ${
+                          <div className={`px-4 py-3 rounded-2xl text-sm font-medium leading-relaxed shadow-sm w-full overflow-hidden break-words ${
                             msg.role === 'user' 
-                              ? 'bg-rose-500 text-white rounded-tr-none' 
+                              ? 'bg-doccure-teal text-white rounded-tr-none' 
                               : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none'
                           }`}>
-                            {msg.content}
+                            {msg.role === 'user' ? (
+                              <div className="whitespace-pre-wrap">{msg.content}</div>
+                            ) : (
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                                  ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                                  ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                                  li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                  strong: ({node, ...props}) => <strong className="font-bold text-slate-900" {...props} />,
+                                  em: ({node, ...props}) => <em className="italic" {...props} />,
+                                  table: ({node, ...props}) => (
+                                    <div className="overflow-x-auto mb-2 w-full">
+                                      <table className="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-lg" {...props} />
+                                    </div>
+                                  ),
+                                  th: ({node, ...props}) => <th className="px-3 py-2 bg-slate-50 text-left text-xs font-semibold text-slate-600 uppercase" {...props} />,
+                                  td: ({node, ...props}) => <td className="px-3 py-2 text-sm border-t border-slate-100" {...props} />,
+                                  a: ({node, ...props}) => <a className="text-doccure-teal hover:underline font-semibold" target="_blank" rel="noopener noreferrer" {...props} />,
+                                }}
+                              >
+                                {msg.content || ''}
+                              </ReactMarkdown>
+                            )}
                           </div>
                         </div>
                       </motion.div>
                     ))}
-                    {isTyping && (
+                    {isTyping && messages[messages.length - 1]?.role !== 'assistant' && (
                       <div className="flex gap-3 justify-start">
                         <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shadow-sm">
-                          <Bot size={14} className="text-rose-500" />
+                          <Bot size={14} className="text-doccure-teal" />
                         </div>
                         <div className="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm flex gap-1.5 items-center">
-                          <motion.span animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1 }} className="w-1.5 h-1.5 bg-rose-400 rounded-full"></motion.span>
-                          <motion.span animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 bg-rose-400 rounded-full"></motion.span>
-                          <motion.span animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 bg-rose-400 rounded-full"></motion.span>
+                          <motion.span animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1 }} className="w-1.5 h-1.5 bg-doccure-teal/60 rounded-full" />
+                          <motion.span animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 bg-doccure-teal/60 rounded-full" />
+                          <motion.span animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 bg-doccure-teal/60 rounded-full" />
                         </div>
                       </div>
                     )}
@@ -355,24 +373,22 @@ export function AiChatFloating() {
               {/* Footer Input */}
               {selectedChatId && (
                 <form 
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    sendMessage();
-                  }}
+                  onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
                   className="p-5 bg-white border-t border-slate-100"
                 >
-                  <div className="relative group bg-slate-50 rounded-[1.5rem] border border-transparent focus-within:border-rose-100 focus-within:bg-white transition-all p-1.5 flex items-center">
+                  <div className="relative group bg-slate-50 rounded-[1.5rem] border border-transparent focus-within:border-doccure-teal/20 focus-within:bg-white transition-all p-1.5 flex items-center">
                     <input
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       placeholder="Tanya GENTING AI..."
-                      className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium px-3 text-slate-700 placeholder:text-slate-400"
+                      disabled={isTyping}
+                      className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium px-3 text-slate-700 placeholder:text-slate-400 outline-none disabled:opacity-50"
                     />
                     <Button
                       type="submit"
                       disabled={!inputValue.trim() || isTyping}
                       size="icon"
-                      className="w-10 h-10 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-all shadow-lg shadow-rose-200 shrink-0"
+                      className="w-10 h-10 bg-doccure-teal hover:bg-doccure-dark text-white rounded-xl transition-all shadow-lg shadow-doccure-teal/20 shrink-0"
                     >
                       <Send size={18} />
                     </Button>

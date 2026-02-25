@@ -3,6 +3,11 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+const pseudoRandom = (seed: number) => {
+  const x = Math.sin(seed * 9999) * 10000;
+  return x - Math.floor(x);
+};
+
 export const SparklesCore = (props: {
   id?: string;
   className?: string;
@@ -27,16 +32,16 @@ export const SparklesCore = (props: {
   const particles = useMemo(() => {
     return Array.from({ length: particleDensity }).map((_, i) => ({
       id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * (maxSize - minSize) + minSize,
-      duration: Math.random() * 5 + 2 / speed,
-      delay: Math.random() * 5,
+      x: pseudoRandom(i + 1) * 100,
+      y: pseudoRandom(i + 101) * 100,
+      size: pseudoRandom(i + 201) * (maxSize - minSize) + minSize,
+      duration: pseudoRandom(i + 301) * 5 + 2 / speed,
+      delay: pseudoRandom(i + 401) * 5,
     }));
   }, [particleDensity, minSize, maxSize, speed]);
 
   return (
-    <div className={cn("absolute inset-0 overflow-hidden", className)}>
+    <div data-sparkle-id={id} className={cn("absolute inset-0 overflow-hidden", className)} style={{ background }}>
       {particles.map((p) => (
         <motion.div
           key={p.id}

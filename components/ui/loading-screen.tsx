@@ -69,7 +69,7 @@ export function LoadingScreen({ message = 'Memuat...', fullScreen = false }: Loa
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-[100] bg-floral flex items-center justify-center">
+      <div className="fixed inset-0 z-[100] bg-white flex items-center justify-center">
         {content}
       </div>
     )
