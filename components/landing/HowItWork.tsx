@@ -1,61 +1,68 @@
-import { motion } from "framer-motion";
-import { UserPlus, LineChart, Salad, MessageCircle } from "lucide-react";
+'use client'
 
-const steps = [
-  { icon: UserPlus, title: "Daftarkan Data Anak", desc: "Masukkan data dasar anak seperti nama, tanggal lahir, jenis kelamin, serta tinggi dan berat badan awal." },
-  { icon: LineChart, title: "Pantau Pertumbuhan", desc: "Catat perkembangan tinggi dan berat badan anak secara berkala. Grafik otomatis menunjukkan tren pertumbuhan." },
-  { icon: Salad, title: "Dapatkan Rekomendasi Nutrisi", desc: "Sistem memberikan saran menu dan pola makan sesuai kebutuhan gizi anak berdasarkan data pertumbuhan." },
-  { icon: MessageCircle, title: "Konsultasi dengan Ahli", desc: "Hubungi dokter anak atau ahli gizi untuk konsultasi langsung jika ada kekhawatiran soal tumbuh kembang." },
-];
+import { motion } from 'framer-motion'
+import { Camera, Route, BookOpen, Stethoscope } from 'lucide-react'
 
-const HowItWorks = () => {
+export default function HowItWork() {
+  const reasons = [
+    {
+      icon: Camera,
+      title: 'Vision AI — Deteksi Nutrisi',
+      description: 'Scan makanan untuk mengukur kandungan gizi secara instan menggunakan teknologi AI.',
+    },
+    {
+      icon: Route,
+      title: 'Roadmap Kehamilan',
+      description: 'Panduan perjalanan kehamilan lengkap dengan milestone dan tips kesehatan setiap trimester.',
+    },
+    {
+      icon: BookOpen,
+      title: 'Edukasi Interaktif',
+      description: 'Konten edukasi terstruktur tentang nutrisi, imunisasi, dan tumbuh kembang anak.',
+    },
+    {
+      icon: Stethoscope,
+      title: 'Konsultasi Dokter Online',
+      description: 'Reservasi dan konsultasi langsung dengan dokter spesialis anak terverifikasi.',
+    }
+  ]
+
   return (
-    <section className="py-20 lg:py-28 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-semibold mb-4">
-            Cara Kerja
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
-            Mudah Digunakan, Hasil Nyata
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Hanya 4 langkah sederhana untuk mulai memantau dan mencegah stunting pada anak Anda.
-          </p>
-        </motion.div>
+    <section className="py-20 bg-[#0F6856]">
+      <div className="container mx-auto px-4">
+        {/* Section header */}
+        <div className="text-center max-w-2xl mx-auto mb-14">
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {steps.map((s, i) => (
+          <h2 className="text-3xl md:text-4xl font-bold text-white">
+            Kenapa Orang Tua{' '}
+            <span className="italic underline decoration-[#E8C84A] underline-offset-4">
+              Memilih Genting
+            </span>
+          </h2>
+        </div>
+
+        {/* 4 Feature Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {reasons.map((reason, index) => (
             <motion.div
-              key={i}
+              key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.12 }}
-              className="relative text-center"
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="bg-white rounded-2xl p-6 text-center group hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
-              {i < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-10 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/30 to-transparent" />
-              )}
-              <div className="relative inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 text-primary mb-5 mx-auto group hover:bg-primary hover:text-primary-foreground transition-colors">
-                <s.icon className="w-8 h-8" />
-                <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-extrabold flex items-center justify-center shadow-lg">
-                  {i + 1}
-                </div>
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-[#0F6856]/10 flex items-center justify-center mb-5 group-hover:bg-[#0F6856] transition-colors duration-300">
+                <reason.icon size={28} className="text-[#0F6856] group-hover:text-white transition-colors duration-300" />
               </div>
-              <h3 className="font-bold text-foreground mb-2">{s.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              <h3 className="text-base font-bold text-foreground mb-3">{reason.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {reason.description}
+              </p>
             </motion.div>
           ))}
         </div>
       </div>
     </section>
-  );
-};
-
-export default HowItWorks;
+  )
+}

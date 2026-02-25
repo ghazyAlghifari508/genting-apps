@@ -1,7 +1,7 @@
-import { google } from '@/lib/google-ai'
+import { openrouter } from '@/lib/openrouter'
 import { generateText } from 'ai'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+
 
 const FoodAnalysisSchema = z.object({
   foodName: z.string().describe('Nama makanan yang terdeteksi dalam bahasa Indonesia'),
@@ -60,20 +60,19 @@ export async function POST(req: Request) {
     
     Berikan estimasi nutrisi yang akurat. Jika bukan gambar makanan, berikan nilai 0 dan isHealthy: false.`
 
-    // Analyze with Gemini Vision using generateText (v1 compatible)
     const { text: jsonString } = await generateText({
-      model: google('gemini-1.5-flash'),
+      model: openrouter('openrouter/free'),
       messages: [
         {
           role: 'user',
           content: [
             {
-              type: 'image',
-              image: `data:${mimeType};base64,${base64}`,
-            },
-            {
               type: 'text',
               text: prompt,
+            },
+            {
+              type: 'image',
+              image: new URL(`data:${mimeType};base64,${base64}`),
             },
           ],
         },
@@ -81,66 +80,44 @@ export async function POST(req: Request) {
     })
 
     // Parse JSON manually
-    let analysis;
+    let analysis: z.infer<typeof FoodAnalysisSchema>;
     try {
       // Clean potential markdown code blocks
       const cleanJson = jsonString.replace(/```json/g, '').replace(/```/g, '').trim();
-      analysis = JSON.parse(cleanJson);
-    } catch (e) {
+      analysis = FoodAnalysisSchema.parse(JSON.parse(cleanJson));
+    } catch {
+      console.error('--- OPENROUTER VISION PARSE ERROR ---');
       console.error('Failed to parse JSON:', jsonString);
       throw new Error('Gagal memproses hasil analisis AI');
     }
 
     // Save to database if userId provided
     if (userId) {
-      const supabase = await createClient()
-      
-      // Upload image to Supabase Storage
-      const fileName = `${userId}/${Date.now()}.${image.type.split('/')[1] || 'jpg'}`
-      const { data: uploadData } = await supabase.storage
-        .from('food-images')
-        .upload(fileName, image)
-
-      let imageUrl = null
-      if (uploadData) {
-        const { data: { publicUrl } } = supabase.storage
-          .from('food-images')
-          .getPublicUrl(fileName)
-        imageUrl = publicUrl
-      }
-
-      // Save to food_logs
-      await supabase.from('food_logs').insert({
-        user_id: userId,
-        image_url: imageUrl,
-        food_name: analysis.foodName,
-        calories: analysis.calories,
-        protein: analysis.protein,
-        carbs: analysis.carbs,
-        fat: analysis.fat,
-        iron: analysis.iron,
-        zinc: analysis.zinc,
-        calcium: analysis.calcium,
-        folic_acid: analysis.folicAcid,
-        vitamin_a: analysis.vitaminA,
-        ai_tip: analysis.tip,
-        stunting_nutrition_score: analysis.stuntingNutritionScore,
-      })
+      // TODO: Implement saving to PG and strict file storage (S3/R2)
+      console.warn('Saving to DB/Storage disabled during migration cleanup')
     }
 
     return new Response(
       JSON.stringify({ success: true, analysis }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
-  } catch (error) {
-    console.error('Analyze Food API Error Detailed:', error)
-    if (error instanceof Error) {
-      console.error('Error Message:', error.message)
-      console.error('Error Stack:', error.stack)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('--- OPENROUTER VISION DEBUG START ---');
+    console.error('Error:', errorMessage);
+
+    if (typeof error === 'object' && error !== null && 'response' in error) {
+      const response = (error as { response?: { text?: () => Promise<string> } }).response
+      if (response?.text) {
+        console.error('Response:', await response.text());
+      }
     }
+
+    console.error('--- OPENROUTER VISION DEBUG END ---');
+    
     return new Response(
       JSON.stringify({ 
-        error: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        error: `Gagal menganalisis gambar Bunda. Silakan coba lagi nanti ya. 🙏`,
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )

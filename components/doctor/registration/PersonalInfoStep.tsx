@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
-import { Card } from '@/components/ui/card'
+import React, { useEffect, useMemo } from 'react'
+import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '../../ui/textarea'
@@ -15,6 +15,17 @@ interface PersonalInfoStepProps {
 }
 
 export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProps) {
+  const previewUrl = useMemo(
+    () => (formData.profilePicture ? URL.createObjectURL(formData.profilePicture) : null),
+    [formData.profilePicture]
+  )
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -25,63 +36,72 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="fullName">Nama Lengkap *</Label>
+        <Label htmlFor="fullName" className="text-slate-700 dark:text-slate-300 transition-colors">Nama Lengkap *</Label>
         <Input
           id="fullName"
           value={formData.fullName}
           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
           placeholder="Dr. Nama Lengkap"
-          className="mt-1"
+          className="mt-1 dark:bg-slate-800 dark:border-white/10 dark:text-white transition-colors"
         />
       </div>
 
       <div>
-        <Label htmlFor="phone">Nomor Telepon *</Label>
+        <Label htmlFor="phone" className="text-slate-700 dark:text-slate-300 transition-colors">Nomor Telepon *</Label>
         <Input
           id="phone"
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           placeholder="+62 8..."
-          className="mt-1"
+          className="mt-1 dark:bg-slate-800 dark:border-white/10 dark:text-white transition-colors"
         />
       </div>
 
       <div>
-        <Label htmlFor="bio">Bio / Tentang Anda</Label>
+        <Label htmlFor="bio" className="text-slate-700 dark:text-slate-300 transition-colors">Bio / Tentang Anda</Label>
         <Textarea
           id="bio"
           value={formData.bio}
           onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
           placeholder="Ceritakan pengalaman Anda..."
-          className="mt-1"
+          className="mt-1 dark:bg-slate-800 dark:border-white/10 dark:text-white transition-colors"
           rows={3}
         />
       </div>
 
       <div>
-        <Label>Foto Profil</Label>
-        <div className="mt-1 border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-blue-500 transition-colors relative bg-slate-50">
+        <Label className="text-slate-700 dark:text-slate-300 transition-colors">Foto Profil</Label>
+        <div className="mt-1 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl p-6 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-colors relative bg-slate-50 dark:bg-slate-800">
           {formData.profilePicture ? (
             <div className="flex flex-col items-center gap-2">
-              <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-200">
-                <img src={URL.createObjectURL(formData.profilePicture)} alt="Preview" className="w-full h-full object-cover" />
+              <div className="relative w-16 h-16 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700">
+                {previewUrl ? (
+                  <Image
+                    src={previewUrl}
+                    alt="Preview"
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                    unoptimized
+                  />
+                ) : null}
               </div>
-              <p className="text-sm font-medium text-slate-700">{formData.profilePicture.name}</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{formData.profilePicture.name}</p>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setFormData({ ...formData, profilePicture: null })}
-                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 <X size={14} className="mr-1" /> Hapus
               </Button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+              <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 trasition-colors">
                 <Upload size={20} />
               </div>
-              <p className="text-sm text-slate-500">Klik untuk upload foto (JPG/PNG)</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 transition-colors">Klik untuk upload foto (JPG/PNG)</p>
               <input
                 type="file"
                 accept="image/*"

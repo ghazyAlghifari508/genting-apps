@@ -22,7 +22,7 @@ export function DoctorRegistrationButton({ userRole, isLoggedIn }: DoctorRegistr
     <>
       <Button 
         onClick={() => setIsOpen(true)}
-        className="bg-gradient-to-r from-cerulean to-sea-green hover:from-cerulean/90 hover:to-sea-green/90 text-white shadow-lg shadow-cerulean/20 rounded-full px-6 transition-all duration-300 transform hover:-translate-y-0.5"
+        className="bg-doccure-yellow hover:bg-[#cbe33a] text-doccure-dark shadow-lg shadow-doccure-yellow/20 rounded-full px-6 transition-all duration-300 transform hover:-translate-y-0.5 font-bold"
         size="sm"
       >
         <Stethoscope size={16} className="mr-2" />

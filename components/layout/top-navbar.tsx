@@ -6,21 +6,30 @@ import { useAuth } from '@/hooks/useAuth'
 import { usePathname, useRouter } from 'next/navigation'
 import { 
   Leaf, 
-  Settings, 
+  History as HistoryIcon, 
   LogOut, 
   LayoutDashboard, 
   Route, 
   Camera, 
   BookOpen, 
   Stethoscope,
-  MessageCircle,
-  ChevronDown,
-  User
+  User,
+  Sun,
+  Moon,
+  Menu,
 } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { DoctorRegistrationButton } from '@/components/layout/DoctorRegistrationButton'
 import { useUserRole } from '@/hooks/useUserRole'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,146 +38,280 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const dashboardNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
   { icon: Route, label: 'Roadmap', href: '/roadmap' },
   { icon: Camera, label: 'Vision', href: '/vision' },
   { icon: BookOpen, label: 'Education', href: '/education' },
-  { icon: Stethoscope, label: 'Konsultasi', href: '/konsultasi-dokter' },
+  { icon: Stethoscope, label: 'Konsultasi', href: '/konsultasi-dokter', },
 ]
 
-const landingNavItems = [
-  { icon: Leaf, label: 'Fitur', href: '/#features' },
-  { icon: BookOpen, label: 'Tentang', href: '/#about' },
+const landingNavItems: { label: string; href: string }[] = [
+  { label: 'Beranda', href: '/#home' },
+  { label: 'Layanan', href: '/#services' },
+  { label: 'Statistik', href: '/#stats' },
+  { label: 'Tentang', href: '/#about' },
+  { label: 'Tim', href: '/#team' },
+  { label: 'FAQ', href: '/#faq' },
+  { label: 'Blog', href: '/#blog' },
 ]
 
 export function TopNavbar() {
   const pathname = usePathname()
-  const router = useRouter()
-  const supabase = createClient()
+
   const { user } = useAuth()
   const { role } = useUserRole()
   const [scrolled, setScrolled] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
+
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setIsMounted(true)
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10)
+    handleScroll()
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   // Deterministic check for dashboard area to prevent flickering
-  const isDashboardArea = pathname.startsWith('/dashboard') || 
-                          pathname.startsWith('/roadmap') || 
-                          pathname.startsWith('/vision') || 
-                          pathname.startsWith('/konsultasi-dokter') ||
-                          pathname.startsWith('/education') ||
-                          pathname.startsWith('/profile') ||
-                          pathname.startsWith('/admin')
+  const dashboardPaths = [
+    '/dashboard', '/roadmap', '/vision', '/konsultasi-dokter',
+    '/education', '/profile', '/admin', '/booking', '/payment',
+    '/doctors', '/riwayat-transaksi'
+  ]
+  const isDashboardArea = dashboardPaths.some(path => pathname.startsWith(path))
 
   const activeNavItems = (user || isDashboardArea) ? dashboardNavItems : landingNavItems
   const logoHref = (user || isDashboardArea) ? "/dashboard" : "/"
 
+  const isLanding = !user && !isDashboardArea
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-floral/80 backdrop-blur-md border-b border-white/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+    <nav className={`fixed top-0 left-0 right-0 z-50 ${isLanding ? 'bg-doccure-dark' : (isDashboardArea || scrolled ? 'bg-doccure-dark shadow-md' : 'bg-transparent')} transition-colors duration-200`}>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={`h-20 flex items-center justify-between ${isDashboardArea ? 'lg:grid lg:grid-cols-[auto_1fr_auto]' : ''} items-center`}>
+          
           {/* Logo */}
-          <Link href={logoHref} className="flex items-center gap-2 group shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cerulean to-sea-green flex items-center justify-center shadow-lg shadow-cerulean/20 transition-transform group-hover:scale-110">
-              <Leaf className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-black tracking-tighter gradient-text">
-              GENTING
-            </span>
-          </Link>
-
-          {/* Navigation Items - Desktop */}
-          <div className="hidden lg:flex items-center gap-1 mx-4">
-            <div className="p-1.5 rounded-2xl flex items-center gap-1 bg-white/40 border border-white/50 shadow-sm">
-              {activeNavItems.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-bold text-sm ${
-                      isActive 
-                        ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' 
-                        : 'text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-sm'
-                    }`}>
-                      <item.icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                      <span>{item.label}</span>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
+          <div className="flex items-center">
+            <Link href={logoHref} className="flex items-center gap-2 group shrink-0">
+              <div className="flex items-center justify-center transition-transform group-hover:scale-105">
+                <Leaf className="w-8 h-8 text-doccure-yellow" />
+                <span className="text-2xl font-bold tracking-tight text-white ml-2">
+                  GENTING<span className="text-doccure-yellow">+</span>
+                </span>
+              </div>
+            </Link>
           </div>
 
-          {/* User Actions */}
-          <div className="flex items-center gap-8 shrink-0 ml-8">
-            {user ? (
-              <>
-                <div className="hidden md:block">
-                  <DoctorRegistrationButton isLoggedIn={!!user} userRole={role} />
-                </div>
-                
+          {/* Navigation Items - Desktop */}
+          <div className="hidden lg:flex items-center justify-center gap-8">
+            {activeNavItems.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link key={item.href} href={item.href} className="group relative">
+                  <div className={`relative text-[15px] font-medium transition-colors ${
+                    isActive ? 'text-white' : 'text-white/80 group-hover:text-white'
+                  }`}>
+                    <span>{item.label}</span>
+                    <span
+                      className={`absolute left-0 -bottom-2 h-[2px] w-full bg-white transform origin-left transition-transform duration-300 ${
+                        isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                      }`}
+                    />
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
 
+          {/* User Actions - Desktop & Mobile */}
+          <div className="flex items-center gap-4 sm:gap-6 shrink-0 lg:ml-0">
+            {/* Action Icons */}
+            <div className="hidden lg:flex items-center gap-6">
+              {mounted && (
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="text-white/90 hover:text-white transition-colors p-1"
+                >
+                  <Sun className="w-5 h-5" />
+                </button>
+              )}
+            </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0 border-2 border-white/50 shadow-sm overflow-hidden bg-white/50 hover:bg-white transition-all">
-                      {user?.user_metadata?.avatar_url ? (
-                        <img src={user.user_metadata.avatar_url} alt="Profile" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-cerulean/10 to-sea-green/10">
-                          <User className="h-6 w-6 text-cerulean" />
-                        </div>
-                      )}
+            {/* User Account / Auth */}
+            <div className="hidden lg:flex items-center gap-6">
+              {!user && !isDashboardArea ? (
+                <div className="hidden lg:flex items-center gap-4">
+                  <Link href="/login">
+                    <Button className="bg-doccure-yellow hover:bg-doccure-yellow/90 text-doccure-dark font-bold rounded-full px-6">
+                      Login
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 border-white/50 shadow-2xl backdrop-blur-xl bg-white/90">
-                    <DropdownMenuLabel className="font-bold text-slate-900 px-3 py-2">
-                      <div className="flex flex-col">
-                        <span className="text-sm truncate">{user?.user_metadata?.full_name || 'Bunda GENTING'}</span>
-                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{role === 'doctor' ? 'Dokter Terverifikasi' : 'Ibu Hamil'}</span>
+                  </Link>
+                </div>
+              ) : user && (
+                <div className="flex items-center gap-6">
+                  {role === 'user' && !pathname.includes('/doctor') && (
+                    <div className="hidden md:block">
+                      <DoctorRegistrationButton isLoggedIn={!!user} userRole={role} />
+                    </div>
+                  )}
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center hover:opacity-80 transition-all outline-none">
+                        <Avatar className="h-10 w-10 border-2 border-white/20 shadow-sm ring-offset-2 ring-offset-doccure-dark active:scale-95 transition-transform">
+                          <AvatarImage src={user.user_metadata?.avatar_url} />
+                          <AvatarFallback className="bg-red-600 text-white font-bold text-lg flex items-center justify-center p-0">
+                            g
+                          </AvatarFallback>
+                        </Avatar>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-64 mt-4 rounded-3xl p-3 bg-white dark:bg-slate-900 border-none shadow-[0_20px_50px_rgba(0,0,0,0.2)]" align="end">
+                      <DropdownMenuLabel className="font-bold px-4 pt-3 pb-2 text-slate-400 text-[11px] uppercase tracking-[0.2em]">Akun Saya</DropdownMenuLabel>
+                      <DropdownMenuSeparator className="mx-2 my-2 bg-slate-100/80 dark:bg-slate-800" />
+                      
+                      <div className="space-y-1">
+                        <Link href={role === 'doctor' ? '/doctor/profile' : '/profile'}>
+                          <DropdownMenuItem className="rounded-2xl px-4 py-3.5 cursor-pointer font-bold focus:bg-slate-50 dark:focus:bg-slate-800 text-[#1e293b] dark:text-slate-200 transition-colors">
+                            <User className="mr-3 h-5 w-5 text-doccure-teal" />
+                            <span className="text-[15px]">Profil</span>
+                          </DropdownMenuItem>
+                        </Link>
+                        
+                        <Link href="/riwayat-transaksi">
+                          <DropdownMenuItem className="rounded-2xl px-4 py-3.5 cursor-pointer font-bold focus:bg-slate-50 dark:focus:bg-slate-800 text-[#1e293b] dark:text-slate-200 transition-colors">
+                            <HistoryIcon className="mr-3 h-5 w-5 text-doccure-teal" />
+                            <span className="text-[15px]">Riwayat Transaksi</span>
+                          </DropdownMenuItem>
+                        </Link>
                       </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-slate-100 mx-1" />
-                    <DropdownMenuItem onClick={() => router.push('/profile')} className="rounded-xl px-3 py-2.5 cursor-pointer font-bold text-sm text-slate-600 focus:bg-cerulean/5 focus:text-cerulean">
-                      <User className="mr-2 h-4 w-4" />
-                      Profil Saya
-                    </DropdownMenuItem>
-                    
 
+                      <DropdownMenuSeparator className="mx-2 my-2 bg-slate-100/80 dark:bg-slate-800" />
+                      
+                      <DropdownMenuItem 
+                        onClick={handleLogout}
+                        className="rounded-2xl px-4 py-3.5 cursor-pointer font-bold text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20 transition-colors mt-1"
+                      >
+                        <LogOut className="mr-3 h-5 w-5" />
+                        <span className="text-[15px]">Keluar Akun</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
 
-                    <DropdownMenuItem onClick={() => router.push('/settings')} className="rounded-xl px-3 py-2.5 cursor-pointer font-bold text-sm text-slate-600 focus:bg-cerulean/5 focus:text-cerulean">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Pengaturan
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-slate-100 mx-1" />
-                    <DropdownMenuItem onClick={handleLogout} className="rounded-xl px-3 py-2.5 cursor-pointer font-bold text-sm text-rose-500 focus:bg-rose-50 focus:text-rose-600">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Keluar Akun
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (isMounted) ? (
-              <Link href="/login">
-                <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 h-12 font-bold shadow-lg shadow-slate-900/10">
-                  Masuk
+            {/* Mobile Menu */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" className="lg:hidden p-2 text-white hover:bg-white/10 rounded-full">
+                  <Menu className="w-6 h-6" />
                 </Button>
-              </Link>
-            ) : null}
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] bg-doccure-dark border-white/10 p-0 overflow-hidden">
+                <SheetHeader className="p-6 border-b border-white/10">
+                  <div className="flex items-center justify-between">
+                    <SheetTitle className="text-left">
+                      <div className="flex items-center gap-2">
+                        <Leaf className="w-6 h-6 text-doccure-yellow" />
+                        <span className="text-xl font-bold text-white tracking-tight">GENTING<span className="text-doccure-yellow">+</span></span>
+                      </div>
+                    </SheetTitle>
+                    {mounted && (
+                      <button
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        className="p-2 text-white hover:bg-white/10 rounded-full transition-all"
+                      >
+                        {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                      </button>
+                    )}
+                  </div>
+                </SheetHeader>
+                <div className="flex flex-col py-4">
+                  {activeNavItems.map((item) => {
+                    const isActive = pathname === item.href
+                    const Icon = ('icon' in item ? item.icon : null) as any
+                    return (
+                      <Link 
+                        key={item.href} 
+                        href={item.href}
+                        className={`flex items-center gap-4 px-6 py-4 transition-colors ${
+                          isActive ? 'bg-white/10 text-doccure-yellow' : 'text-white/80 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        {Icon && <Icon className="w-5 h-5" />}
+                        <span className="font-bold text-base">{item.label}</span>
+                      </Link>
+                    )
+                  })}
+                  
+                  {role === 'user' && !isDashboardArea && (
+                    <div className="mt-4 px-6">
+                      <DoctorRegistrationButton isLoggedIn={!!user} userRole={role} />
+                    </div>
+                  )}
+
+                  {!user && !isDashboardArea && (
+                    <div className="mt-8 px-6 flex flex-col gap-3">
+                      <Link href="/login" className="w-full">
+                        <Button className="w-full bg-doccure-yellow hover:bg-doccure-yellow/90 text-doccure-dark font-bold rounded-xl h-12">
+                          Login
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+
+                  {user && (
+                    <div className="mt-auto p-6 border-t border-white/10">
+                      <Link href={role === 'doctor' ? '/doctor/profile' : '/profile'} className="flex items-center gap-4 mb-6 hover:opacity-80 transition-opacity">
+                        <Avatar className="h-12 w-12 border-2 border-doccure-teal">
+                          <AvatarImage src={user.user_metadata?.avatar_url} />
+                          <AvatarFallback className="bg-doccure-teal text-white">
+                            {user.email?.[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-white truncate max-w-[150px]">
+                            {user.user_metadata?.full_name || 'User'}
+                          </span>
+                          <span className="text-xs text-white/50 truncate max-w-[150px]">
+                            {user.email}
+                          </span>
+                        </div>
+                      </Link>
+                      
+                      <Link href="/riwayat-transaksi" className="flex items-center gap-3 mb-6 px-1 text-white/80 hover:text-white transition-colors">
+                        <HistoryIcon className="w-5 h-5 text-doccure-teal" />
+                        <span className="font-bold">Riwayat Transaksi</span>
+                      </Link>
+
+                      <Button 
+                        onClick={handleLogout}
+                        variant="outline" 
+                        className="w-full border-red-500/30 text-red-500 hover:bg-red-500/10 font-bold rounded-xl h-12 justify-start px-4"
+                      >
+                        <LogOut className="mr-3 h-5 w-5" />
+                        Keluar Akun
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
-      
-
     </nav>
   )
 }

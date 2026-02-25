@@ -7,12 +7,18 @@
   /* GENTING Color Palette 3 */
   --genting-cerulean: 34 124 157;
   --genting-sea-green: 23 195 178;
-  --genting-grapefruit: 254 109 115;
+  --genting-grapefruit: 217 119 6;
   --genting-apricot: 255 203 119;
-  --genting-floral: 254 249 239;
-  
+  --genting-floral: 255 255 255;
+  /* Doccure Palette */
+  --doccure-dark: 14 94 88;
+  --doccure-teal: 19 122 116;
+  --doccure-yellow: 221 242 71;
+  --doccure-light-yellow: 246 252 190;
+  --doccure-gray: 246 247 249;
+
   /* Base colors */
-  --background: var(--genting-floral);
+  --background: 255 255 255;
   --foreground: 34 40 45;
   
   --popover: 255 255 255;
@@ -30,9 +36,9 @@
   --secondary: var(--genting-sea-green);
   --secondary-foreground: 255 255 255;
   
-  /* Accent - Grapefruit Pink */
-  --accent: var(--genting-grapefruit);
-  --accent-foreground: 255 255 255;
+  /* Accent - Neutral (focus/hover states for shadcn UI) */
+  --accent: 241 245 249;
+  --accent-foreground: 15 23 42;
   
   /* Success - Sea Green */
   --success: var(--genting-sea-green);
@@ -77,6 +83,11 @@
   
   --border: 40 60 75;
   --input: 40 60 75;
+
+  /* Custom palette overrides for dark mode */
+  --doccure-gray: 25 35 40;
+  --doccure-light-yellow: 40 45 20;
+  --genting-floral: 15 25 30;
 }
 
 @theme inline {
@@ -110,6 +121,22 @@
   --color-grapefruit: rgb(var(--genting-grapefruit));
   --color-apricot: rgb(var(--genting-apricot));
   --color-floral: rgb(var(--genting-floral));
+
+  --color-doccure-dark: rgb(var(--doccure-dark));
+  --color-doccure-teal: rgb(var(--doccure-teal));
+  --color-doccure-yellow: rgb(var(--doccure-yellow));
+  --color-doccure-light-yellow: rgb(var(--doccure-light-yellow));
+  --color-doccure-gray: rgb(var(--doccure-gray));
+
+  /* Medical / Doctor Dashboard Palette */
+  --color-medical-blue: #0066CC;
+  --color-medical-teal: #00A699;
+  --color-medical-green: #4CAF50;
+  --color-medical-red: #E53935;
+  --color-medical-orange: #FF9800;
+  --color-medical-gray: #757575;
+  --color-medical-light-gray: #F5F5F5;
+
   
   /* Backward compatibility aliases */
   --color-lavender: rgb(var(--genting-cerulean));
@@ -128,11 +155,14 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: rgb(var(--doccure-dark));
+  overscroll-behavior-y: none;
 }
 
 body {
   @apply bg-background text-foreground antialiased;
-  font-family: 'Plus Jakarta Sans', var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-plus-jakarta-sans), system-ui, -apple-system, sans-serif;
+  overscroll-behavior-y: none;
 }
 
 /* Glassmorphism utilities */
@@ -212,6 +242,20 @@ body {
   animation-delay: -4s;
 }
 
+/* Shimmer animation for skeletons */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
 /* Blob animations */
 @keyframes blob {
   0%, 100% {
@@ -249,10 +293,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--royal-lavender) / 0.5);
+  background: rgb(var(--genting-cerulean) / 0.5);
   border-radius: var(--radius);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--royal-lavender) / 0.7);
+  background: rgb(var(--genting-cerulean) / 0.7);
 }

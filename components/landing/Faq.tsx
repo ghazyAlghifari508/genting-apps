@@ -1,58 +1,131 @@
-import { motion } from "framer-motion";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+'use client'
 
-const faqs = [
-  { q: "Apa itu Genting?", a: "Genting (Generasi Anti-Stunting) adalah platform digital yang membantu orang tua dan tenaga kesehatan memantau tumbuh kembang anak, memberikan panduan nutrisi, dan menghubungkan dengan ahli gizi untuk mencegah stunting." },
-  { q: "Apakah Genting gratis?", a: "Ya! Genting menyediakan fitur-fitur dasar secara gratis termasuk monitoring pertumbuhan, panduan nutrisi, dan reminder imunisasi. Fitur premium seperti konsultasi ahli tersedia dengan biaya terjangkau." },
-  { q: "Bagaimana cara memulai menggunakan Genting?", a: "Cukup daftar dengan email atau nomor telepon, masukkan data anak Anda, dan mulai pantau pertumbuhannya. Prosesnya hanya membutuhkan waktu 2 menit!" },
-  { q: "Apakah data anak saya aman?", a: "Keamanan data adalah prioritas utama kami. Semua data dienkripsi dan disimpan dengan standar keamanan tinggi. Kami tidak pernah membagikan data pribadi Anda kepada pihak ketiga." },
-  { q: "Siapa saja yang bisa menggunakan Genting?", a: "Genting dirancang untuk orang tua, bidan, kader posyandu, dokter anak, ahli gizi, dan siapa saja yang peduli dengan tumbuh kembang anak Indonesia." },
-  { q: "Apakah Genting sesuai dengan standar WHO?", a: "Ya, semua parameter pertumbuhan dan rekomendasi nutrisi di Genting mengacu pada standar WHO (World Health Organization) dan Kementerian Kesehatan Republik Indonesia." },
-];
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Plus, Minus } from 'lucide-react'
 
-const FAQSection = () => {
+export default function Faq() {
+  const [openIndex, setOpenIndex] = useState<number | null>(1)
+
+  const faqs = [
+    {
+      question: 'Usia berapa saja yang bisa dipantau di Genting?',
+      answer: 'Genting dapat digunakan untuk memantau tumbuh kembang anak dari usia 0 hingga 5 tahun (balita), serta mendampingi ibu hamil selama masa kehamilan melalui fitur Roadmap.'
+    },
+    {
+      question: 'Bagaimana cara membaca grafik pertumbuhan anak?',
+      answer: 'Grafik pertumbuhan di Genting menggunakan standar WHO. Area hijau menandakan pertumbuhan normal, kuning berisiko, dan merah membutuhkan perhatian medis segera. Anda bisa berkonsultasi langsung dengan dokter untuk penjelasan lebih lanjut.'
+    },
+    {
+      question: 'Apakah saya bisa konsultasi secara online?',
+      answer: 'Ya! Anda bisa melakukan reservasi dan konsultasi langsung dengan dokter spesialis anak yang terverifikasi melalui fitur Konsultasi Dokter di aplikasi Genting.'
+    },
+    {
+      question: 'Apakah data medis anak saya aman?',
+      answer: 'Ya, kami menggunakan enkripsi untuk melindungi seluruh data medis dan privasi pengguna. Keamanan data adalah prioritas utama kami.'
+    },
+    {
+      question: 'Bagaimana cara kerja fitur Vision AI?',
+      answer: 'Vision AI memungkinkan Anda scan makanan menggunakan kamera untuk mendapatkan informasi nutrisi secara instan. Cukup arahkan kamera ke makanan, dan AI kami akan menganalisis kandungan gizinya.'
+    }
+  ]
+
   return (
-    <section id="faq" className="py-20 lg:py-28 bg-muted/30">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
-            FAQ
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
-            Pertanyaan yang Sering Diajukan
-          </h2>
-        </motion.div>
+    <section className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          
+          {/* Left - FAQ Accordion */}
+          <div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <Accordion type="single" collapsible className="space-y-3">
-            {faqs.map((faq, i) => (
-              <AccordionItem
-                key={i}
-                value={`faq-${i}`}
-                className="bg-card rounded-xl border border-border px-5 data-[state=open]:shadow-sm"
-              >
-                <AccordionTrigger className="text-sm font-semibold text-foreground hover:no-underline">
-                  {faq.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
-                  {faq.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </motion.div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-8">
+              Pertanyaan yang Sering{' '}
+              <span className="italic text-[#0F6856] underline decoration-[#E8C84A] underline-offset-4">
+                Ditanyakan
+              </span>
+            </h2>
+
+            <div className="space-y-3">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  className={`border rounded-xl overflow-hidden transition-colors ${
+                    openIndex === index ? 'border-[#0F6856]/20 bg-white shadow-sm' : 'border-slate-100 bg-white'
+                  }`}
+                >
+                  <button
+                    onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                    className="w-full flex items-center justify-between px-5 py-4 text-left"
+                  >
+                    <span className={`font-semibold text-sm pr-4 ${openIndex === index ? 'text-[#0F6856]' : 'text-foreground'}`}>
+                      {faq.question}
+                    </span>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                      openIndex === index ? 'bg-[#0F6856] text-white' : 'bg-slate-100 text-foreground'
+                    }`}>
+                      {openIndex === index ? <Minus size={14} /> : <Plus size={14} />}
+                    </div>
+                  </button>
+                  
+                  {openIndex === index && (
+                    <div className="px-5 pb-4">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right - Contact Form */}
+          <div>
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 sticky top-24">
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                Butuh bantuan? Hubungi kami.
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6">Isi form di bawah dan tim kami akan segera menghubungi Anda.</p>
+
+              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <input
+                  type="text"
+                  placeholder="Nama"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F6856]/20 focus:border-[#0F6856] transition-colors bg-white"
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F6856]/20 focus:border-[#0F6856] transition-colors bg-white"
+                />
+                <select className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0F6856]/20 focus:border-[#0F6856] transition-colors bg-white appearance-none">
+                  <option value="">Pilih Kategori</option>
+                  <option value="konsultasi">Konsultasi Dokter</option>
+                  <option value="tumbuh-kembang">Pantau Tumbuh Kembang</option>
+                  <option value="vision">Vision AI</option>
+                  <option value="lainnya">Lainnya</option>
+                </select>
+                <textarea
+                  placeholder="Pesan Anda..."
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F6856]/20 focus:border-[#0F6856] transition-colors bg-white resize-none"
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-[#0F6856] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#0D5A4B] transition-colors shadow-lg shadow-[#0F6856]/20"
+                >
+                  Kirim Pesan
+                </button>
+              </form>
+            </div>
+          </div>
+
+        </div>
       </div>
     </section>
-  );
-};
-
-export default FAQSection;
+  )
+}
