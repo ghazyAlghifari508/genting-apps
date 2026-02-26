@@ -2,8 +2,7 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle2, Target } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { CheckCircle2, Target } from 'lucide-react'
 
 const features = [
   "Konsultasi dokter online",

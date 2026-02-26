@@ -1,69 +1,45 @@
 'use client'
 
-import React from 'react'
-import { Star } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 interface RoadmapHeaderProps {
-  trimester: number
-  pregnancyWeek: number
-  completedCount: number
-  totalCount: number
-  streakDays: number
-  totalXp: number
+  todayLabel: string
 }
 
-function formatToday() {
-  return new Date().toLocaleDateString('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
-export const RoadmapHeader = React.memo(({
-  trimester,
-  pregnancyWeek,
-  completedCount,
-  totalCount,
-  streakDays,
-  totalXp,
-}: RoadmapHeaderProps) => {
-  const todayLabel = formatToday()
-
+export function RoadmapHeader({ todayLabel }: RoadmapHeaderProps) {
   return (
-    <section className="px-1">
-      <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-doccure-teal">
-          Minggu {pregnancyWeek || 0} · Trimester {trimester} · {todayLabel}
-        </p>
-        <h1 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
-          Roadmap Harian
-        </h1>
-        <p className="mt-1 text-slate-500 font-semibold text-[15px] max-w-xl">
-          Aktivitas hari ini difokuskan untuk progres kehamilan yang terarah.
-        </p>
-
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-[13px] font-semibold text-slate-600">
-          <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2.5 py-1">
-            ✓ {completedCount}/{totalCount} selesai
-          </span>
-          <span>·</span>
-          <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2.5 py-1">
-            🔥 {streakDays} hari
-          </span>
-          {totalXp > 0 && (
-            <>
-              <span>·</span>
-              <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2.5 py-1">
-                <Star className="w-3.5 h-3.5 text-amber-500" /> {totalXp} XP
+    <section className="w-full bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-white/10 relative overflow-hidden transition-colors duration-300">
+      {/* Subtle decorative motif */}
+      <div className="absolute top-0 right-0 w-64 h-full opacity-[0.03] pointer-events-none" 
+           style={{ backgroundImage: 'radial-gradient(circle, #227c9d 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+      
+      <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:px-8 relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-2"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{todayLabel}</span>
+            </div>
+            
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-none transition-colors">
+              Roadmap <span className="text-doccure-teal italic relative inline-block">
+                1000 HPK
+                <svg className="absolute w-full h-3 -bottom-2 left-0 text-doccure-yellow" viewBox="0 0 200 12" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                  <path d="M2 9.5C50 3 150 2 198 9.5" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                </svg>
               </span>
-            </>
-          )}
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 font-medium max-w-lg transition-colors">
+              Peta jalan harian adaptif untuk tumbuh kembang optimal Bunda & Si Kecil.
+            </p>
+          </motion.div>
+
+          <div className="hidden lg:block w-32" />
         </div>
       </div>
     </section>
   )
-})
-
-RoadmapHeader.displayName = 'RoadmapHeader'
+}

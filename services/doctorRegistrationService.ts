@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
-import { getCurrentUser } from '@/lib/auth-server'
+import { assertAuthenticated, handleServiceError } from '@/lib/service-helper'
 import { DoctorRegistrationFormData } from '@/types/doctor'
 
 /**
@@ -22,9 +22,7 @@ export async function uploadFile(file: File, path: string): Promise<string> {
     })
 
   if (error) {
-    console.error(`[DoctorRegistrationService] Error uploading to storage:`, error)
-    // Fallback if bucket doesn't exist or other error, but ideally we should handle this
-    throw new Error(`Gagal mengunggah file: ${error.message}`)
+    handleServiceError(error, 'Gagal mengunggah file ke storage')
   }
 
   const { data: { publicUrl } } = supabase.storage
@@ -40,8 +38,8 @@ export async function uploadFile(file: File, path: string): Promise<string> {
  * The user's role stays 'user' until admin approves.
  */
 export async function submitDoctorRegistration(userId: string, formData: DoctorRegistrationFormData) {
-  const user = await getCurrentUser()
-  if (!user || user.id !== userId) throw new Error('Unauthorized')
+  const user = await assertAuthenticated()
+  if (user.id !== userId) throw new Error('Akses ditolak: ID User tidak cocok')
 
   let profilePictureUrl = null
   if (formData.profilePicture) {
@@ -104,7 +102,7 @@ export async function submitDoctorRegistration(userId: string, formData: DoctorR
         .select('id')
         .single()
 
-      if (error) throw error
+      if (error) handleServiceError(error, 'Gagal memperbarui pendaftaran dokter')
       return data!.id
     }
   }
@@ -132,7 +130,7 @@ export async function submitDoctorRegistration(userId: string, formData: DoctorR
     if (error.code === '23505') {
       throw new Error('Anda sudah memiliki pendaftaran aktif.')
     }
-    throw error
+    handleServiceError(error, 'Gagal mengirim pendaftaran dokter')
   }
 
   return data.id

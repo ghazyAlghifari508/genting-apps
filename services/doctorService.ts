@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
-import { getCurrentUser } from '@/lib/auth-server'
+import { assertAuthenticated, handleServiceError } from '@/lib/service-helper'
 import type { Doctor, DoctorSchedule } from '@/types/doctor'
 
 export async function getDoctors(filters?: {
@@ -25,7 +25,7 @@ export async function getDoctors(filters?: {
   }
 
   const { data, error } = await query.order('created_at', { ascending: false })
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil daftar dokter')
   return data as Doctor[]
 }
 
@@ -37,8 +37,8 @@ export async function getDoctorById(id: string) {
     .eq('id', id)
     .single()
 
-  if (error) throw error
-  if (!data) throw new Error('Doctor not found')
+  if (error) handleServiceError(error, 'Gagal mengambil data dokter')
+  if (!data) throw new Error('Dokter tidak ditemukan')
   return data as Doctor
 }
 
@@ -51,16 +51,14 @@ export async function getDoctorByUserId(userId: string) {
     .single()
 
   if (error) {
-    if (error.code === 'PGRST116') return null // Not found
-    console.error('Error fetching doctor by user_id:', error)
-    return null
+    if (error.code === 'PGRST116') return null
+    handleServiceError(error, 'Gagal mengambil data dokter berdasarkan User ID')
   }
   return data as Doctor
 }
 
 export async function upsertDoctorProfile(doctor: Partial<Doctor> & { user_id: string }) {
-  const user = await getCurrentUser()
-  if (!user) throw new Error('Unauthorized')
+  await assertAuthenticated()
 
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -69,7 +67,7 @@ export async function upsertDoctorProfile(doctor: Partial<Doctor> & { user_id: s
     .select()
     .single()
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal memperbarui profil dokter')
   return data as Doctor
 }
 
@@ -82,13 +80,12 @@ export async function getDoctorSchedules(doctorId: string) {
     .order('day_of_week', { ascending: true })
     .order('start_time', { ascending: true })
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil jadwal dokter')
   return data as DoctorSchedule[]
 }
 
 export async function upsertSchedule(schedule: Omit<DoctorSchedule, 'id' | 'created_at' | 'updated_at'>) {
-  const user = await getCurrentUser()
-  if (!user) throw new Error('Unauthorized')
+  await assertAuthenticated()
     
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -97,13 +94,12 @@ export async function upsertSchedule(schedule: Omit<DoctorSchedule, 'id' | 'crea
     .select()
     .single()
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal menambahkan jadwal')
   return data as DoctorSchedule
 }
 
 export async function deleteSchedule(id: string) {
-  const user = await getCurrentUser()
-  if (!user) throw new Error('Unauthorized')
+  await assertAuthenticated()
     
   const supabase = await createClient()
   const { error } = await supabase
@@ -111,7 +107,7 @@ export async function deleteSchedule(id: string) {
     .delete()
     .eq('id', id)
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal menghapus jadwal')
 }
 
 export async function getDoctorStats(doctorId: string) {
@@ -134,7 +130,7 @@ export async function getDoctorStats(doctorId: string) {
       .eq('doctor_id', doctorId)
   ])
 
-  if (cError) throw cError
+  if (cError) handleServiceError(cError, 'Gagal mengambil statistik dokter')
 
   const consultations = allConsultations || []
 
@@ -224,8 +220,7 @@ export async function getDoctorStats(doctorId: string) {
 }
 
 export async function updateScheduleStatus(id: string, isAvailable: boolean) {
-  const user = await getCurrentUser()
-  if (!user) throw new Error('Unauthorized')
+  await assertAuthenticated()
     
   const supabase = await createClient()
   const { error } = await supabase
@@ -233,12 +228,11 @@ export async function updateScheduleStatus(id: string, isAvailable: boolean) {
     .update({ is_available: isAvailable, updated_at: new Date().toISOString() })
     .eq('id', id)
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal memperbarui status ketersediaan')
 }
 
 export async function updateSchedule(id: string, updates: Partial<DoctorSchedule>) {
-  const user = await getCurrentUser()
-  if (!user) throw new Error('Unauthorized')
+  await assertAuthenticated()
 
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -248,6 +242,6 @@ export async function updateSchedule(id: string, updates: Partial<DoctorSchedule
     .select()
     .single()
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal memperbarui jadwal')
   return data as DoctorSchedule
 }

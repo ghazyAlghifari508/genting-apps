@@ -12,6 +12,28 @@ Lakukan clean code secara **menyeluruh** pada **semua file dan folder** dalam pr
 
 ## ✅ Checklist Tugas
 
+### 0. 📸 Benchmark SEBELUM Mulai (Baseline)
+
+> **Wajib dilakukan dulu sebelum menyentuh satu baris kode pun.**
+
+Ukur performa awal sebagai baseline perbandingan:
+
+- **Buka Chrome DevTools → tab Lighthouse** → jalankan audit untuk Mobile & Desktop
+  - Catat skor: Performance, LCP, FID/INP, CLS, TBT
+- **Buka tab Network** → reload halaman (Ctrl+Shift+R) → catat:
+  - Total load time (DOMContentLoaded & Load)
+  - Total transfer size
+  - Jumlah request
+- **Buka tab Performance** → record reload → catat:
+  - Time to First Byte (TTFB)
+  - First Contentful Paint (FCP)
+  - Largest Contentful Paint (LCP)
+- **Gunakan WebPageTest** (webpagetest.org) atau **GTmetrix** untuk hasil lebih detail jika perlu
+
+> 💾 Simpan screenshot / export hasil Lighthouse sebagai file `benchmark-before.json` atau screenshot `benchmark-before.png`
+
+---
+
 ### 1. 🗂️ Scan Seluruh File & Folder
 - Masuk ke setiap folder dan subfolder secara rekursif
 - Daftar semua file yang ditemukan sebelum mulai mengerjakan
@@ -52,6 +74,9 @@ Identifikasi dan refactor:
 - **Minimalkan re-render** — audit penggunaan `useEffect` dan pastikan dependency array-nya benar
 - **Pisahkan bundle besar** — pastikan tidak ada satu file JS yang terlalu besar (code splitting)
 - **Hapus library yang tidak dipakai** dari `package.json`
+- **Preload resource kritis** — tambahkan `<link rel="preload">` untuk font dan asset above-the-fold
+- **Cek font loading** — gunakan `font-display: swap` agar teks tidak invisible saat font belum load (ini sering bikin render delay)
+- **Defer script non-kritis** — pastikan script pihak ketiga (analytics, chat widget, dll) pakai `async` atau `defer`
 
 ---
 
@@ -84,6 +109,35 @@ Jika ada file yang tidak di tempat yang seharusnya → **pindahkan dan update se
 
 ---
 
+### 7. 🏁 Benchmark SETELAH Selesai (Validasi)
+
+> **Target: halaman utama load dalam < 3 detik pada koneksi normal (4G / Fast 3G).**
+
+Ulangi semua langkah benchmark dari Step 0, lalu bandingkan:
+
+| Metrik | Sebelum | Sesudah | Target |
+|--------|---------|---------|--------|
+| Lighthouse Performance Score | - | - | ≥ 85 |
+| LCP (Largest Contentful Paint) | - | - | < 2.5 detik |
+| FCP (First Contentful Paint) | - | - | < 1.8 detik |
+| TBT (Total Blocking Time) | - | - | < 200ms |
+| CLS (Cumulative Layout Shift) | - | - | < 0.1 |
+| Total Load Time | - | - | < 3 detik |
+| Total Transfer Size | - | - | Lebih kecil |
+| Jumlah Request | - | - | Lebih sedikit |
+
+**Cara cek load time secara manual:**
+1. Buka Chrome → DevTools → tab Network
+2. Centang "Disable cache"
+3. Pilih throttling **"Fast 3G"** (simulasi user HP biasa)
+4. Reload halaman (Ctrl+Shift+R)
+5. Lihat angka di bagian bawah: `DOMContentLoaded` dan `Load`
+6. Ulangi 3x, ambil rata-rata
+
+> ⚠️ Jika load time masih > 3 detik di Fast 3G → cek tab Lighthouse untuk tahu bottleneck spesifiknya sebelum deploy.
+
+---
+
 ## ⚠️ Aturan Penting
 
 | Aturan | Detail |
@@ -93,6 +147,21 @@ Jika ada file yang tidak di tempat yang seharusnya → **pindahkan dan update se
 | ✋ Jangan ubah fungsionalitas | Clean code ≠ ubah behavior. Fungsi harus tetap sama persis |
 | 📝 Catat semua perubahan | Buat summary perubahan per file setelah selesai |
 | 🧪 Pastikan tidak ada yang broken | Setelah selesai, pastikan semua halaman & fitur masih berjalan |
+| 📸 Simpan baseline | Jangan mulai tanpa screenshot benchmark awal |
+
+---
+
+## 💡 Tips Tambahan (Sering Terlewat)
+
+**Render-blocking resources** — jalankan Lighthouse dan cek bagian "Eliminate render-blocking resources". Ini salah satu penyebab paling umum halaman terasa lemot walau ukuran filenya kecil.
+
+**Bundle analyzer** — install `webpack-bundle-analyzer` atau `vite-bundle-visualizer` untuk lihat visualisasi isi bundle. Sering kali ada satu library yang nyedot 40%+ ukuran bundle padahal cuma dipakai di satu tempat.
+
+**HTTP/2 & compression** — pastikan server mengaktifkan Gzip/Brotli compression dan HTTP/2. Ini bisa reduce transfer size 60-70% tanpa ubah kode sama sekali. Cek di tab Network → klik salah satu response → lihat header `content-encoding`.
+
+**Critical CSS** — CSS yang dipakai above-the-fold bisa di-inline di `<head>` supaya tidak ada render-blocking. Tools: `critters` untuk Next.js / Vite.
+
+**API waterfall** — audit apakah ada API call yang sequential padahal bisa di-parallel pakai `Promise.all()`. Ini sering jadi hidden bottleneck yang tidak keliatan di Lighthouse.
 
 ---
 
@@ -103,20 +172,25 @@ Setelah selesai, buat laporan berisi:
 1. **Daftar file yang diproses** (total berapa file)
 2. **Komponen baru yang dibuat** (nama + alasan)
 3. **File / fungsi yang dihapus** (nama + alasan)
-4. **Estimasi improvement performa** (jika bisa diukur)
-5. **Hal yang perlu diperhatikan** oleh developer ke depannya
+4. **Perbandingan benchmark** (tabel Sebelum vs Sesudah dari Step 7)
+5. **Estimasi improvement performa** (persentase improvement LCP / load time)
+6. **Hal yang perlu diperhatikan** oleh developer ke depannya
 
 ---
 
 ## 🚀 Mulai dari Sini
 
 ```
-1. List semua file dulu
+0. Benchmark dulu → simpan hasilnya
+1. List semua file
 2. Kerjakan per folder, dari yang paling sering dipakai
 3. Komponen/pages → hooks → utils → services → constants
 4. Terakhir cek package.json dan config files
+5. Benchmark lagi → bandingkan → pastikan < 3 detik
 ```
 
 ---
 
 > 💡 **Prioritas tertinggi:** Komponen yang di-render di halaman utama (above the fold) — ini yang paling berdampak ke performa user.
+> 
+> 🎯 **Quick win terbesar:** Biasanya ada di gambar yang tidak dioptimasi, bundle size yang kegedean, atau render-blocking script. Cek tiga ini dulu sebelum yang lain.

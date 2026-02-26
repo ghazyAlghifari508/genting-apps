@@ -12,12 +12,6 @@ export const metadata: Metadata = {
   title: "GENTING - Cegah Stunting Sejak Dini",
   description: "Platform pencegahan stunting dengan AI, gamifikasi, dan telemedicine untuk mendampingi 1000 Hari Pertama Kehidupan",
   keywords: ["stunting", "kehamilan", "nutrisi", "kesehatan ibu", "bayi", "1000 HPK"],
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "GENTING",
-  },
   formatDetection: {
     telephone: false,
   },
@@ -42,10 +36,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning className={plusJakartaSans.variable}>
-      <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      </head>
       <body className="font-sans overflow-x-hidden">
         <ThemeProvider
           attribute="class"

@@ -19,6 +19,19 @@ import {
 import { useToast } from '@/components/ui/use-toast'
 import { Card } from '@/components/ui/card'
 
+declare global {
+  interface Window {
+    snap: {
+      pay: (token: string, options: {
+        onSuccess: (result: unknown) => void
+        onPending: (result: unknown) => void
+        onError: (result: unknown) => void
+        onClose: () => void
+      }) => void
+    }
+  }
+}
+
 export default function PaymentPage() {
   const { consultationId } = useParams()
   const router = useRouter()
@@ -67,28 +80,29 @@ export default function PaymentPage() {
         throw new Error(data.error || 'Gagal membuat transaksi pembayaran')
       }
 
-      if (!(window as any).snap) {
+      if (!window.snap) {
         throw new Error('Midtrans Snap tidak termuat dengan benar')
       }
 
-      (window as any).snap.pay(data.token, {
-        onSuccess: async (result: any) => {
+      window.snap.pay(data.token, {
+        onSuccess: async (result) => {
+          const res = result as { order_id?: string }
           console.log('Payment success:', result)
           setShowSuccess(true)
           await updateConsultation(consultation.id, { 
             status: 'scheduled',
             payment_status: 'confirmed',
-            payment_reference: result.order_id || data.order_id
+            payment_reference: res.order_id || data.order_id
           })
         },
-        onPending: (result: any) => {
+        onPending: (result) => {
           console.log('Payment pending:', result)
           toast({
             title: 'Pembayaran Tertunda',
             description: 'Silakan selesaikan pembayaran sesuai instruksi di popup Midtrans.',
           })
         },
-        onError: (result: any) => {
+        onError: (result) => {
           console.error('Payment error:', result)
           toast({
             title: 'Pembayaran Gagal',
@@ -100,11 +114,12 @@ export default function PaymentPage() {
           console.log('Payment popup closed')
         }
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Terjadi kesalahan sistem'
       console.error('Payment process error:', error)
       toast({
         title: 'Error',
-        description: error.message || 'Terjadi kesalahan sistem. Silakan coba lagi.',
+        description: message,
         variant: 'destructive'
       })
       setProcessing(false)

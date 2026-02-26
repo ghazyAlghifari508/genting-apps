@@ -1,8 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
-import { getCurrentUser } from '@/lib/auth-server'
-import type { UserProfile } from '@/types/education' // UserProfile definition needs check
+import { assertAuthenticated, handleServiceError } from '@/lib/service-helper'
+import type { UserProfile } from '@/types/education'
 
 // We need to define UserProfile type if not available or import it.
 // Assuming it matches the table structure.
@@ -16,18 +16,16 @@ export async function getUserProfile(userId: string) {
     .single()
 
   if (error) {
-    if (error.code === 'PGRST116') return null // Not found
-    console.error('Error fetching user profile:', error)
-    return null
+    if (error.code === 'PGRST116') return null
+    handleServiceError(error, 'Gagal mengambil data profil user')
   }
   return data as UserProfile
 }
 
 export async function upsertUserProfile(profile: Partial<UserProfile> & { id: string }) {
-  const user = await getCurrentUser()
-  if (!user || user.id !== profile.id) {
-    console.error(`[UserService] Unauthorized upsert attempt by ${user?.id} for ${profile.id}`)
-    throw new Error('Unauthorized: You can only update your own profile')
+  const user = await assertAuthenticated()
+  if (user.id !== profile.id) {
+    throw new Error('Akses ditolak: Anda hanya dapat memperbarui profil Anda sendiri')
   }
 
   const supabase = await createClient()
@@ -37,13 +35,12 @@ export async function upsertUserProfile(profile: Partial<UserProfile> & { id: st
     .select()
     .single()
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal memperbarui profil user')
   return data as UserProfile
 }
 
 export async function deleteUserProfile(userId: string) {
-  const user = await getCurrentUser()
-  if (!user) throw new Error('Unauthorized')
+  await assertAuthenticated()
 
   const supabase = await createClient()
   const { error } = await supabase
@@ -51,6 +48,6 @@ export async function deleteUserProfile(userId: string) {
     .delete()
     .eq('id', userId)
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal menghapus profil user')
   return true
 }

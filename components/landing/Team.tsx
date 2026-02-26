@@ -8,26 +8,30 @@ const professionals = [
   {
     name: 'Dokter Spesialis Anak',
     role: 'Konsultan Tumbuh Kembang',
-    img: '/images/unsplash/img_410c423e.png',
-    bgColor: 'bg-indigo-400'
+    img: '/images/unsplash/doctor-clean-rbg.png',
+    bgColor: 'bg-indigo-400',
+    imgClass: 'h-[95%] w-auto object-contain object-bottom'
   },
   {
     name: 'Dokter Gizi Anak',
     role: 'Konsultan Nutrisi',
     img: '/images/unsplash/foto2-rbg.png',
-    bgColor: 'bg-lime-400'
+    bgColor: 'bg-lime-400',
+    imgClass: 'h-[110%] w-auto object-contain'
   },
   {
     name: 'Dokter Imunisasi',
     role: 'Konsultan Imunisasi',
     img: '/images/unsplash/foto3-rbg.png',
-    bgColor: 'bg-sky-400'
+    bgColor: 'bg-sky-400',
+    imgClass: 'h-[90%] w-auto object-contain object-bottom mb-[-5px]'
   },
   {
     name: 'Dokter Laktasi',
     role: 'Konsultan Laktasi',
     img: '/images/unsplash/foto4-rbg.png',
-    bgColor: 'bg-teal-400'
+    bgColor: 'bg-teal-400',
+    imgClass: 'h-[110%] w-auto object-contain'
   }
 ]
 
@@ -75,7 +79,7 @@ export default function Team() {
                     alt={person.name}
                     width={400}
                     height={500}
-                    className="h-[110%] w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+                    className={`${person.imgClass || 'h-[110%] w-auto object-contain'} transition-transform duration-500 group-hover:scale-105`}
                   />
                   
                   {/* Social Overlay on hover */}

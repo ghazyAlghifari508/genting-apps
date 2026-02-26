@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
-import { getCurrentUser } from '@/lib/auth-server'
+import { assertAuthenticated, handleServiceError } from '@/lib/service-helper'
 import { Consultation, ConsultationConversation, ConsultationMessage, DoctorEarningRecord } from '@/types/consultation'
 
 export async function getUpcomingConsultations(doctorId: string, limit: number = 5) {
@@ -14,7 +14,7 @@ export async function getUpcomingConsultations(doctorId: string, limit: number =
     .order('scheduled_at', { ascending: true })
     .limit(limit)
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil jadwal konsultasi mendatang')
   return data
 }
 
@@ -28,7 +28,7 @@ export async function getRecentConsultations(doctorId: string, limit: number = 5
     .order('ended_at', { ascending: false })
     .limit(limit)
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil riwayat konsultasi')
   return data
 }
 
@@ -57,7 +57,7 @@ export async function getTodayEarnings(doctorId: string) {
     .eq('status', 'completed')
     .gte('ended_at', today.toISOString())
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil data penghasilan hari ini')
   return data.reduce((acc, curr) => acc + (curr.total_cost || 0), 0)
 }
 
@@ -73,7 +73,7 @@ export async function getMonthlyStats(doctorId: string) {
     .eq('doctor_id', doctorId)
     .gte('created_at', monthStart.toISOString())
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil statistik bulanan')
 
   const completed = data.filter(c => c.status === 'completed')
   const totalEarnings = completed.reduce((acc, curr) => acc + (curr.total_cost || 0), 0)
@@ -96,7 +96,10 @@ export async function getConsultationById(id: string): Promise<Consultation | nu
     .from('consultations')
     .select(`
       *,
-      doctor:doctors(*),
+      doctor:doctors(
+        *,
+        user:profiles(*)
+      ),
       user:profiles(*)
     `)
     .eq('id', id)
@@ -104,35 +107,14 @@ export async function getConsultationById(id: string): Promise<Consultation | nu
 
   if (error) {
     if (error.code === 'PGRST116') return null
-    throw new Error(`Gagal mengambil data konsultasi: ${error.message}`)
+    handleServiceError(error, 'Gagal mengambil data konsultasi')
   }
 
-  if (!data) return null
-
-  // Fetch doctor profile secondary info if needed
-  let doctorProfile = null
-  if (data.doctor && data.doctor.user_id) {
-    const { data: profile, error: pError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', data.doctor.user_id)
-      .maybeSingle()
-    
-    if (!pError) {
-      doctorProfile = profile
-    }
-  }
-
-  return {
-    ...data,
-    doctor: data.doctor ? { ...data.doctor, user: doctorProfile } : null
-  } as Consultation
+  return data as Consultation
 }
 
 export async function updateConsultation(id: string, updates: Partial<Consultation>) {
-  const user = await getCurrentUser()
-  if (!user) throw new Error('Unauthorized')
-
+  const user = await assertAuthenticated()
   const supabase = await createClient()
   
   // Security check: only the user or the doctor in the consultation can update it
@@ -142,14 +124,14 @@ export async function updateConsultation(id: string, updates: Partial<Consultati
     .eq('id', id)
     .single()
     
-  if (fetchError || !existing) throw new Error('Consultation not found')
+  if (fetchError || !existing) throw new Error('Konsultasi tidak ditemukan')
   
   // Check if user is either the patient or the doctor
   const { data: doctor } = await supabase.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
   const isOwner = existing.user_id === user.id || (doctor && existing.doctor_id === doctor.id)
   
   if (!isOwner && user.role !== 'admin') {
-    throw new Error('Unauthorized: You do not have permission to update this consultation')
+    throw new Error('Akses ditolak: Anda tidak memiliki izin untuk mengubah konsultasi ini')
   }
 
   const { data, error } = await supabase
@@ -159,7 +141,7 @@ export async function updateConsultation(id: string, updates: Partial<Consultati
     .select()
     .single()
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal memperbarui data konsultasi')
   return data
 }
 
@@ -208,15 +190,13 @@ export async function markMessagesAsRead(consultationId: string, readerType: 'us
     .neq('sender_type', readerType)
     .eq('is_read', false)
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal menandai pesan sebagai terbaca')
   return true
 }
 
 
 export async function createConsultation(payload: Partial<Consultation>) {
-  const user = await getCurrentUser()
-  if (!user) throw new Error('Unauthorized')
-
+  await assertAuthenticated()
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('consultations')
@@ -224,13 +204,12 @@ export async function createConsultation(payload: Partial<Consultation>) {
     .select()
     .single()
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal membuat data konsultasi')
   return data
 }
 
 export async function getUserConsultations(userId: string) {
   const supabase = await createClient()
-  // Join doctors and profiles for the user side
   const { data, error } = await supabase
     .from('consultations')
     .select(`
@@ -243,7 +222,7 @@ export async function getUserConsultations(userId: string) {
     .eq('user_id', userId)
     .order('scheduled_at', { ascending: false })
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil daftar konsultasi user')
   return data
 }
 
@@ -271,9 +250,7 @@ export async function getDoctorConsultations(doctorId: string, filters?: { statu
 }
 
 export async function submitConsultationRating(id: string, rating: number, review?: string) {
-  const user = await getCurrentUser()
-  if (!user) throw new Error('Unauthorized')
-
+  const user = await assertAuthenticated()
   const supabase = await createClient()
   
   // Security check: only the user who booked the consultation can rate it
@@ -283,8 +260,8 @@ export async function submitConsultationRating(id: string, rating: number, revie
     .eq('id', id)
     .single()
     
-  if (fetchError || !existing) throw new Error('Consultation not found')
-  if (existing.user_id !== user.id) throw new Error('Unauthorized: You can only rate your own consultations')
+  if (fetchError || !existing) throw new Error('Konsultasi tidak ditemukan')
+  if (existing.user_id !== user.id) throw new Error('Akses ditolak: Anda hanya dapat memberi rating pada konsultasi Anda sendiri')
 
   const { data, error } = await supabase
     .from('consultations')
@@ -297,7 +274,7 @@ export async function submitConsultationRating(id: string, rating: number, revie
     .select()
     .single()
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal memberikan rating')
   return data
 }
 
