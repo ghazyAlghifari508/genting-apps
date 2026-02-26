@@ -299,17 +299,16 @@ export default function Education() {
                     >
                       <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 xl:grid-cols-3">
                         {paginatedContents.length > 0 ? (
-                          paginatedContents.map((content, index) => {
-                            const featured = index === 0 && searchQuery === '' && selectedPhase === 'all'
+                          paginatedContents.map((content) => {
                             return (
-                              <div key={content.id} className={featured ? 'sm:col-span-2' : ''}>
+                              <div key={content.id}>
                                 <EducationCard
                                   content={content}
                                   isRead={readDays.has(content.day)}
                                   isFavorite={favoriteDays.has(content.day)}
                                   onClick={() => handleCardClick(content.day)}
                                   onFavorite={() => handleFavorite(content.day)}
-                                  featured={featured}
+                                  featured={false}
                                 />
                               </div>
                             )

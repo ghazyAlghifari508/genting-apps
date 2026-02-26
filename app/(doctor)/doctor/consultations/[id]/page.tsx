@@ -69,10 +69,12 @@ export default function DoctorConsultationRoomPage() {
           table: 'consultations',
           filter: `id=eq.${id}`
         },
-        (payload: any) => {
+        (payload) => {
           console.log('[DoctorConsultationRoom] Status change received:', payload)
-          setConsultation(payload.new as Consultation)
-          if (payload.new.notes) setNotes(payload.new.notes)
+          if (payload.new) {
+            setConsultation(payload.new as Consultation)
+            if (payload.new.notes) setNotes(payload.new.notes)
+          }
         }
       )
       .subscribe()
@@ -171,31 +173,35 @@ export default function DoctorConsultationRoomPage() {
   return (
     <div className="h-screen flex flex-col bg-slate-50">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="lg:hidden">
-            <DoctorTopHeader showSearch={false} />
-          </div>
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 px-4 py-3 flex items-center justify-between shrink-0 transition-colors z-20">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Link href="/doctor/consultations" className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors block lg:hidden">
+            <ArrowLeft size={18} className="text-slate-500" />
+          </Link>
           <div className="hidden lg:block">
-            <Link href="/doctor/consultations" className="p-2 hover:bg-slate-50 rounded-full transition-colors block">
+            <Link href="/doctor/consultations" className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors block">
               <ArrowLeft size={20} className="text-slate-400" />
             </Link>
           </div>
           <div>
-            <p className="text-xl font-bold text-slate-900 line-clamp-1">{consultation.user?.full_name || 'Pasien'}</p>
-            <ConsultationStatusBadge status={consultation.status} />
+            <p className="text-base md:text-xl font-bold text-slate-900 dark:text-white line-clamp-1">{consultation.user?.full_name || 'Pasien'}</p>
+            <div className="scale-75 origin-left">
+              <ConsultationStatusBadge status={consultation.status} />
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <ConsultationTimer startedAt={consultation.started_at} endedAt={consultation.ended_at} />
+          <div className="hidden sm:block">
+            <ConsultationTimer startedAt={consultation.started_at} endedAt={consultation.ended_at} />
+          </div>
           {consultation.status === 'scheduled' && (
-            <Button onClick={startConsultation} className="rounded-xl bg-green-600 hover:bg-green-700 font-bold text-sm">
-              <Play size={14} className="mr-1" /> Mulai
+            <Button onClick={startConsultation} size="sm" className="rounded-xl bg-green-600 hover:bg-green-700 font-bold px-3">
+               Mulai
             </Button>
           )}
           {consultation.status === 'ongoing' && (
-            <Button onClick={endConsultation} className="rounded-xl bg-red-600 hover:bg-red-700 font-bold text-sm">
-              <CheckCircle size={14} className="mr-1" /> Selesai
+            <Button onClick={endConsultation} size="sm" className="rounded-xl bg-red-600 hover:bg-red-700 font-bold px-3">
+               Selesai
             </Button>
           )}
         </div>
@@ -259,17 +265,17 @@ export default function DoctorConsultationRoomPage() {
 
           {/* Input */}
           {consultation.status === 'ongoing' && (
-            <div className="p-4 bg-white border-t border-slate-100">
-              <div className="flex gap-2">
+            <div className="p-3 md:p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 transition-colors">
+              <div className="flex gap-2 max-w-4xl mx-auto">
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
                   placeholder="Ketik pesan..."
-                  className="rounded-xl flex-1"
+                  className="rounded-2xl flex-1 bg-slate-50 dark:bg-slate-800 border-none h-11 md:h-12 px-4 shadow-inner"
                 />
-                <Button onClick={handleSend} disabled={!input.trim()} className="rounded-xl bg-blue-600 hover:bg-blue-700">
-                  <Send size={16} />
+                <Button onClick={handleSend} disabled={!input.trim()} className="rounded-2xl bg-blue-600 hover:bg-blue-700 w-11 h-11 md:w-12 md:h-12 p-0 flex items-center justify-center shrink-0">
+                  <Send size={18} />
                 </Button>
               </div>
             </div>

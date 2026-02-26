@@ -49,16 +49,19 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
   }, [])
 
   const toggleMode = (mode: 'login' | 'register') => {
-    setIsSignUp(mode === 'register')
-    router.replace(`/${mode}`, { scroll: false })
-    setError(null)
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      fullName: ''
-    })
+    setFormVisible(false)
+    setTimeout(() => {
+      setIsSignUp(mode === 'register')
+      router.replace(`/${mode}`, { scroll: false })
+      setError(null)
+      setFormData({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        fullName: ''
+      })
+    }, 300)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,6 +74,8 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
     setLoading(true)
     setError(null)
 
+    const normalizedEmail = formData.email.trim().toLowerCase()
+
     try {
       if (isSignUp) {
         if (formData.password !== formData.confirmPassword) {
@@ -81,7 +86,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
         }
 
         const { error } = await supabase.auth.signUp({
-          email: formData.email,
+          email: normalizedEmail,
           password: formData.password,
           options: {
             data: {
@@ -98,7 +103,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
         router.push('/onboarding')
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
+          email: normalizedEmail,
           password: formData.password,
         })
         if (error) throw new Error(error.message || 'Email atau kata sandi salah')
@@ -322,8 +327,25 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_55%)]" />
           <div className="relative z-10 flex flex-col w-full">
             <div className="ml-auto w-full max-w-xs rounded-3xl bg-white/10 border border-white/10 p-4 mb-8">
-              <p className="text-xs text-white/70 mb-1">GENTING Dashboard</p>
-              <div className="h-20 rounded-2xl bg-white/10" />
+              <p className="text-xs text-white/70 mb-2 font-semibold">GENTING+ Overview</p>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-end gap-2 h-16">
+                  <div className="w-1/3 h-[75%] relative rounded-xl overflow-hidden bg-doccure-teal/20 border border-white/5">
+                     <Image src="/images/unsplash/trimester1.jpg" alt="TM1" fill sizes="100px" className="object-cover opacity-80" />
+                  </div>
+                  <div className="w-1/3 h-full relative rounded-xl overflow-hidden bg-doccure-teal/40 border border-white/5">
+                     <Image src="/images/unsplash/trimester2.jpg" alt="TM2" fill sizes="100px" className="object-cover opacity-90" />
+                  </div>
+                  <div className="w-1/3 h-[85%] relative rounded-xl overflow-hidden bg-doccure-teal/20 border border-white/5">
+                     <Image src="/images/unsplash/trimester3.jpg" alt="TM3" fill sizes="100px" className="object-cover opacity-80" />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-white/50 font-medium px-1">
+                  <span>Trimester 1</span>
+                  <span>Trimester 2</span>
+                  <span>Trimester 3</span>
+                </div>
+              </div>
             </div>
 
             <h2 className="text-2xl lg:text-3xl font-bold leading-snug mb-4">
@@ -333,14 +355,27 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
               Satu platform untuk konsultasi dokter, edukasi nutrisi, dan pemantauan 1000 Hari Pertama Kehidupan.
             </p>
 
-            <div className="mt-auto rounded-3xl bg-white/10 p-4 border border-white/10">
+            <div className="mt-auto rounded-3xl overflow-hidden relative shadow-2xl">
               <Image
                 src="/images/unsplash/img_22b8c27b.png"
                 alt="Ilustrasi layanan Genting"
                 width={1200}
                 height={560}
-                className="w-full h-56 object-cover rounded-2xl"
+                className="w-full h-56 md:h-[280px] object-cover transition-transform duration-700 hover:scale-105"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-doccure-dark/80 to-transparent pointer-events-none" />
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                 <div className="flex -space-x-2">
+                   {[1,2,3].map(i => (
+                     <div key={i} className="w-8 h-8 rounded-full border-2 border-doccure-dark bg-doccure-dark flex items-center justify-center">
+                        <Users className="w-4 h-4 text-doccure-teal" />
+                     </div>
+                   ))}
+                 </div>
+                 <div className="text-xs font-bold text-white bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full">
+                    Grup Diskusi
+                 </div>
+              </div>
             </div>
           </div>
         </div>

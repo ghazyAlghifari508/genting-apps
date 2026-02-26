@@ -87,12 +87,12 @@ export default function Hero() {
           
           {/* Main Character Image */}
           <Image
-            src="/images/unsplash/foto1-rbg.png"
+            src="/images/unsplash/foto2-rbg.png"
             alt="Doctor and Child"
             width={800}
             height={750}
             priority
-            className="absolute bottom-[-100px] left-1/2 -translate-x-[45%] h-[750px] w-auto object-cover object-top z-10 drop-shadow-2xl"
+            className="absolute bottom-[-30px] left-1/2 -translate-x-[45%] h-[130%] w-auto object-contain object-bottom z-10 drop-shadow-2xl"
             style={{
               maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%)',
               WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%)'

@@ -386,7 +386,7 @@ export default function ProfilePage() {
           </aside>
 
           {/* Right Column: Tabbed Workspace */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 min-w-0">
             <div className="overflow-hidden rounded-[32px] border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900 shadow-sm flex flex-col transition-colors duration-300">
               {/* Custom Tabs Navigation */}
               <div className="border-b border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-white/5 px-4 pt-4">

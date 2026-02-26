@@ -71,9 +71,11 @@ export default function UserConsultationRoomPage() {
           table: 'consultations',
           filter: `id=eq.${id}`
         },
-        (payload: any) => {
+        (payload) => {
           console.log('[UserConsultationRoom] Status change received:', payload)
-          setConsultation(payload.new as Consultation)
+          if (payload.new) {
+            setConsultation(payload.new as Consultation)
+          }
         }
       )
       .subscribe()

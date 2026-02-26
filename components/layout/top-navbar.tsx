@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { 
   Leaf, 
   History as HistoryIcon, 
@@ -69,7 +69,8 @@ export function TopNavbar() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    const timer = setTimeout(() => setMounted(true), 0)
+    return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
@@ -241,7 +242,7 @@ export function TopNavbar() {
                 <div className="flex flex-col py-4">
                   {activeNavItems.map((item) => {
                     const isActive = pathname === item.href
-                    const Icon = ('icon' in item ? item.icon : null) as any
+                    const Icon = ('icon' in item ? item.icon : null) as React.ElementType
                     return (
                       <Link 
                         key={item.href} 

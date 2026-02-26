@@ -8,14 +8,26 @@ import { fetchPendingDoctors } from '@/services/adminService'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
+import NextImage from 'next/image'
+
+interface DoctorRegistration {
+  id: string
+  user_id: string
+  full_name: string
+  specialization: string
+  hospital_name: string
+  profile_photo_url: string | null
+  status: string
+}
+
 export function PendingApprovalList() {
-  const [pendingDoctors, setPendingDoctors] = useState<any[]>([])
+  const [pendingDoctors, setPendingDoctors] = useState<DoctorRegistration[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await fetchPendingDoctors()
+        const data = await fetchPendingDoctors() as DoctorRegistration[]
         // Take top 5 for dashboard
         setPendingDoctors(data?.slice(0, 5) || [])
       } catch (e) {
@@ -63,19 +75,19 @@ export function PendingApprovalList() {
         <div className="space-y-4">
           {pendingDoctors.map((doc) => (
              <div key={doc.id} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-700 group">
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700 border-2 border-white dark:border-slate-800 shadow-sm shrink-0 transition-colors">
-                {doc.users?.avatar_url ? (
-                   <img src={doc.users.avatar_url} alt={doc.users.full_name} className="w-full h-full object-cover" />
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700 border-2 border-white dark:border-slate-800 shadow-sm shrink-0 transition-colors relative">
+                {doc.profile_photo_url ? (
+                   <NextImage src={doc.profile_photo_url} alt={doc.full_name} fill className="object-cover" />
                 ) : (
                    <div className="w-full h-full flex items-center justify-center bg-cerulean/10 dark:bg-cerulean/20 text-cerulean font-bold text-sm transition-colors">
-                     {doc.users?.full_name?.charAt(0) || 'D'}
+                     {doc.full_name?.charAt(0) || 'D'}
                    </div>
                 )}
               </div>
               
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-cerulean transition-colors">
-                  {doc.users?.full_name || 'Unnamed Doctor'}
+                  {doc.full_name || 'Unnamed Doctor'}
                 </h4>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider transition-colors">{doc.specialization}</span>
