@@ -82,22 +82,21 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="relative hidden lg:block w-1/2 h-[600px] mt-10 lg:mt-0"
         >
-          {/* Yellow Shape Background */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] w-[450px] h-[500px] bg-doccure-yellow rounded-b-full rounded-tr-[250px] rounded-tl-full z-0 overflow-hidden" />
-          
-          {/* Main Character Image */}
-          <Image
-            src="/images/unsplash/foto2-rbg.png"
-            alt="Doctor and Child"
-            width={800}
-            height={750}
-            priority
-            className="absolute bottom-[-30px] left-1/2 -translate-x-[45%] h-[130%] w-auto object-contain object-bottom z-10 drop-shadow-2xl"
-            style={{
-              maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%)'
-            }}
-          />
+          {/* Wrapper to clip only the bottom part while letting the top overflow */}
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-[25px] w-[450px] h-[750px] rounded-b-full overflow-hidden flex items-end justify-center z-10 pointer-events-none">
+            {/* Yellow Shape Background */}
+            <div className="absolute bottom-0 left-0 w-full h-[500px] bg-doccure-yellow rounded-b-full rounded-tr-[250px] rounded-tl-full pointer-events-auto" />
+            
+            {/* Main Character Image */}
+            <Image
+              src="/images/unsplash/craiyon_110913_image.png"
+              alt="Doctor and Child"
+              width={800}
+              height={800}
+              priority
+              className="relative w-[110%] md:w-[120%] max-w-none h-auto object-contain object-bottom translate-y-38 drop-shadow-2xl pointer-events-auto"
+            />
+          </div>
 
           {/* Floating Pill/Capsule Element */}
           <div className="absolute bottom-10 left-10 w-24 h-8 bg-doccure-teal rounded-full rotate-[-30deg] shadow-lg z-20 flex border-2 border-white/20" />
