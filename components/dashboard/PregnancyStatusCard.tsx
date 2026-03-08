@@ -21,7 +21,7 @@ export function PregnancyStatusCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="bg-doccure-dark rounded-[32px] p-8 border border-slate-700 shadow-2xl relative overflow-hidden group"
+      className="bg-doccure-dark rounded-2xl p-8 border border-slate-700 shadow-2xl relative overflow-hidden group"
     >
       {/* Decorative Pulse Accent */}
       <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-doccure-yellow/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-1000" />
@@ -41,7 +41,7 @@ export function PregnancyStatusCard({
               initial={{ width: 0 }}
               animate={{ width: `${pregnancyProgress}%` }}
               transition={{ duration: 1.5, ease: "circOut" }}
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-doccure-yellow via-yellow-400 to-yellow-200 rounded-full shadow-[0_0_30px_rgba(221,242,71,0.4)]" 
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-doccure-yellow via-yellow-400 to-yellow-200 rounded-full" 
             />
           </div>
           <div className="flex justify-between text-white/40 text-[10px] font-bold uppercase tracking-[0.1em]">

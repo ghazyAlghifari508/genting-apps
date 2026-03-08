@@ -8,6 +8,7 @@ import {
   CalendarCheck, 
   DollarSign
 } from 'lucide-react'
+import type { DoctorStats } from '@/types/doctor'
 
 // Mock Data for Bars
 const MockBars = () => (
@@ -15,7 +16,7 @@ const MockBars = () => (
     {[35, 60, 45, 70, 50, 65, 40, 55, 75, 50, 60, 45, 35, 60, 45, 70, 50, 65, 40, 55, 75, 50, 60].map((h, i) => (
       <div 
         key={i} 
-        className={`w-full rounded-t-sm transition-colors ${i % 2 === 0 ? 'bg-doccure-teal/80' : 'bg-slate-200 dark:bg-slate-700'}`} 
+        className={`w-full rounded-t-sm transition-colors ${i % 2 === 0 ? 'bg-cerulean' : 'bg-slate-200 '}`} 
         style={{ height: `${h}%` }} 
       />
     ))}
@@ -27,7 +28,7 @@ const MockLines = () => (
     {[20, 40, 30, 50, 35, 55, 25, 45, 60, 40, 50, 35, 20, 40, 30, 50, 35, 55, 25, 45, 60, 40, 50].map((h, i) => (
       <div 
         key={i} 
-        className={`w-full rounded-t-sm transition-colors ${i % 3 === 0 ? 'bg-medical-red/60' : 'bg-slate-200 dark:bg-slate-700'}`} 
+        className={`w-full rounded-t-sm transition-colors ${i % 3 === 0 ? 'bg-sea-green' : 'bg-slate-200 '}`} 
         style={{ height: `${h}%` }} 
       />
     ))}
@@ -35,16 +36,7 @@ const MockLines = () => (
 )
 
 interface MetricsGridProps {
-  stats: {
-    totalPatients: number
-    activeConsultations: number
-    todayAppointments: {
-      total: number
-      completed: number
-      upcoming: number
-    }
-    monthlyRevenue: number
-  } | null
+  stats: DoctorStats | null
 }
 
 export const MetricsGrid = ({ stats }: MetricsGridProps) => {
@@ -60,7 +52,7 @@ export const MetricsGrid = ({ stats }: MetricsGridProps) => {
           <div className="flex justify-between items-end">
             <div className="text-xs">
               <span className="text-slate-400">Total</span>
-              <p className="font-bold text-slate-700 dark:text-white transition-colors">{stats?.totalPatients || 0}</p>
+              <p className="font-bold text-slate-700  transition-colors">{stats?.totalPatients || 0}</p>
             </div>
           </div>
         }
@@ -76,7 +68,7 @@ export const MetricsGrid = ({ stats }: MetricsGridProps) => {
           <div className="flex justify-between items-end">
             <div className="text-xs">
               <span className="text-slate-400">Ongoing</span>
-              <p className="font-bold text-slate-700 dark:text-white transition-colors">{stats?.activeConsultations || 0}</p>
+              <p className="font-bold text-slate-700  transition-colors">{stats?.activeConsultations || 0}</p>
             </div>
           </div>
         }
@@ -90,7 +82,7 @@ export const MetricsGrid = ({ stats }: MetricsGridProps) => {
         footer={
           <div className="flex gap-4 mt-2">
             <div className="flex-1 space-y-3">
-               <StatProgress label="Completed" value={stats?.todayAppointments?.completed || 0} total={stats?.todayAppointments?.total || 1} color="bg-yellow-400" />
+               <StatProgress label="Completed" value={stats?.todayAppointments?.completed || 0} total={stats?.todayAppointments?.total || 1} color="bg-sea-green" />
             </div>
             <div className="flex-1 space-y-3">
                <StatProgress label="Upcoming" value={stats?.todayAppointments?.upcoming || 0} total={stats?.todayAppointments?.total || 1} color="bg-slate-200" />
@@ -107,7 +99,7 @@ export const MetricsGrid = ({ stats }: MetricsGridProps) => {
         footer={
           <div className="flex gap-4 mt-2">
              <div className="flex-1 space-y-3">
-               <StatProgress label="This Month" value={stats?.monthlyRevenue || 0} total={stats?.monthlyRevenue || 1} color="bg-doccure-teal" />
+               <StatProgress label="This Month" value={stats?.monthlyRevenue || 0} total={stats?.monthlyRevenue || 1} color="bg-cerulean" />
             </div>
           </div>
         }

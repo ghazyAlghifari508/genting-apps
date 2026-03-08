@@ -23,14 +23,14 @@ export const QuickActions = React.memo(function QuickActions() {
       title: "Mulai Konsultasi",
       description: "Mulai sesi dengan pasien",
       icon: Video,
-      color: "bg-green-100 text-green-600 hover:bg-green-200",
+      color: "bg-sea-green/20 text-cerulean hover:bg-sea-green/30",
       action: () => router.push('/doctor/consultations')
     },
     {
       title: "Jadwal Hari Ini",
       description: "Lihat jadwal praktik",
       icon: Calendar,
-      color: "bg-blue-100 text-blue-600 hover:bg-blue-200",
+      color: "bg-cerulean/10 text-cerulean hover:bg-cerulean/20",
       action: () => router.push('/doctor/schedule'),
       badge: "3"
     },
@@ -38,7 +38,7 @@ export const QuickActions = React.memo(function QuickActions() {
       title: "Pesan Baru",
       description: "Chat dengan pasien",
       icon: MessageSquare,
-      color: "bg-purple-100 text-purple-600 hover:bg-purple-200",
+      color: "bg-slate-100 text-slate-600 hover:bg-slate-200",
       action: () => router.push('/doctor/chat'),
       badge: "5"
     },
@@ -46,7 +46,7 @@ export const QuickActions = React.memo(function QuickActions() {
       title: "Laporan Keuangan",
       description: "Lihat pendapatan",
       icon: DollarSign,
-      color: "bg-yellow-100 text-yellow-600 hover:bg-yellow-200",
+      color: "bg-sea-green/20 text-cerulean hover:bg-sea-green/30",
       action: () => router.push('/doctor/earnings')
     }
   ]
@@ -58,7 +58,7 @@ export const QuickActions = React.memo(function QuickActions() {
           <h3 className="text-lg font-black text-slate-900">Akses Cepat</h3>
           <p className="text-sm text-slate-500">Tindakan yang sering dilakukan</p>
         </div>
-        <Button variant="ghost" size="sm" className="text-doccure-teal hover:text-doccure-teal/80">
+        <Button variant="ghost" size="sm" className="text-cerulean hover:text-cerulean/80 transition-colors">
           Lihat Semua
         </Button>
       </div>

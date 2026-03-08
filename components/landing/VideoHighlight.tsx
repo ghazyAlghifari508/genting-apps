@@ -27,9 +27,9 @@ export default function VideoHighlight() {
   }, [isPlaying])
 
   return (
-    <section className="py-20 bg-white dark:bg-slate-900 transition-colors" id="video" ref={sectionRef}>
+    <section className="py-20 bg-white  transition-colors" id="video" ref={sectionRef}>
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 group aspect-video">
+        <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100  group aspect-video">
           <Image
             src="/images/unsplash/img_b359ec41.png"
             alt="Konsultasi dokter anak"
@@ -69,7 +69,7 @@ export default function VideoHighlight() {
                   zIndex: isFloating ? 40 : 30, // Stay below navbar (z-50)
                 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className={`bg-black overflow-hidden shadow-2xl ${isFloating ? 'rounded-2xl border-4 border-white dark:border-slate-800' : ''}`}
+                className={`bg-black overflow-hidden shadow-2xl ${isFloating ? 'rounded-2xl border-4 border-white ' : ''}`}
               >
                 <button 
                   onClick={() => {

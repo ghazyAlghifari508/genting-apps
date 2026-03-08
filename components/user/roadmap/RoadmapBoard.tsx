@@ -5,33 +5,17 @@ import { CalendarRange, Route, LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { ActivityCard } from './ActivityCard'
 import React from 'react'
-
-interface Activity {
-  id: string
-  activity_name: string
-  category: string
-  description: string
-  benefits: string[]
-  difficulty_level: number
-  min_trimester: number
-  max_trimester: number
-  duration_minutes: number
-  frequency_per_week: number
-  instructions: string[]
-  tips: string | null
-  warnings: string | null
-  icon_name: string
-}
+import type { RoadmapActivity } from '@/types/roadmap'
 
 interface RoadmapBoardProps {
-  filteredActivities: Activity[]
+  filteredActivities: RoadmapActivity[]
   todayLabel: string
   getActivityStatus: (id: string) => 'not_started' | 'in_progress' | 'completed'
   statusConfig: Record<string, { label: string; icon: LucideIcon; color: string; bg: string }>
   difficultyConfig: Record<number, { label: string; color: string; bg: string }>
   defaultDifficulty: { label: string; color: string; bg: string }
   trimester: number
-  setSelectedActivity: (activity: Activity) => void
+  setSelectedActivity: (activity: RoadmapActivity) => void
   setIsModalOpen: (val: boolean) => void
   handleComplete: (id: string) => void
 }
@@ -51,11 +35,11 @@ export function RoadmapBoard({
   const statusTone = (status: string) => {
     if (status === 'completed') return 'bg-emerald-500'
     if (status === 'in_progress') return 'bg-sky-500'
-    return 'bg-slate-300 dark:bg-slate-700'
+    return 'bg-slate-300 '
   }
 
   return (
-    <div id="roadmap-activities" className="rounded-[40px] border border-slate-100 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-sm md:p-10 relative overflow-hidden">
+    <div id="roadmap-activities" className="rounded-2xl border border-slate-100  bg-white  p-6 shadow-sm md:p-10 relative overflow-hidden">
       {/* Subtle Texture Pattern */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none"
            style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
@@ -66,9 +50,9 @@ export function RoadmapBoard({
              <div className="h-1.5 w-6 rounded-full bg-doccure-teal" />
              <p className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400">Roadmap Board</p>
           </div>
-          <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Aktivitas Hari Ini</h2>
+          <h2 className="text-3xl font-black tracking-tight text-slate-900 ">Aktivitas Hari Ini</h2>
         </div>
-        <div className="inline-flex items-center gap-3 rounded-2xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 shadow-sm transition-all hover:bg-white dark:hover:bg-white/10">
+        <div className="inline-flex items-center gap-3 rounded-2xl border border-slate-100  bg-slate-50  px-5 py-3 text-xs font-bold text-slate-600  shadow-sm transition-all hover:bg-white ">
           <CalendarRange className="h-4 w-4 text-doccure-teal" />
           {todayLabel}
         </div>
@@ -77,7 +61,7 @@ export function RoadmapBoard({
       {filteredActivities.length > 0 ? (
         <div className="relative mt-16 px-4 md:px-8">
           {/* Timeline Connector Line */}
-          <div className="absolute left-[2.5rem] md:left-1/2 top-0 h-full w-[2px] -translate-x-1/2 rounded-full bg-slate-100 dark:bg-white/5" />
+          <div className="absolute left-[2.5rem] md:left-1/2 top-0 h-full w-[2px] -translate-x-1/2 rounded-full bg-slate-100 " />
           
           <div className="relative space-y-16">
             {filteredActivities.map((activity, index) => {
@@ -112,7 +96,7 @@ export function RoadmapBoard({
                   <div className="order-1 md:order-2 flex justify-start md:justify-center relative">
                      <motion.div 
                         whileHover={{ scale: 1.1 }}
-                        className={`z-10 flex h-14 w-14 items-center justify-center rounded-3xl border-4 border-white dark:border-slate-800 shadow-2xl ${statusTone(status)} text-white transition-all`}
+                        className={`z-10 flex h-14 w-14 items-center justify-center rounded-3xl border-4 border-white  shadow-2xl ${statusTone(status)} text-white transition-all`}
                      >
                         <span className="font-black text-xl">{index + 1}</span>
                      </motion.div>
@@ -144,11 +128,11 @@ export function RoadmapBoard({
           </div>
         </div>
       ) : (
-        <div className="mt-12 rounded-[40px] border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/5 py-24 text-center group">
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-[32px] bg-white dark:bg-slate-900 text-slate-200 dark:text-slate-700 shadow-sm border border-slate-100 dark:border-white/10 group-hover:scale-110 transition-transform duration-500 mb-8">
+        <div className="mt-12 rounded-3xl border border-dashed border-slate-200  bg-slate-50/50  py-24 text-center group">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-white text-slate-200 shadow-sm border border-slate-100 group-hover:scale-110 transition-transform duration-500 mb-8">
              <Route size={40} />
           </div>
-          <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Kustomisasi Roadmap...</h3>
+          <h3 className="text-3xl font-black text-slate-900  tracking-tight">Kustomisasi Roadmap...</h3>
           <p className="mt-4 mx-auto max-w-sm text-lg font-medium text-slate-500 leading-relaxed">
             Bunda, silakan lengkapi profil kehamilan Anda agar sistem dapat menyusun rencana harian yang paling tepat.
           </p>
@@ -156,7 +140,7 @@ export function RoadmapBoard({
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/profile"
-              className="h-14 inline-flex items-center justify-center rounded-2xl bg-doccure-teal px-10 text-base font-black text-white hover:bg-doccure-dark shadow-xl shadow-doccure-teal/20 transition-all active:scale-95"
+              className="h-14 inline-flex items-center justify-center rounded-2xl bg-doccure-teal px-10 text-base font-black text-white hover:bg-doccure-dark shadow-md transition-all active:scale-95"
             >
               Lengkapi Profil Bunda
             </Link>

@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getDoctorByUserId, upsertDoctorProfile } from '@/services/doctorService'
-import { useRouter } from 'next/navigation'
+import { upsertDoctorProfile } from '@/services/doctorService'
 import { useAuth } from '@/hooks/useAuth'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
@@ -12,49 +11,38 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/components/ui/use-toast'
 import { Save, User, Stethoscope, DollarSign } from 'lucide-react'
 import { SPECIALIZATIONS } from '@/types/doctor'
+import { useDoctorContext } from '@/components/providers/Providers'
 
 export default function DoctorProfilePage() {
+  const doctorContext = useDoctorContext()
+  const doc = doctorContext?.doctor
+  const loading = doctorContext?.loading
   const [form, setForm] = useState({
     full_name: '', email: '', phone: '', bio: '',
     specialization: 'Umum', license_number: '', years_of_experience: 0,
     hourly_rate: 50000, profile_picture_url: '',
   })
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { user } = useAuth()
   const { toast } = useToast()
 
   useEffect(() => {
-    if (authLoading) return
-    if (!user) { router.push('/login'); return }
-
-    const load = async () => {
-      setForm((f) => ({ ...f, email: user.email || '' }))
-
-      try {
-        const doc = await getDoctorByUserId(user.id)
-        if (doc) {
-          setForm({
-            full_name: doc.full_name || '',
-            email: doc.email || user.email || '',
-            phone: doc.phone || '',
-            bio: doc.bio || '',
-            specialization: doc.specialization || 'Umum',
-            license_number: doc.license_number || '',
-            years_of_experience: doc.years_of_experience || 0,
-            hourly_rate: doc.hourly_rate || 50000,
-            profile_picture_url: doc.profile_picture_url || '',
-          })
-        }
-      } catch (error) {
-        console.error('Error loading doctor profile:', error)
-      } finally {
-        setLoading(false)
-      }
+    if (doc) {
+      setForm({
+        full_name: doc.full_name || '',
+        email: doc.email || user?.email || '',
+        phone: doc.phone || '',
+        bio: doc.bio || '',
+        specialization: doc.specialization || 'Umum',
+        license_number: doc.license_number || '',
+        years_of_experience: doc.years_of_experience || 0,
+        hourly_rate: doc.hourly_rate || 50000,
+        profile_picture_url: doc.profile_picture_url || '',
+      })
+    } else if (user) {
+      setForm(f => ({ ...f, email: user.email || '' }))
     }
-    load()
-  }, [router, user, authLoading])
+  }, [doc, user])
 
   const handleSave = async () => {
     if (!user) return
@@ -73,6 +61,7 @@ export default function DoctorProfilePage() {
         profile_picture_url: form.profile_picture_url,
       })
 
+      await doctorContext?.loadDoctorData(true)
       toast({ title: 'Profil disimpan!', description: 'Data profil dokter berhasil diperbarui.' })
     } catch (error) {
       console.error('Error saving doctor profile:', error)
@@ -85,7 +74,7 @@ export default function DoctorProfilePage() {
   const completionFields = ['full_name', 'email', 'phone', 'specialization', 'license_number', 'hourly_rate'] as const
   const completion = Math.round((completionFields.filter((f) => form[f]).length / completionFields.length) * 100)
 
-  if (loading) {
+  if (loading && !doc) {
     return (
       <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
         <div className="flex items-center justify-end mb-6">
@@ -130,7 +119,7 @@ export default function DoctorProfilePage() {
         <div className="md:hidden">
             {/* Empty space to balance flex justify-between if needed, or just let it be handled by DoctorTopHeader */}
         </div>
-        <Button onClick={handleSave} disabled={saving} className="rounded-full bg-doccure-teal hover:bg-[#0f605c] text-white px-6 h-12 font-bold shadow-lg shadow-doccure-teal/30 ml-auto">
+        <Button onClick={handleSave} disabled={saving} className="rounded-full bg-cerulean hover:bg-[#0c594a] text-white px-6 h-12 font-bold shadow-md ml-auto transition-all">
           <Save size={18} className="mr-2" />{saving ? 'Menyimpan...' : 'Simpan Profil'}
         </Button>
       </div>
@@ -140,17 +129,17 @@ export default function DoctorProfilePage() {
         <Card className="p-5 rounded-2xl border-0 shadow-sm bg-white">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-bold text-slate-700">Kelengkapan Profil</p>
-            <span className="text-sm font-black text-blue-600">{completion}%</span>
+            <span className="text-sm font-black text-cerulean">{completion}%</span>
           </div>
           <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-            <motion.div initial={{ width: 0 }} animate={{ width: `${completion}%` }} className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" />
+            <motion.div initial={{ width: 0 }} animate={{ width: `${completion}%` }} className="h-full bg-gradient-to-r from-cerulean to-sea-green rounded-full" />
           </div>
         </Card>
 
         {/* Personal Info */}
         <Card className="p-6 rounded-2xl border-0 shadow-sm bg-white">
           <div className="flex items-center gap-2 mb-4">
-            <User size={18} className="text-blue-500" />
+            <User size={18} className="text-cerulean" />
             <h2 className="font-bold text-slate-900">Informasi Pribadi</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -172,7 +161,7 @@ export default function DoctorProfilePage() {
             </div>
             <div className="md:col-span-2">
               <label className="text-xs font-bold text-slate-500 mb-1 block">Bio</label>
-              <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} maxLength={500} className="w-full rounded-xl border border-slate-200 p-3 text-sm resize-none h-24 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ceritakan tentang diri Anda..." />
+              <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} maxLength={500} className="w-full rounded-xl border border-slate-200 p-3 text-sm resize-none h-24 focus:ring-2 focus:ring-cerulean focus:border-transparent outline-none transition-all" placeholder="Ceritakan tentang diri Anda..." />
               <p className="text-xs text-slate-400 mt-1">{form.bio.length}/500</p>
             </div>
           </div>
@@ -181,13 +170,13 @@ export default function DoctorProfilePage() {
         {/* Professional Info */}
         <Card className="p-6 rounded-2xl border-0 shadow-sm bg-white">
           <div className="flex items-center gap-2 mb-4">
-            <Stethoscope size={18} className="text-green-500" />
+            <Stethoscope size={18} className="text-sea-green" />
             <h2 className="font-bold text-slate-900">Informasi Profesional</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-slate-500 mb-1 block">Spesialisasi *</label>
-              <select value={form.specialization} onChange={(e) => setForm({ ...form, specialization: e.target.value })} className="w-full rounded-xl border border-slate-200 p-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+              <select value={form.specialization} onChange={(e) => setForm({ ...form, specialization: e.target.value })} className="w-full rounded-xl border border-slate-200 p-2.5 text-sm bg-white focus:ring-2 focus:ring-cerulean outline-none transition-all tracking-tight">
                 {SPECIALIZATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
@@ -205,7 +194,7 @@ export default function DoctorProfilePage() {
         {/* Pricing */}
         <Card className="p-6 rounded-2xl border-0 shadow-sm bg-white">
           <div className="flex items-center gap-2 mb-4">
-            <DollarSign size={18} className="text-purple-500" />
+            <DollarSign size={18} className="text-cerulean" />
             <h2 className="font-bold text-slate-900">Tarif Konsultasi</h2>
           </div>
           <div>

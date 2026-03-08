@@ -17,7 +17,7 @@ interface RoadmapSidebarProps {
   trimester: number
 }
 
-export function RoadmapSidebar({
+export default function RoadmapSidebar({
   pregnancyWeek,
   timelineWeeks,
   journal,
@@ -30,15 +30,15 @@ export function RoadmapSidebar({
 }: RoadmapSidebarProps) {
   return (
     <aside className="space-y-8 xl:sticky xl:top-24 xl:self-start">
-      <div className="rounded-[36px] border border-slate-100 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-sm relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-bl-[60px] -mr-4 -mt-4 transition-colors" />
+      <div className="rounded-3xl border border-slate-100  bg-white  p-6 shadow-sm relative overflow-hidden">
+         <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50  rounded-bl-2xl -mr-4 -mt-4 transition-colors" />
          
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 relative z-10">
+        <h3 className="text-lg font-bold text-slate-900  flex items-center gap-2 relative z-10">
            <Compass className="h-5 w-5 text-doccure-teal" />
            Timeline Minggu Ini
         </h3>
         <div className="relative mt-8 space-y-4">
-          <div className="absolute left-[20px] top-1 h-[calc(100%-12px)] w-px bg-slate-100 dark:bg-white/5" />
+          <div className="absolute left-[20px] top-1 h-[calc(100%-12px)] w-px bg-slate-100 " />
           {timelineWeeks.map((week) => {
             const isCurrent = week === pregnancyWeek
             const isPast = week < pregnancyWeek
@@ -52,12 +52,12 @@ export function RoadmapSidebar({
                   }`}
                 />
                 <div
-                  className={`flex-1 rounded-[20px] border px-4 py-3 transition-all ${
+                  className={`flex-1 rounded-xl border px-4 py-3 transition-all ${
                     isCurrent
-                      ? 'border-doccure-teal/30 bg-doccure-teal/5 text-slate-900 dark:text-white shadow-sm'
+                      ? 'border-doccure-teal/30 bg-doccure-teal/5 text-slate-900  shadow-sm'
                       : isPast
-                        ? 'border-emerald-100 bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                        : 'border-slate-50 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 text-slate-400 dark:text-slate-500 group-hover/item:border-slate-200 dark:group-hover/item:border-white/10'
+                        ? 'border-emerald-100 bg-emerald-50/50  text-emerald-700 '
+                        : 'border-slate-50  bg-slate-50/50  text-slate-400  group-hover/item:border-slate-200 '
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -72,7 +72,7 @@ export function RoadmapSidebar({
         </div>
       </div>
 
-      <div id="roadmap-journal" className="rounded-[36px] border border-slate-100 bg-slate-900 p-8 shadow-2xl relative group overflow-hidden">
+      <div id="roadmap-journal" className="rounded-3xl border border-slate-100 bg-slate-900 p-8 shadow-2xl relative group overflow-hidden">
         <div className="absolute bottom-0 left-0 w-32 h-32 opacity-10 pointer-events-none" 
              style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
         
@@ -107,7 +107,7 @@ export function RoadmapSidebar({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/10 rounded-[36px] p-6 shadow-sm overflow-hidden text-center relative">
+      <div className="bg-white  border border-slate-100  rounded-3xl p-6 shadow-sm overflow-hidden text-center relative">
          <div className="absolute -left-10 -top-10 w-24 h-24 bg-doccure-yellow/10 rounded-full blur-2xl" />
          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 italic">Current Achievement</p>
          <RoadmapProgress

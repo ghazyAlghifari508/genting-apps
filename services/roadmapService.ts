@@ -2,8 +2,9 @@
 
 import { createClient } from '@/lib/supabase-server'
 import { getCurrentUser } from '@/lib/auth-server'
+import { RoadmapActivity, UserRoadmapProgress } from '@/types/roadmap'
 
-export async function getRoadmapActivities() {
+export async function getRoadmapActivities(): Promise<RoadmapActivity[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('roadmap_activities')
@@ -11,10 +12,10 @@ export async function getRoadmapActivities() {
     .order('difficulty_level', { ascending: true })
   
   if (error) throw error
-  return data
+  return (data || []) as RoadmapActivity[]
 }
 
-export async function getUserRoadmapProgress(userId: string) {
+export async function getUserRoadmapProgress(userId: string): Promise<UserRoadmapProgress[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('user_roadmap_progress')
@@ -22,7 +23,7 @@ export async function getUserRoadmapProgress(userId: string) {
     .eq('user_id', userId)
   
   if (error) throw error
-  return data
+  return (data || []) as UserRoadmapProgress[]
 }
 
 export async function upsertRoadmapProgress(payload: {
@@ -32,7 +33,7 @@ export async function upsertRoadmapProgress(payload: {
   completion_date?: string | null
   streak_count: number
   last_completed_date: string
-}) {
+}): Promise<UserRoadmapProgress> {
   const user = await getCurrentUser()
   if (!user || user.id !== payload.user_id) throw new Error('Unauthorized')
 
@@ -73,5 +74,32 @@ export async function upsertRoadmapProgress(payload: {
   }
 
   if (result.error) throw result.error
-  return result.data
+  return result.data as UserRoadmapProgress
+}
+
+export async function saveDailyJournal(payload: {
+  user_id: string
+  content: string
+  date: string
+}) {
+  const user = await getCurrentUser()
+  if (!user || user.id !== payload.user_id) throw new Error('Unauthorized')
+
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from('user_journals')
+    .upsert({
+      user_id: payload.user_id,
+      content: payload.content,
+      journal_date: payload.date,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id,journal_date'
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
 }

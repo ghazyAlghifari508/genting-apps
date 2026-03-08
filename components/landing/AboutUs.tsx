@@ -86,13 +86,13 @@ export default function AboutUs() {
             </p>
 
             {/* Mission Card */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 flex gap-5 items-start w-full max-w-xl mb-10 shadow-xl border border-transparent dark:border-slate-700 transition-colors">
+            <div className="bg-white  rounded-2xl p-6 flex gap-5 items-start w-full max-w-xl mb-10 shadow-xl border border-transparent  transition-colors">
               <div className="w-14 h-14 shrink-0 bg-doccure-yellow rounded-xl flex items-center justify-center text-doccure-dark">
                 <Target className="w-7 h-7" />
               </div>
               <div>
-                <h4 className="text-slate-900 dark:text-white font-bold text-lg mb-1">Misi Kami</h4>
-                <p className="text-slate-600 dark:text-slate-400 text-[15px] leading-snug">
+                <h4 className="text-slate-900  font-bold text-lg mb-1">Misi Kami</h4>
+                <p className="text-slate-600  text-[15px] leading-snug">
                   Menciptakan generasi Indonesia yang sehat melalui teknologi, edukasi, dan akses ke layanan kesehatan berkualitas.
                 </p>
               </div>

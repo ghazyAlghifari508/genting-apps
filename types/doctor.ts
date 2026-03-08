@@ -75,6 +75,33 @@ export interface DoctorRegistration {
   certification_url: string | null
   years_of_experience: number | null
   hourly_rate: number
+  hospital_name: string | null
+  university: string | null
+  id_photo_url: string | null
   created_at: string
   updated_at: string
+  users?: {
+    avatar_url?: string | null
+  }
+}
+
+export interface DoctorStats {
+  totalPatients: number
+  activeConsultations: number
+  todayAppointments: {
+    total: number
+    completed: number
+    upcoming: number
+  }
+  monthlyRevenue: number
+  newPatientsThisMonth: number
+  averageRating: number
+  totalConsultations: number
+  completedConsultations: number
+  weeklyTrend: Array<{ name: string; value: number }>
+  statusSummary: {
+    completed: number
+    pending: number
+    cancelled: number
+  }
 }

@@ -1,13 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { getDoctorConsultations } from '@/services/consultationService'
-import { getDoctorByUserId } from '@/services/doctorService'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
+import { useState } from 'react'
+import { useDoctorContext } from '@/components/providers/Providers'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
-
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ConsultationStatusBadge } from '@/components/shared/ConsultationStatus'
@@ -15,7 +11,6 @@ import { RatingStars } from '@/components/shared/RatingStars'
 import { Search, Users, Clock, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import type { Consultation } from '@/types/consultation'
-import { supabase } from '@/lib/supabase'
 
 const STATUS_TABS: { label: string; value: string }[] = [
   { label: 'Semua', value: 'all' },
@@ -26,67 +21,19 @@ const STATUS_TABS: { label: string; value: string }[] = [
 ]
 
 export default function DoctorConsultationsPage() {
-  const [consultations, setConsultations] = useState<Consultation[]>([])
+  const doctorContext = useDoctorContext()
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const consultations = doctorContext?.consultations || []
+  const loading = doctorContext?.loading
 
-  useEffect(() => {
-    if (authLoading) return
-    if (!user) { router.push('/login'); return }
+  const filtered = consultations.filter((c) => {
+    const matchesSearch = !search || c.user?.full_name?.toLowerCase().includes(search.toLowerCase())
+    const matchesFilter = filter === 'all' || c.status === filter
+    return matchesSearch && matchesFilter
+  })
 
-    const load = async () => {
-      try {
-        const doc = await getDoctorByUserId(user.id)
-        if (!doc) { router.push('/doctor/profile'); return }
-
-        const fetchData = async () => {
-          const data = await getDoctorConsultations(doc.id, { 
-            status: filter,
-            order: filter === 'scheduled' ? 'asc' : 'desc' 
-          })
-          setConsultations(data || [])
-        }
-
-        await fetchData()
-
-        // Realtime Subscription
-        const subscription = supabase
-          .channel('consultation_list_changes')
-          .on(
-            'postgres_changes',
-            {
-              event: '*',
-              schema: 'public',
-              table: 'consultations',
-              filter: `doctor_id=eq.${doc.id}`
-            },
-            () => {
-              console.log('Consultations list changed, refreshing...')
-              fetchData()
-            }
-          )
-          .subscribe()
-
-        return () => {
-          subscription.unsubscribe()
-        }
-      } catch (error) {
-        console.error('Error loading consultations:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
-  }, [router, filter, user, authLoading])
-
-  const filtered = consultations.filter((c) =>
-    !search || c.user?.full_name?.toLowerCase().includes(search.toLowerCase())
-  )
-
-  if (loading) {
+  if (loading && consultations.length === 0) {
     return (
       <div className="p-8 max-w-[1600px] mx-auto min-h-screen">
         <div className="flex items-center justify-between mb-6 max-w-4xl mx-auto">
@@ -110,23 +57,29 @@ export default function DoctorConsultationsPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
-
       <main className="space-y-4">
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari pasien..." className="pl-9 rounded-xl" />
+            <Input 
+              value={search} 
+              onChange={(e) => setSearch(e.target.value)} 
+              placeholder="Cari pasien..." 
+              className="pl-9 rounded-xl" 
+            />
           </div>
           <div className="flex gap-1 overflow-x-auto pb-1">
             {STATUS_TABS.map((tab) => (
               <button
                 key={tab.value}
-                onClick={() => { setFilter(tab.value); setLoading(true) }}
+                onClick={() => setFilter(tab.value)}
                 className={`px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                   filter === tab.value ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'
                 }`}
-              >{tab.label}</button>
+              >
+                {tab.label}
+              </button>
             ))}
           </div>
         </div>
@@ -139,13 +92,18 @@ export default function DoctorConsultationsPage() {
         ) : (
           <div className="space-y-3">
             {filtered.map((c, i) => (
-              <motion.div key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+              <motion.div 
+                key={c.id} 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ delay: i * 0.05 }}
+              >
                 <Link href={`/doctor/consultations/${c.id}`}>
                   <Card className="p-4 rounded-2xl border-0 shadow-sm bg-white hover:shadow-md transition-shadow group cursor-pointer">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <Users className="w-5 h-5 text-blue-600" />
+                        <div className="w-10 h-10 rounded-full bg-cerulean/10 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-cerulean" />
                         </div>
                         <div>
                           <p className="font-bold text-sm text-slate-900">{c.user?.full_name || 'Pasien'}</p>
@@ -162,7 +120,7 @@ export default function DoctorConsultationsPage() {
                         <p className="text-sm font-bold text-slate-700 hidden sm:block">
                           Rp {(c.total_cost || 0).toLocaleString('id-ID')}
                         </p>
-                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-500" />
+                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-cerulean" />
                       </div>
                     </div>
                   </Card>

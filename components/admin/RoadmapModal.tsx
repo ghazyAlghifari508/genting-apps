@@ -9,11 +9,9 @@ import { motion } from 'framer-motion'
 interface RoadmapActivity {
   id: string
   activity_name: string
-  category: 'exercise' | 'nutrition'
+  category: 'exercise' | 'nutrition' | 'sleep' | 'mental' | 'checkup' | 'bonding'
   description: string
   difficulty_level: number
-  icon_name: string | null
-  xp_reward: number
   min_trimester: number
   max_trimester: number
   duration_minutes: number
@@ -39,8 +37,6 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
     category: RoadmapActivity['category']
     description: string
     difficulty_level: number
-    icon_name: string
-    xp_reward: number
     min_trimester: number
     max_trimester: number
     duration_minutes: number
@@ -54,8 +50,6 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
     category: 'exercise',
     description: '',
     difficulty_level: 1,
-    icon_name: '',
-    xp_reward: 50,
     min_trimester: 1,
     max_trimester: 3,
     duration_minutes: 15,
@@ -73,8 +67,6 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
         category: initialData.category,
         description: initialData.description || '',
         difficulty_level: initialData.difficulty_level,
-        icon_name: initialData.icon_name || '',
-        xp_reward: initialData.xp_reward || 0,
         min_trimester: initialData.min_trimester || 1,
         max_trimester: initialData.max_trimester || 3,
         duration_minutes: initialData.duration_minutes || 0,
@@ -90,8 +82,6 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
         category: 'exercise',
         description: '',
         difficulty_level: 1,
-        icon_name: '',
-        xp_reward: 50,
         min_trimester: 1,
         max_trimester: 3,
         duration_minutes: 15,
@@ -120,8 +110,6 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
         category: form.category,
         description: form.description,
         difficulty_level: form.difficulty_level,
-        icon_name: form.icon_name || null,
-        xp_reward: form.xp_reward,
         min_trimester: form.min_trimester,
         max_trimester: form.max_trimester,
         duration_minutes: form.duration_minutes,
@@ -155,14 +143,14 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl transition-colors"
+        className="relative bg-white  rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl transition-colors"
       >
-        <div className="p-6 border-b dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800 transition-colors">
+        <div className="p-6 border-b  flex items-center justify-between bg-slate-50/50  transition-colors">
           <div>
-            <h2 className="text-xl font-black text-slate-800 dark:text-white transition-colors">
+            <h2 className="text-xl font-black text-slate-800  transition-colors">
               {initialData ? 'Edit Aktivitas' : 'Tambah Aktivitas'}
             </h2>
-            <p className="text-xs text-muted-foreground dark:text-slate-400 font-medium transition-colors">Bunda, silakan lengkapi detail aktivitas roadmap di bawah ini.</p>
+            <p className="text-xs text-muted-foreground  font-medium transition-colors">Bunda, silakan lengkapi detail aktivitas roadmap di bawah ini.</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="rounded-xl">
             <X className="w-5 h-5" />
@@ -188,7 +176,7 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                     value={form.activity_name}
                     onChange={(e) => setForm((prev) => ({ ...prev, activity_name: e.target.value }))}
                     placeholder="Contoh: Morning Yoga, Sarapan Sehat..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 transition-all font-medium transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 transition-all font-medium transition-colors"
                   />
                 </div>
 
@@ -200,20 +188,15 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, category: e.target.value as RoadmapActivity['category'] }))
                       }
-                      className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-medium transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-medium transition-colors"
                     >
                       <option value="exercise">Olahraga</option>
                       <option value="nutrition">Nutrisi</option>
+                      <option value="sleep">Tidur</option>
+                      <option value="mental">Mental</option>
+                      <option value="checkup">Pemeriksaan</option>
+                      <option value="bonding">Bonding</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold mb-1.5 text-slate-500 uppercase">XP Reward</label>
-                    <input
-                      type="number"
-                      value={form.xp_reward}
-                      onChange={(e) => setForm((prev) => ({ ...prev, xp_reward: Number(e.target.value) }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-colors"
-                    />
                   </div>
                 </div>
 
@@ -242,7 +225,7 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                     <select
                       value={form.min_trimester}
                       onChange={(e) => setForm((prev) => ({ ...prev, min_trimester: Number(e.target.value) }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-colors"
                     >
                       <option value={1}>Trimester 1</option>
                       <option value={2}>Trimester 2</option>
@@ -254,7 +237,7 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                     <select
                       value={form.max_trimester}
                       onChange={(e) => setForm((prev) => ({ ...prev, max_trimester: Number(e.target.value) }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-colors"
                     >
                       <option value={1}>Trimester 1</option>
                       <option value={2}>Trimester 2</option>
@@ -270,7 +253,7 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                       type="number"
                       value={form.duration_minutes}
                       onChange={(e) => setForm((prev) => ({ ...prev, duration_minutes: Number(e.target.value) }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-all transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-all transition-colors"
                     />
                   </div>
                   <div>
@@ -279,21 +262,14 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                       type="number"
                       value={form.frequency_per_week}
                       onChange={(e) => setForm((prev) => ({ ...prev, frequency_per_week: Number(e.target.value) }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-all transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-all transition-colors"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold mb-1.5 text-slate-500 uppercase">Icon Name (Lucide)</label>
-                  <input
-                    type="text"
-                    value={form.icon_name}
-                    onChange={(e) => setForm((prev) => ({ ...prev, icon_name: e.target.value }))}
-                    placeholder="Contoh: dumbbell, apple, heart, soup..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-colors"
-                  />
-                  <p className="text-[10px] text-muted-foreground mt-1 font-medium italic">* Gunakan nama icon Lucide React (lowercase)</p>
+                  <label className="block text-xs font-bold mb-1.5 text-slate-500 uppercase">Tips & Peringatan</label>
+                  <p className="text-[10px] text-muted-foreground mt-1 font-medium italic">Isi tips dan peringatan di kolom kanan.</p>
                 </div>
               </div>
             </div>
@@ -309,7 +285,7 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                     onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                     placeholder="Deskripsi singkat aktivitas..."
                     rows={2}
-                    className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium transition-colors"
                   />
                 </div>
 
@@ -320,7 +296,7 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                     onChange={(e) => setForm((prev) => ({ ...prev, benefits: e.target.value }))}
                     placeholder="Meningkatkan energi&#10;Melancarkan pencernaan..."
                     rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium transition-colors"
                   />
                 </div>
 
@@ -331,7 +307,7 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                     onChange={(e) => setForm((prev) => ({ ...prev, instructions: e.target.value }))}
                     placeholder="Siapkan alat yoga&#10;Lakukan pemanasan 5 menit..."
                     rows={4}
-                    className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium transition-colors"
                   />
                 </div>
 
@@ -342,7 +318,7 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                     onChange={(e) => setForm((prev) => ({ ...prev, tips: e.target.value }))}
                     placeholder="Gunakan pakaian yang nyaman..."
                     rows={2}
-                    className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium border-apricot/20 transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium border-apricot/20 transition-colors"
                   />
                 </div>
 
@@ -353,7 +329,7 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
                     onChange={(e) => setForm((prev) => ({ ...prev, warnings: e.target.value }))}
                     placeholder="Hentikan jika merasa pusing..."
                     rows={2}
-                    className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium border-grapefruit/20 transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium border-grapefruit/20 transition-colors"
                   />
                 </div>
               </div>
@@ -372,7 +348,7 @@ export function RoadmapModal({ isOpen, onClose, onSuccess, initialData }: Roadma
             <Button
               type="submit"
               disabled={saving}
-              className="flex-[2] h-12 rounded-xl bg-doccure-teal hover:bg-[#0f605c] text-white font-black shadow-lg shadow-doccure-teal/30"
+              className="flex-[2] h-12 rounded-xl bg-doccure-teal hover:bg-[#0f605c] text-white font-black shadow-md"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
               {initialData ? 'Update Aktivitas' : 'Simpan Aktivitas'}

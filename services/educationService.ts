@@ -38,7 +38,7 @@ export async function getUserProgress(userId: string) {
   return (data || []) as UserProgress[]
 }
 
-export async function toggleReadStatus(userId: string, day: number, isRead: boolean) {
+export async function toggleReadStatus(userId: string, day: number, isRead: boolean): Promise<UserProgress> {
   const user = await assertAuthenticated()
   if (user.id !== userId) throw new Error('Akses ditolak: ID User tidak cocok')
   
@@ -59,10 +59,10 @@ export async function toggleReadStatus(userId: string, day: number, isRead: bool
     .single()
 
   if (error) handleServiceError(error, 'Gagal memperbarui status baca')
-  return data
+  return data as UserProgress
 }
 
-export async function toggleFavoriteStatus(userId: string, day: number, isFavorite: boolean) {
+export async function toggleFavoriteStatus(userId: string, day: number, isFavorite: boolean): Promise<UserProgress> {
   const user = await assertAuthenticated()
   if (user.id !== userId) throw new Error('Akses ditolak: ID User tidak cocok')
   
@@ -83,7 +83,7 @@ export async function toggleFavoriteStatus(userId: string, day: number, isFavori
     .single()
 
   if (error) handleServiceError(error, 'Gagal memperbarui status favorit')
-  return data
+  return data as UserProgress
 }
 
 export async function getProgressStats(userId: string) {

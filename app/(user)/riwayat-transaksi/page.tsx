@@ -1,48 +1,35 @@
-﻿'use client'
+'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { getUserConsultations } from '@/services/consultationService'
-import { useAuth } from '@/hooks/useAuth'
+import { usePregnancyData } from '@/hooks/usePregnancyData'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ConsultationStatusBadge } from '@/components/shared/ConsultationStatus'
 import { RatingStars } from '@/components/shared/RatingStars'
 import { Calendar, Clock, Stethoscope, ChevronRight, ArrowLeft } from 'lucide-react'
-import type { Consultation } from '@/types/consultation'
 
 export default function ConsultationHistoryPage() {
-  const [consultations, setConsultations] = useState<Consultation[]>([])
-  const [loading, setLoading] = useState(true)
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { profile, loading: dataLoading, consultations: consultationsData, loadConsultations } = usePregnancyData()
+  const consultationsLocal = consultationsData.data || []
 
   useEffect(() => {
-    if (authLoading) return
-    if (!user) {
+    if (dataLoading || !profile) return
+    loadConsultations()
+  }, [profile, dataLoading, consultationsLocal.length, loadConsultations])
+
+  useEffect(() => {
+    if (!dataLoading && !profile) {
       router.push('/login')
-      return
     }
+  }, [profile, dataLoading, router])
 
-    const load = async () => {
-      try {
-        const data = await getUserConsultations(user.id)
-        setConsultations(data || [])
-      } catch (error) {
-        console.error('Error loading consultation history:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    load()
-  }, [router, user, authLoading])
-
-  if (loading) {
+  if ((dataLoading || consultationsData.loading) && consultationsLocal.length === 0) {
     return (
       <div className="space-y-5 pb-32 text-slate-900">
         <section className="w-full pt-8 mb-6 relative">
@@ -90,7 +77,7 @@ export default function ConsultationHistoryPage() {
 
       <section className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-slate-100/80 bg-white/95 shadow-[0_10px_26px_rgba(15,23,42,0.06)] p-4">
-          {consultations.length === 0 ? (
+          {consultationsLocal.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 py-24 text-center">
               <Calendar className="mb-3 h-10 w-10 text-slate-300" />
               <p className="text-base font-semibold text-slate-900">Belum ada transaksi</p>
@@ -103,7 +90,7 @@ export default function ConsultationHistoryPage() {
             </div>
           ) : (
             <div className="space-y-2.5">
-              {consultations.map((consultation, index) => (
+              {consultationsLocal.map((consultation, index) => (
                 <motion.div
                   key={consultation.id}
                   initial={{ opacity: 0, y: 8 }}

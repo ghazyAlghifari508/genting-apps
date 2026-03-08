@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import type { ConsultationStatus as Status } from '@/types/consultation'
 

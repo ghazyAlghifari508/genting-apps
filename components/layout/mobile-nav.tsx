@@ -23,7 +23,7 @@ export function MobileNav() {
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
-      <div className="max-w-md mx-auto h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-[2rem] shadow-2xl shadow-cerulean/10 flex items-center justify-around px-2 transition-colors duration-300">
+      <div className="max-w-md mx-auto h-20 bg-white/80  backdrop-blur-xl border border-white/50  rounded-3xl shadow-2xl shadow-cerulean/10 flex items-center justify-around px-2 transition-colors duration-300">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           
@@ -42,10 +42,10 @@ export function MobileNav() {
               key={item.href} 
               href={item.href}
               className={`flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-200 ${
-                isActive ? 'text-cerulean' : 'text-slate-400 dark:text-slate-500'
+                isActive ? 'text-cerulean' : 'text-slate-400 '
               }`}
             >
-              <item.icon className={`w-6 h-6 ${isActive ? 'text-cerulean' : 'text-slate-400 dark:text-slate-500'}`} />
+              <item.icon className={`w-6 h-6 ${isActive ? 'text-cerulean' : 'text-slate-400 '}`} />
               <span className={`text-[10px] font-bold ${isActive ? 'opacity-100' : 'opacity-60'}`}>{item.label}</span>
               {isActive && (
                 <div className="w-1 h-1 rounded-full bg-cerulean mt-0.5" />

@@ -181,7 +181,7 @@ export function AiChatFloating() {
             whileHover={{ scale: 1.1, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-[2rem] bg-gradient-to-br from-slate-900 to-slate-800 shadow-xl shadow-slate-900/30 flex items-center justify-center group"
+            className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-[2rem] bg-gradient-to-br from-slate-900 to-slate-800 shadow-lg flex items-center justify-center group"
           >
             <Sparkles className="w-8 h-8 text-white transition-transform group-hover:scale-110" />
             <motion.div 
@@ -268,7 +268,7 @@ export function AiChatFloating() {
                   >
                     <History className="w-5 h-5" />
                   </button>
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-doccure-teal to-doccure-dark flex items-center justify-center shadow-lg shadow-doccure-teal/20">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-doccure-teal to-doccure-dark flex items-center justify-center shadow-md">
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -330,20 +330,20 @@ export function AiChatFloating() {
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
                                 components={{
-                                  p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
-                                  ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                                  ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                                  li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                                  strong: ({node, ...props}) => <strong className="font-bold text-slate-900" {...props} />,
-                                  em: ({node, ...props}) => <em className="italic" {...props} />,
-                                  table: ({node, ...props}) => (
+                                  p: ({...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                                  ul: ({...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                                  ol: ({...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                                  li: ({...props}) => <li className="mb-1" {...props} />,
+                                  strong: ({...props}) => <strong className="font-bold text-slate-900" {...props} />,
+                                  em: ({...props}) => <em className="italic" {...props} />,
+                                  table: ({...props}) => (
                                     <div className="overflow-x-auto mb-2 w-full">
                                       <table className="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-lg" {...props} />
                                     </div>
                                   ),
-                                  th: ({node, ...props}) => <th className="px-3 py-2 bg-slate-50 text-left text-xs font-semibold text-slate-600 uppercase" {...props} />,
-                                  td: ({node, ...props}) => <td className="px-3 py-2 text-sm border-t border-slate-100" {...props} />,
-                                  a: ({node, ...props}) => <a className="text-doccure-teal hover:underline font-semibold" target="_blank" rel="noopener noreferrer" {...props} />,
+                                  th: ({...props}) => <th className="px-3 py-2 bg-slate-50 text-left text-xs font-semibold text-slate-600 uppercase" {...props} />,
+                                  td: ({...props}) => <td className="px-3 py-2 text-sm border-t border-slate-100" {...props} />,
+                                  a: ({...props}) => <a className="text-doccure-teal hover:underline font-semibold" target="_blank" rel="noopener noreferrer" {...props} />,
                                 }}
                               >
                                 {msg.content || ''}
@@ -388,7 +388,7 @@ export function AiChatFloating() {
                       type="submit"
                       disabled={!inputValue.trim() || isTyping}
                       size="icon"
-                      className="w-10 h-10 bg-doccure-teal hover:bg-doccure-dark text-white rounded-xl transition-all shadow-lg shadow-doccure-teal/20 shrink-0"
+                      className="w-10 h-10 bg-doccure-teal hover:bg-doccure-dark text-white rounded-xl transition-all shadow-md shrink-0"
                     >
                       <Send size={18} />
                     </Button>

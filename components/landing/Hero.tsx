@@ -110,7 +110,7 @@ export default function Hero() {
       
       {/* Bottom Pointed Shape (SVG) */}
       <div className="absolute bottom-[-1px] left-0 w-full z-20 leading-none">
-        <svg viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none" className="w-full h-[80px] text-white dark:text-slate-900 transition-colors">
+        <svg viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none" className="w-full h-[80px] text-white  transition-colors">
           <path d="M0 100H1440V0L720 100L0 0V100Z" fill="currentColor" />
         </svg>
       </div>

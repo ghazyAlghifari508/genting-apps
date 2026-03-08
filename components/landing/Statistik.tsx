@@ -47,11 +47,11 @@ const stats = [
 export default function Statistik() {
 
   return (
-    <section className="py-16 bg-white dark:bg-slate-900 transition-colors duration-300 overflow-hidden" id="stats">
+    <section className="py-16 bg-white  transition-colors duration-300 overflow-hidden" id="stats">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white transition-colors duration-300">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900  transition-colors duration-300">
             Ketika Kepedulian Bertemu <span className="text-doccure-teal border-b-2 border-doccure-teal">Layanan Terbaik</span>
           </h2>
         </div>
@@ -68,7 +68,7 @@ export default function Statistik() {
               className={`relative rounded-2xl p-8 lg:p-10 text-center flex flex-col justify-center min-h-[160px] overflow-hidden transition-all duration-300 ${
                 stat.highlight 
                   ? 'bg-doccure-dark text-white shadow-xl' 
-                  : 'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-100 dark:border-white/5'
+                  : 'bg-slate-50  text-slate-900  shadow-sm border border-slate-100 '
               }`}
             >
               {/* Decorative concentric circles background for both light and dark, just varying opacity */}
@@ -86,7 +86,7 @@ export default function Statistik() {
                 <CountUp value={stat.value} />
                 <span>{stat.suffix}</span>
               </div>
-              <div className={`relative z-10 text-sm font-medium transition-colors duration-300 ${stat.highlight ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>
+              <div className={`relative z-10 text-sm font-medium transition-colors duration-300 ${stat.highlight ? 'text-white/80' : 'text-slate-500 '}`}>
                 {stat.label}
               </div>
             </motion.div>

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useConsultationTimer } from '@/hooks/useConsultationTimer'
 import { Clock } from 'lucide-react'

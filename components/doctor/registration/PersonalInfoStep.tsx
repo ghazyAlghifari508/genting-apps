@@ -36,45 +36,45 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="fullName" className="text-slate-700 dark:text-slate-300 transition-colors">Nama Lengkap *</Label>
+        <Label htmlFor="fullName" className="text-slate-700  transition-colors">Nama Lengkap *</Label>
         <Input
           id="fullName"
           value={formData.fullName}
           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
           placeholder="Dr. Nama Lengkap"
-          className="mt-1 dark:bg-slate-800 dark:border-white/10 dark:text-white transition-colors"
+          className="mt-1    transition-colors"
         />
       </div>
 
       <div>
-        <Label htmlFor="phone" className="text-slate-700 dark:text-slate-300 transition-colors">Nomor Telepon *</Label>
+        <Label htmlFor="phone" className="text-slate-700  transition-colors">Nomor Telepon *</Label>
         <Input
           id="phone"
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           placeholder="+62 8..."
-          className="mt-1 dark:bg-slate-800 dark:border-white/10 dark:text-white transition-colors"
+          className="mt-1    transition-colors"
         />
       </div>
 
       <div>
-        <Label htmlFor="bio" className="text-slate-700 dark:text-slate-300 transition-colors">Bio / Tentang Anda</Label>
+        <Label htmlFor="bio" className="text-slate-700  transition-colors">Bio / Tentang Anda</Label>
         <Textarea
           id="bio"
           value={formData.bio}
           onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
           placeholder="Ceritakan pengalaman Anda..."
-          className="mt-1 dark:bg-slate-800 dark:border-white/10 dark:text-white transition-colors"
+          className="mt-1    transition-colors"
           rows={3}
         />
       </div>
 
       <div>
-        <Label className="text-slate-700 dark:text-slate-300 transition-colors">Foto Profil</Label>
-        <div className="mt-1 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl p-6 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-colors relative bg-slate-50 dark:bg-slate-800">
+        <Label className="text-slate-700  transition-colors">Foto Profil</Label>
+        <div className="mt-1 border-2 border-dashed border-slate-200  rounded-xl p-6 text-center hover:border-cerulean  transition-colors relative bg-slate-50 ">
           {formData.profilePicture ? (
             <div className="flex flex-col items-center gap-2">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden bg-slate-200 ">
                 {previewUrl ? (
                   <Image
                     src={previewUrl}
@@ -86,22 +86,22 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
                   />
                 ) : null}
               </div>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{formData.profilePicture.name}</p>
+              <p className="text-sm font-medium text-slate-700 ">{formData.profilePicture.name}</p>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setFormData({ ...formData, profilePicture: null })}
-                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                className="text-red-500 hover:text-red-600 hover:bg-red-50 "
               >
                 <X size={14} className="mr-1" /> Hapus
               </Button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 trasition-colors">
+              <div className="w-12 h-12 rounded-full bg-cerulean/10  flex items-center justify-center text-cerulean  transition-colors">
                 <Upload size={20} />
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 transition-colors">Klik untuk upload foto (JPG/PNG)</p>
+              <p className="text-sm text-slate-500  transition-colors">Klik untuk upload foto (JPG/PNG)</p>
               <input
                 type="file"
                 accept="image/*"

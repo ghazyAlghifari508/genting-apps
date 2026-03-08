@@ -33,15 +33,15 @@ export function ConsultationHistoryList() {
   }, [user])
 
   return (
-    <Card className="p-6 rounded-[2rem] border-none shadow-sm bg-white dark:bg-slate-800 transition-colors h-full">
+    <Card className="p-6 rounded-[2rem] border-none shadow-sm bg-white  transition-colors h-full">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white transition-colors">Riwayat Konsultasi</h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Sesi yang baru saja selesai</p>
+          <h3 className="text-lg font-bold text-slate-900  transition-colors">Riwayat Konsultasi</h3>
+          <p className="text-xs text-slate-400  mt-1">Sesi yang baru saja selesai</p>
         </div>
         <Link href="/doctor/history">
-            <button className="p-2 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-            <ArrowUpRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+            <button className="p-2 rounded-full hover:bg-slate-50  transition-colors">
+            <ArrowUpRight className="w-5 h-5 text-slate-400 " />
             </button>
         </Link>
       </div>
@@ -62,31 +62,31 @@ export function ConsultationHistoryList() {
             ))}
          </div>
       ) : history.length === 0 ? (
-         <div className="py-10 text-center text-slate-400 dark:text-slate-500 text-sm border-2 border-dashed border-slate-100 dark:border-slate-700 rounded-2xl transition-colors">
+         <div className="py-10 text-center text-slate-400  text-sm border-2 border-dashed border-slate-100  rounded-2xl transition-colors">
             Belum ada riwayat konsul.
          </div>
       ) : (
          <div className="space-y-4">
             {history.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-3 gap-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-2xl transition-colors cursor-default border border-transparent hover:border-slate-100 dark:hover:border-slate-600">
+                <div key={item.id} className="flex items-center justify-between p-3 gap-3 hover:bg-slate-50  rounded-2xl transition-colors cursor-default border border-transparent hover:border-slate-100 ">
                     <div className="flex items-center gap-3 overflow-hidden">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                            item.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                            item.status === 'completed' ? 'bg-green-100  text-green-600 ' : 'bg-red-100  text-red-600 '
                         }`}>
                             <History className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-900 dark:text-white transition-colors truncate">
+                            <p className="text-sm font-bold text-slate-900  transition-colors truncate">
                                 {item.status === 'completed' ? 'Selesai' : 'Dibatalkan'}
                             </p>
-                            <p className="text-xs text-slate-400 dark:text-slate-500">
+                            <p className="text-xs text-slate-400 ">
                                 {new Date(item.ended_at || item.created_at || Date.now()).toLocaleDateString()}
                             </p>
                         </div>
                     </div>
 
                     <div className="text-right shrink-0">
-                         <p className="text-sm font-bold text-slate-900 dark:text-white transition-colors">
+                         <p className="text-sm font-bold text-slate-900  transition-colors">
                             Rp {(item.total_cost || 0).toLocaleString('id-ID')}
                          </p>
                          {item.rating && (

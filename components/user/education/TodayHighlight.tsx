@@ -1,28 +1,38 @@
-﻿'use client'
+'use client'
 
 import React from 'react'
 import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Sparkles } from 'lucide-react'
-import { EducationContent } from '@/types/education'
+import { EducationContent, UserProfile } from '@/types/education'
 
 interface TodayHighlightProps {
-  content: EducationContent | null
-  currentDay: number
-  onReadMore: (day: number) => void
+  profile: UserProfile | null
+  contents: EducationContent[]
+  onToggleFavorite: (day: number) => void
 }
 
-export const TodayHighlight = React.memo(({ content, currentDay, onReadMore }: TodayHighlightProps) => {
+export const TodayHighlight = React.memo(({ profile, contents, onToggleFavorite }: TodayHighlightProps) => {
+  const router = useRouter()
+  const currentDay = profile?.current_day || 1
+  const content = contents.find(c => c.day === currentDay) || contents[0]
+
   if (!content) return null
+  
+  const handleReadMore = () => {
+    router.push(`/education/${content.day}`)
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="relative"
     >
-      <Card className="relative overflow-hidden rounded-[28px] border border-doccure-teal/20 bg-[linear-gradient(145deg,#e1f4ef_0%,#f2faf7_50%,#ffffff_100%)] shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
+      <Card className="relative overflow-hidden rounded-2xl border border-doccure-teal/20 bg-[linear-gradient(145deg,#e1f4ef_0%,#f2faf7_50%,#ffffff_100%)] shadow-lg">
         <div className="pointer-events-none absolute -left-16 top-10 h-44 w-44 rounded-full border border-doccure-teal/20" />
         <div className="pointer-events-none absolute -right-16 -top-14 h-52 w-52 rounded-full bg-doccure-teal/15 blur-3xl" />
 
@@ -48,7 +58,7 @@ export const TodayHighlight = React.memo(({ content, currentDay, onReadMore }: T
 
             <div className="flex flex-wrap gap-2">
               {content.tags && content.tags.length > 0 ? (
-                content.tags.slice(0, 3).map(tag => (
+                content.tags.slice(0, 3).map((tag: string) => (
                   <Badge key={tag} variant="outline" className="rounded-xl border-slate-200 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.07em] text-slate-500">
                     #{tag.replace('#', '')}
                   </Badge>
@@ -62,7 +72,7 @@ export const TodayHighlight = React.memo(({ content, currentDay, onReadMore }: T
 
             <Button
               size="lg"
-              onClick={() => onReadMore(content.day)}
+              onClick={handleReadMore}
               className="h-10 rounded-xl bg-doccure-teal px-5 text-sm font-semibold text-white transition-colors hover:bg-doccure-dark"
             >
               Baca Panduan Lengkap

@@ -21,7 +21,7 @@ export function DoctorRegistrationCTA() {
   return (
     <>
       <Card className="relative overflow-hidden border-0 rounded-[2rem] bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-2xl shadow-slate-900/20 mb-8 p-8 md:p-10">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-doccure-teal/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-cerulean/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-sea-green/20 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
         
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
@@ -42,7 +42,7 @@ export function DoctorRegistrationCTA() {
           <div className="shrink-0">
             <Button 
               onClick={() => setIsOpen(true)}
-              className="h-14 px-8 rounded-2xl bg-gradient-to-r from-doccure-teal to-sea-green hover:from-doccure-teal/90 hover:to-sea-green/90 text-white font-bold text-lg shadow-xl shadow-doccure-teal/20 transition-all transform hover:-translate-y-1"
+              className="h-14 px-8 rounded-2xl bg-gradient-to-r from-cerulean to-sea-green hover:from-cerulean/90 hover:to-sea-green/90 text-white font-bold text-lg shadow-lg transition-all transform hover:-translate-y-1"
             >
               <Stethoscope className="mr-2 w-5 h-5" />
               Daftar Sebagai Dokter

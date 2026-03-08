@@ -35,7 +35,7 @@ export function useConsultationMessages(consultationId: string) {
           filter: `consultation_id=eq.${consultationId}`
         },
         (payload) => {
-          console.log('[useConsultationMessages] Realtime event:', payload.eventType, payload.new)
+
           if (payload.eventType === 'INSERT') {
             const newMsg = payload.new as ConsultationMessage
             setMessages((prev) => {
@@ -50,12 +50,10 @@ export function useConsultationMessages(consultationId: string) {
           }
         }
       )
-      .subscribe((status) => {
-        console.log(`[useConsultationMessages] Subscription status: ${status}`)
-      })
+      .subscribe()
+
 
     return () => { 
-      console.log('[useConsultationMessages] Cleaning up subscription')
       supabase.removeChannel(channel)
     }
   }, [consultationId])

@@ -26,9 +26,9 @@ interface NotificationsPanelProps {
 const getNotificationIcon = (type: string) => {
   switch (type) {
     case 'new_consultation':
-      return <MessageSquare className="w-5 h-5 text-doccure-teal" />
+      return <MessageSquare className="w-5 h-5 text-cerulean" />
     case 'message':
-      return <MessageSquare className="w-5 h-5 text-doccure-teal" />
+      return <MessageSquare className="w-5 h-5 text-cerulean" />
     case 'payment':
       return <DollarSign className="w-5 h-5 text-sea-green" />
     case 'reminder':
@@ -45,9 +45,9 @@ const getNotificationIcon = (type: string) => {
 const getNotificationColor = (type: string) => {
   switch (type) {
     case 'new_consultation':
-      return 'bg-doccure-teal/10 border-doccure-teal/20'
+      return 'bg-cerulean/10 border-cerulean/20'
     case 'message':
-      return 'bg-doccure-teal/10 border-doccure-teal/20'
+      return 'bg-cerulean/10 border-cerulean/20'
     case 'payment':
       return 'bg-sea-green/10 border-sea-green/20'
     case 'reminder':
@@ -65,7 +65,7 @@ export default function NotificationsPanel({ notifications, onMarkAsRead }: Noti
   const unreadCount = notifications.filter(n => !n.is_read).length
 
   return (
-    <Card className="rounded-[2.5rem] p-8 border-white/50 bg-white/70 backdrop-blur-md shadow-xl shadow-slate-200/50">
+    <Card className="rounded-[2.5rem] p-8 border-white/50 bg-white/70 backdrop-blur-md shadow-lg">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h3 className="text-xl font-black tracking-tight text-slate-900">Notifikasi</h3>
@@ -73,8 +73,8 @@ export default function NotificationsPanel({ notifications, onMarkAsRead }: Noti
             {unreadCount > 0 ? `${unreadCount} belum dibaca` : 'Semua sudah dibaca'}
           </p>
         </div>
-        <div className="w-12 h-12 rounded-2xl bg-doccure-teal/10 flex items-center justify-center">
-          <Bell className="w-6 h-6 text-doccure-teal" />
+        <div className="w-12 h-12 rounded-2xl bg-cerulean/10 flex items-center justify-center">
+          <Bell className="w-6 h-6 text-cerulean" />
         </div>
       </div>
 
@@ -116,7 +116,7 @@ export default function NotificationsPanel({ notifications, onMarkAsRead }: Noti
                       </p>
                     </div>
                     {!notification.is_read && (
-                      <div className="w-2 h-2 rounded-full bg-doccure-teal flex-shrink-0 mt-1" />
+                      <div className="w-2 h-2 rounded-full bg-cerulean flex-shrink-0 mt-1" />
                     )}
                   </div>
                   
@@ -128,7 +128,7 @@ export default function NotificationsPanel({ notifications, onMarkAsRead }: Noti
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 px-3 text-xs font-bold text-doccure-teal hover:bg-doccure-teal/10 rounded-xl"
+                        className="h-7 px-3 text-xs font-bold text-cerulean hover:bg-cerulean/10 rounded-xl"
                         onClick={(e) => {
                           e.stopPropagation()
                           window.location.href = notification.action_url!
@@ -148,7 +148,7 @@ export default function NotificationsPanel({ notifications, onMarkAsRead }: Noti
       {notifications.length > 0 && (
         <Button 
           variant="ghost" 
-          className="w-full mt-6 rounded-2xl h-14 font-bold text-slate-400 hover:text-doccure-teal hover:bg-doccure-teal/5 transition-all"
+          className="w-full mt-6 rounded-2xl h-14 font-bold text-slate-400 hover:text-cerulean hover:bg-cerulean/5 transition-all"
         >
           Lihat Semua Notifikasi
         </Button>

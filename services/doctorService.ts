@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase-server'
 import { assertAuthenticated, handleServiceError } from '@/lib/service-helper'
-import type { Doctor, DoctorSchedule } from '@/types/doctor'
+import type { Doctor, DoctorSchedule, DoctorStats } from '@/types/doctor'
 
 export async function getDoctors(filters?: {
   specialization?: string
@@ -110,7 +110,7 @@ export async function deleteSchedule(id: string) {
   if (error) handleServiceError(error, 'Gagal menghapus jadwal')
 }
 
-export async function getDoctorStats(doctorId: string) {
+export async function getDoctorStats(doctorId: string): Promise<DoctorStats> {
   const supabase = await createClient()
   const today = new Date()
   today.setHours(0, 0, 0, 0)

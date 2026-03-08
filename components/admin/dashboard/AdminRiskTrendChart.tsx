@@ -24,17 +24,17 @@ const mockRiskTrend = [
 
 export function AdminRiskTrendChart() {
   return (
-    <Card className="p-6 rounded-[2rem] border-none shadow-sm bg-white dark:bg-slate-800 h-full relative overflow-hidden transition-colors">
+    <Card className="p-6 rounded-[2rem] border-none shadow-sm bg-white  h-full relative overflow-hidden transition-colors">
        <div className="flex justify-between items-start mb-6">
         <div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 transition-colors">
+          <h3 className="text-lg font-bold text-slate-900  flex items-center gap-2 transition-colors">
             <TrendingUp className="w-5 h-5 text-medical-green" /> 
             Tren Risiko Stunting
           </h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 transition-colors">Platform-wide average risk index</p>
+          <p className="text-xs text-slate-400  mt-1 transition-colors">Platform-wide average risk index</p>
         </div>
-        <button className="p-2 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-          <ArrowUpRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+        <button className="p-2 rounded-full hover:bg-slate-50  transition-colors">
+          <ArrowUpRight className="w-5 h-5 text-slate-400 " />
         </button>
       </div>
 

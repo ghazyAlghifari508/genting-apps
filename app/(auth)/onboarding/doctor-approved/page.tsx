@@ -17,6 +17,9 @@ export default function DoctorApprovedPage() {
     try {
       const result = await clearApprovalFlag()
       if (result.success) {
+        // Mark as dismissed for this session to prevent redirect bounce
+        sessionStorage.setItem('dismissed_approval_msg', 'true')
+        
         // Force router refresh to update server components/middleware state
         router.refresh() 
         // Give a tiny moment for cache/db to settle
@@ -39,11 +42,11 @@ export default function DoctorApprovedPage() {
   ]
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cerulean/5 via-white to-sea-green/5 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-emerald-200/30 rounded-full blur-[100px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[40%] h-[40%] bg-teal-200/30 rounded-full blur-[100px]" />
+        <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-cerulean/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[40%] h-[40%] bg-sea-green/10 rounded-full blur-[100px]" />
       </div>
 
       <motion.div
@@ -59,7 +62,7 @@ export default function DoctorApprovedPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', damping: 10, stiffness: 200, delay: 0.3 }}
-            className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-2xl shadow-emerald-200"
+            className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-cerulean to-doccure-teal flex items-center justify-center shadow-2xl shadow-cerulean/20"
           >
             <CheckCircle2 className="w-12 h-12 text-white" />
           </motion.div>
@@ -81,7 +84,7 @@ export default function DoctorApprovedPage() {
             transition={{ delay: 0.6 }}
             className="text-slate-500 font-medium mb-6 text-sm sm:text-base"
           >
-            Selamat! Anda sekarang terdaftar sebagai <span className="font-bold text-emerald-600">Doctor</span> di GENTING dan siap melayani pasien.
+            Selamat! Anda sekarang terdaftar sebagai <span className="font-bold text-cerulean">Doctor</span> di GENTING dan siap melayani pasien.
           </motion.p>
 
           {/* Estimation badge */}
@@ -116,8 +119,8 @@ export default function DoctorApprovedPage() {
                   transition={{ delay: 0.9 + i * 0.1 }}
                   className="flex items-center gap-3"
                 >
-                  <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                    <item.icon className="w-4 h-4 text-emerald-600" />
+                  <div className="w-8 h-8 rounded-xl bg-cerulean/10 flex items-center justify-center shrink-0">
+                    <item.icon className="w-4 h-4 text-cerulean" />
                   </div>
                   <p className="text-sm font-medium text-slate-700">{item.text}</p>
                 </motion.div>
@@ -134,7 +137,7 @@ export default function DoctorApprovedPage() {
             <Button
               onClick={handleNavigateToDashboard}
               disabled={isLoading}
-              className="w-full h-14 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-base shadow-lg shadow-emerald-200 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-300 hover:-translate-y-0.5"
+              className="w-full h-14 rounded-2xl bg-gradient-to-r from-cerulean to-doccure-teal hover:shadow-cerulean/30 text-white font-bold text-base shadow-lg shadow-cerulean/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
             >
               {isLoading ? 'Memuat...' : 'Pergi ke Dashboard Doctor →'}
             </Button>
@@ -148,7 +151,7 @@ export default function DoctorApprovedPage() {
             className="text-xs text-slate-400 mt-6"
           >
             Butuh bantuan?{' '}
-            <a href="mailto:support@genting.com" className="text-emerald-500 hover:underline font-medium">
+            <a href="mailto:support@genting.com" className="text-cerulean hover:underline font-medium">
               support@genting.com
             </a>
           </motion.p>

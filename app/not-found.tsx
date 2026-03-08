@@ -84,7 +84,7 @@ export default function NotFound() {
         >
           <Button
             asChild
-            className="w-full sm:w-auto bg-doccure-yellow hover:bg-[#cbe33a] text-doccure-dark rounded-full px-8 h-14 font-black shadow-xl shadow-doccure-yellow/20 transition-all active:scale-95 flex items-center gap-2.5 text-base"
+            className="w-full sm:w-auto bg-doccure-yellow hover:bg-[#cbe33a] text-doccure-dark rounded-full px-8 h-14 font-black shadow-md transition-all active:scale-95 flex items-center gap-2.5 text-base"
           >
             <Link href="/dashboard">
               <Home className="w-5 h-5" />

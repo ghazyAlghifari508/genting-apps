@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React from 'react'
 import { BookCheck } from 'lucide-react'
@@ -10,7 +10,7 @@ interface SidebarStatsProps {
   streakDays?: number
 }
 
-export const SidebarStats = React.memo(({ readCount, totalDays, streakDays = 3 }: SidebarStatsProps) => {
+export const SidebarStats = React.memo(({ readCount, totalDays, streakDays }: SidebarStatsProps) => {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-100/80 bg-white/95 shadow-[0_10px_26px_rgba(15,23,42,0.06)] p-4">
       <div className="mb-4 flex items-center gap-3">

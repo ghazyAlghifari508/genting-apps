@@ -73,8 +73,8 @@ export default function TopStatsBar({
             </div>
 
             <div className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-doccure-teal/5 flex items-center justify-center transition-transform group-hover:scale-110">
-                <Users className="w-5 h-5 text-doccure-teal" />
+              <div className="w-10 h-10 rounded-xl bg-cerulean/10 flex items-center justify-center transition-transform group-hover:scale-110">
+                <Users className="w-5 h-5 text-cerulean" />
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">In Progress</p>
@@ -97,7 +97,7 @@ export default function TopStatsBar({
         {/* Right Section: Notifications */}
         <div className="flex items-center gap-4">
           <Button variant="ghost" className="relative w-12 h-12 rounded-2xl bg-white/50 border border-white/50 group transition-all hover:bg-white hover:shadow-md">
-            <Bell className="w-6 h-6 text-slate-600 group-hover:text-doccure-teal transition-colors" />
+            <Bell className="w-6 h-6 text-slate-600 group-hover:text-cerulean transition-colors" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-grapefruit text-[10px] font-black text-white ring-4 ring-white">
                 {unreadCount}

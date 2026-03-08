@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -9,11 +9,11 @@ import { Baby, Heart, Utensils, User, Filter, Star, Check } from 'lucide-react'
 
 interface PhaseFilterProps {
   selectedPhase: Phase | 'all'
-  onPhaseChange: (phase: Phase | 'all') => void
+  onSelect: (phase: Phase | 'all') => void
   showFavorites?: boolean
-  onFavoritesChange?: (show: boolean) => void
+  onToggleFavorites?: (show: boolean) => void
   showRead?: boolean
-  onReadChange?: (show: boolean) => void
+  onToggleRead?: (show: boolean) => void
 }
 
 const phaseIcons: Record<Phase, React.ReactNode> = {
@@ -25,11 +25,11 @@ const phaseIcons: Record<Phase, React.ReactNode> = {
 
 export function PhaseFilter({
   selectedPhase,
-  onPhaseChange,
+  onSelect,
   showFavorites = false,
-  onFavoritesChange,
+  onToggleFavorites,
   showRead = false,
-  onReadChange,
+  onToggleRead,
 }: PhaseFilterProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -76,7 +76,7 @@ export function PhaseFilter({
                   ? 'border-doccure-teal bg-doccure-teal text-white hover:bg-doccure-dark hover:text-white'
                   : 'bg-white text-slate-900 hover:bg-slate-50'
               )}
-              onClick={() => onPhaseChange('all')}
+              onClick={() => onSelect('all')}
             >
               Semua Fase
             </Button>
@@ -91,7 +91,7 @@ export function PhaseFilter({
                     ? 'border-doccure-teal bg-doccure-teal text-white hover:bg-doccure-dark hover:text-white'
                     : 'bg-white text-slate-900 hover:bg-slate-50'
                 )}
-                onClick={() => onPhaseChange(phase.id)}
+                onClick={() => onSelect(phase.id)}
               >
                 <span className={cn('shrink-0 transition-colors', selectedPhase === phase.id ? 'text-white' : 'text-slate-900')}>
                   {phaseIcons[phase.id]}
@@ -106,7 +106,7 @@ export function PhaseFilter({
           <h4 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">Filter Lain</h4>
 
           <div className="flex flex-col gap-2">
-            {onFavoritesChange && (
+            {onToggleFavorites && (
               <Button
                 variant="outline"
                 className={cn(
@@ -115,14 +115,14 @@ export function PhaseFilter({
                     ? 'border-doccure-teal bg-doccure-teal text-white hover:bg-doccure-dark hover:text-white'
                     : 'bg-white text-slate-900 hover:bg-slate-50'
                 )}
-                onClick={() => onFavoritesChange(!showFavorites)}
+                onClick={() => onToggleFavorites?.(!showFavorites)}
               >
                 <Star className={cn('h-4 w-4', showFavorites && 'fill-current')} />
                 Favorit
               </Button>
             )}
 
-            {onReadChange && (
+            {onToggleRead && (
               <Button
                 variant="outline"
                 className={cn(
@@ -131,7 +131,7 @@ export function PhaseFilter({
                     ? 'border-doccure-teal bg-doccure-teal text-white hover:bg-doccure-dark hover:text-white'
                     : 'bg-white text-slate-900 hover:bg-slate-50'
                 )}
-                onClick={() => onReadChange(!showRead)}
+                onClick={() => onToggleRead?.(!showRead)}
               >
                 <Check className="h-4 w-4" />
                 Sudah Dibaca

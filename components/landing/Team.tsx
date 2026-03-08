@@ -39,7 +39,7 @@ const socialIcons = [Facebook, Twitter, Linkedin]
 
 export default function Team() {
   return (
-    <section className="py-24 bg-white dark:bg-slate-900 transition-colors overflow-hidden" id="team">
+    <section className="py-24 bg-white  transition-colors overflow-hidden" id="team">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -48,7 +48,7 @@ export default function Team() {
             <div className="absolute -left-1 w-2.5 h-2.5 bg-doccure-yellow rounded-full" />
             Tim Kami
           </div>
-          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight transition-colors">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-slate-900  leading-tight transition-colors">
             Kenalan dengan <span className="text-doccure-teal border-b-[3px] border-doccure-teal pb-1">Profesional Kami</span>
           </h2>
         </div>
@@ -69,7 +69,7 @@ export default function Team() {
                 {/* Background colored shape with a notch/curve at the top right */}
                 <div className={`absolute inset-x-0 bottom-0 h-[85%] rounded-3xl ${person.bgColor} z-0 overflow-hidden`}>
                    {/* Notch/Tab shape at top-right - approximating with a white circle slice */}
-                   <div className="absolute top-0 right-0 w-20 h-20 bg-white dark:bg-slate-900 rounded-full -translate-y-1/2 translate-x-1/2 transition-colors" />
+                   <div className="absolute top-0 right-0 w-20 h-20 bg-white  rounded-full -translate-y-1/2 translate-x-1/2 transition-colors" />
                 </div>
 
                 {/* Person Image */}
@@ -85,7 +85,7 @@ export default function Team() {
                   {/* Social Overlay on hover */}
                   <div className="absolute bottom-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
                     {socialIcons.map((Icon, i) => (
-                      <div key={i} className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-900 dark:text-white shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                      <div key={i} className="w-8 h-8 rounded-full bg-white  flex items-center justify-center text-slate-900  shadow-md hover:bg-slate-50  transition-colors">
                         <Icon className="w-3.5 h-3.5" />
                       </div>
                     ))}
@@ -95,8 +95,8 @@ export default function Team() {
 
               {/* Name & Role */}
               <div className="text-center">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-doccure-teal transition-colors">{person.name}</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium transition-colors">{person.role}</p>
+                <h3 className="text-xl font-bold text-slate-900  mb-1 group-hover:text-doccure-teal transition-colors">{person.name}</h3>
+                <p className="text-slate-500  text-sm font-medium transition-colors">{person.role}</p>
               </div>
             </motion.div>
           ))}

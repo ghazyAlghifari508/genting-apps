@@ -12,9 +12,10 @@ import {
   Trash2,
   Loader2
 } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { fetchEducationContents, deleteEducationContent } from '@/services/adminService'
+import { deleteEducationContent } from '@/services/adminService'
+import { useAdminContext } from '@/components/providers/Providers'
 import { EducationModal } from '@/components/admin/EducationModal'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Category, Phase } from '@/types/education'
 
 import { AdminTopHeader } from '@/components/admin/AdminTopHeader'
@@ -59,8 +60,9 @@ const categoryColors: Record<string, string> = {
 }
 
 export default function EducationManagementPage() {
-  const [contents, setContents] = useState<EducationContent[]>([])
-  const [loading, setLoading] = useState(true)
+  const adminContext = useAdminContext()
+  const [contents, setContents] = useState<EducationContent[]>((adminContext?.educationContents || []) as EducationContent[])
+  const loading = adminContext?.loading
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -71,8 +73,22 @@ export default function EducationManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedContent, setSelectedContent] = useState<EducationContent | null>(null)
 
+  // Sync with context if it changes and we are not filtering/searching
+  useEffect(() => {
+    if (!searchQuery && !categoryFilter && !phaseFilter && adminContext?.educationContents) {
+      setContents(adminContext.educationContents as EducationContent[])
+    }
+  }, [adminContext?.educationContents, searchQuery, categoryFilter, phaseFilter])
+
   const loadData = useCallback(async () => {
+    // If we have data in context and it's the first load (no filters), just use it
+    if (!searchQuery && !categoryFilter && !phaseFilter && adminContext?.educationContents?.length) {
+      setContents(adminContext.educationContents as EducationContent[])
+      return
+    }
+
     try {
+      const { fetchEducationContents } = await import('@/services/adminService')
       const data = await fetchEducationContents({
         search: searchQuery || undefined,
         category: categoryFilter || undefined,
@@ -81,35 +97,30 @@ export default function EducationManagementPage() {
       setContents(data as EducationContent[])
     } catch (error) {
       console.error('Error loading education:', error)
-    } finally {
-      setLoading(false)
     }
-  }, [searchQuery, categoryFilter, phaseFilter])
+  }, [searchQuery, categoryFilter, phaseFilter, adminContext?.educationContents])
 
   useEffect(() => {
     loadData()
   }, [categoryFilter, phaseFilter, loadData])
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setLoading(true)
-      loadData()
-    }, 300)
-    return () => clearTimeout(timeout)
-  }, [searchQuery, loadData])
 
   const handleDelete = async () => {
     if (!deleteId) return
     try {
       setDeleting(true)
       await deleteEducationContent(deleteId)
-      setContents((prev) => prev.filter((c) => c.id !== deleteId))
+      await adminContext?.loadAdminData(true)
       setDeleteId(null)
     } catch (error) {
       console.error('Error deleting education:', error)
     } finally {
       setDeleting(false)
     }
+  }
+
+  const handleSuccess = async () => {
+    await adminContext?.loadAdminData(true)
+    setIsModalOpen(false)
   }
 
   const handleCreate = () => {
@@ -141,7 +152,7 @@ export default function EducationManagementPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="flex flex-col p-4 rounded-[2rem] bg-white dark:bg-slate-800 border border-slate-100/50 dark:border-white/5 shadow-sm h-[320px] transition-colors">
+            <div key={i} className="flex flex-col p-4 rounded-[2rem] bg-white  border border-slate-100/50  shadow-sm h-[320px] transition-colors">
               <Skeleton className="w-full h-40 rounded-2xl mb-4" />
               <Skeleton className="h-4 w-20 mb-3 rounded-full" />
               <Skeleton className="h-5 w-full mb-2" />
@@ -168,7 +179,7 @@ export default function EducationManagementPage() {
         </div>
         <Button 
           onClick={handleCreate}
-          className="rounded-full bg-doccure-teal hover:bg-[#0f605c] text-white px-6 h-12 font-bold shadow-lg shadow-doccure-teal/30"
+          className="rounded-full bg-doccure-teal hover:bg-[#0f605c] text-white px-6 h-12 font-bold shadow-md"
         >
           <Plus className="w-5 h-5 mr-2" />
           <span>Tambah Edukasi</span>
@@ -185,14 +196,14 @@ export default function EducationManagementPage() {
               placeholder="Cari judul artikel..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-all transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200  bg-white  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-all transition-colors"
             />
           </div>
           <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-bold text-slate-600 dark:text-slate-300 min-w-[140px] shadow-sm transition-colors"
+              className="px-4 py-2.5 rounded-xl border border-slate-200  bg-white  text-sm focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-bold text-slate-600  min-w-[140px] shadow-sm transition-colors"
             >
               <option value="">Semua Kategori</option>
               {Object.entries(categoryLabels).map(([key, label]) => (
@@ -202,7 +213,7 @@ export default function EducationManagementPage() {
             <select
               value={phaseFilter}
               onChange={(e) => setPhaseFilter(e.target.value)}
-              className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-bold text-slate-600 dark:text-slate-300 min-w-[140px] shadow-sm transition-colors"
+              className="px-4 py-2.5 rounded-xl border border-slate-200  bg-white  text-sm focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-bold text-slate-600  min-w-[140px] shadow-sm transition-colors"
             >
               <option value="">Semua Fase</option>
               {Object.entries(phaseLabels).map(([key, label]) => (
@@ -214,9 +225,9 @@ export default function EducationManagementPage() {
 
         {/* Content List */}
         {contents.length === 0 ? (
-          <Card className="p-12 rounded-2xl border-0 shadow-sm bg-white dark:bg-slate-800 text-center mt-6 transition-colors">
+          <Card className="p-12 rounded-2xl border-0 shadow-sm bg-white  text-center mt-6 transition-colors">
             <BookOpen className="w-16 h-16 text-slate-200 mx-auto mb-4" />
-            <p className="font-bold text-slate-800 text-lg">Belum ada artikel edukasi</p>
+            <p className="font-bold text-slate-800 text-lg transition-colors">Belum ada artikel edukasi</p>
             <p className="text-sm text-slate-500 font-medium mt-1">Klik &quot;Tambah Edukasi&quot; untuk mulai mengedukasi Bunda-bunda.</p>
           </Card>
         ) : (
@@ -228,7 +239,7 @@ export default function EducationManagementPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
               >
-                <Card className="p-4 rounded-2xl border-0 shadow-sm bg-white dark:bg-slate-800 hover:shadow-md transition-all group transition-colors">
+                <Card className="p-4 rounded-2xl border-0 shadow-sm bg-white  hover:shadow-md transition-all group transition-colors">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="w-14 h-14 rounded-2xl bg-doccure-teal/5 flex flex-col items-center justify-center shrink-0 border border-doccure-teal/10 group-hover:scale-105 transition-transform">
@@ -236,7 +247,7 @@ export default function EducationManagementPage() {
                         <span className="text-lg font-black text-doccure-teal -mt-1">{content.day}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-slate-900 dark:text-white truncate text-base transition-colors">{content.title}</p>
+                        <p className="font-bold text-slate-900  truncate text-base transition-colors">{content.title}</p>
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${categoryColors[content.category] || 'bg-slate-100 text-slate-600'}`}>
                             {categoryLabels[content.category] || content.category}
@@ -283,7 +294,7 @@ export default function EducationManagementPage() {
             <EducationModal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
-              onSuccess={loadData}
+              onSuccess={handleSuccess}
               initialData={selectedContent}
             />
           )}
@@ -296,10 +307,10 @@ export default function EducationManagementPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="relative bg-white dark:bg-slate-800 rounded-[2rem] p-6 w-full max-w-sm shadow-2xl transition-colors"
+              className="relative bg-white  rounded-[2rem] p-6 w-full max-w-sm shadow-2xl transition-colors"
             >
-              <h3 className="text-lg font-black text-slate-800 dark:text-white mb-2 transition-colors">Hapus Artikel?</h3>
-              <p className="text-sm border-l-2 pl-3 border-doccure-teal/50 text-slate-600 dark:text-slate-400 mb-6 font-medium leading-relaxed transition-colors">
+              <h3 className="text-lg font-black text-slate-800  mb-2 transition-colors">Hapus Artikel?</h3>
+              <p className="text-sm border-l-2 pl-3 border-doccure-teal/50 text-slate-600  mb-6 font-medium leading-relaxed transition-colors">
                 Artikel yang dihapus tidak dapat dikembalikan. Yakin ingin menghapus edukasi ini?
               </p>
               <div className="flex gap-3">

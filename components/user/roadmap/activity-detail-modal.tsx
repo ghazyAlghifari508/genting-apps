@@ -72,7 +72,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onComplete, sta
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-x-4 bottom-4 top-16 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:top-[5vh] md:bottom-[5vh] md:w-[600px] z-50 bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col"
+            className="fixed inset-x-4 bottom-4 top-16 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:top-[5vh] md:bottom-[5vh] md:w-[600px] z-50 bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className={`relative px-8 pt-8 pb-6 ${activity.category === 'exercise' ? 'bg-gradient-to-br from-cerulean/5 to-cerulean/10' : 'bg-gradient-to-br from-sea-green/5 to-sea-green/10'}`}>

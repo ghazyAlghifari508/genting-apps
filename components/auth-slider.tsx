@@ -8,7 +8,6 @@ import {
   User,
   Loader2,
   Lock,
-  Leaf,
   ArrowLeft,
   Users,
   XCircle
@@ -32,6 +31,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
   const [mounted, setMounted] = useState(false)
   const [formVisible, setFormVisible] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [needsConfirmation, setNeedsConfirmation] = useState(false)
 
   const [formData, setFormData] = useState({
     username: '',
@@ -85,7 +85,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
           throw new Error('Username wajib diisi')
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: normalizedEmail,
           password: formData.password,
           options: {
@@ -99,8 +99,13 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
         })
         if (error) throw new Error(error.message || 'Gagal mendaftar')
 
-        // Redirect to onboarding after successful registration
-        router.push('/onboarding')
+        // If 'Confirm Email' is DISABLED in Supabase, 'data.session' will exist immediately.
+        // If 'Confirm Email' is ENABLED, 'data.session' will be null.
+        if (data.session) {
+          window.location.href = '/onboarding'
+        } else {
+          setNeedsConfirmation(true)
+        }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: normalizedEmail,
@@ -110,11 +115,24 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
 
         const role = data.user?.user_metadata?.role
         if (role === 'admin') {
-          router.push('/admin/dashboard')
+          window.location.href = '/admin/dashboard'
+          return
         } else if (role === 'doctor') {
-          router.push('/doctor')
+          window.location.href = '/doctor'
+          return
+        }
+
+        // For 'user' role, check onboarding status
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', data.user?.id)
+          .single()
+
+        if (profile && !profile.onboarding_completed) {
+          window.location.href = '/onboarding'
         } else {
-          router.push('/dashboard')
+          window.location.href = '/dashboard'
         }
       }
     } catch (err) {
@@ -127,7 +145,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
   if (!mounted) return null
 
   return (
-    <div className={`min-h-[85vh] w-full max-w-5xl mx-auto overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-2xl shadow-doccure-teal/10 border border-slate-100 dark:border-white/5 transition-all duration-500 ease-out ${formVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+    <div className={`min-h-[85vh] w-full max-w-5xl mx-auto overflow-hidden rounded-[2.5rem] bg-white  shadow-xl border border-slate-100  transition-all duration-500 ease-out ${formVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
       <div className="grid grid-cols-1 md:grid-cols-[1.05fr_0.95fr] min-h-[640px]">
         <div className="p-8 md:p-12 lg:p-14 flex flex-col">
           {/* Back button inside card */}
@@ -139,18 +157,15 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
             <span>Kembali ke Beranda</span>
           </Link>
 
-          <div className="flex items-center gap-2 text-doccure-teal mb-10">
-            <div className="w-9 h-9 rounded-xl bg-doccure-yellow flex items-center justify-center">
-              <Leaf className="w-5 h-5 text-doccure-dark" />
-            </div>
-            <span className="text-lg font-extrabold tracking-tight">GENTING+</span>
+          <div className="flex items-center gap-0 text-doccure-teal mb-10 -ml-4 overflow-visible">
+            <Image src="/images/unsplash/logo-genting.png" alt="Genting Logo" width={130} height={130} className="w-[100px] h-[100px] scale-[1.3] object-contain drop-shadow-sm" />
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3">
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-900  mb-3">
               {isSignUp ? 'Buat Akun' : 'Selamat Datang Kembali'}
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base">
+            <p className="text-slate-500  text-sm md:text-base">
               {isSignUp
                 ? 'Daftarkan akun untuk memulai pendampingan 1000 HPK.'
                 : 'Masuk untuk melanjutkan pemantauan tumbuh kembang si kecil.'}
@@ -164,7 +179,31 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
             </div>
           )}
 
-          <form onSubmit={handleAuth} className="space-y-4">
+          {needsConfirmation ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center space-y-6 animate-in fade-in zoom-in duration-500">
+              <div className="mb-2 flex items-center justify-center overflow-visible">
+                <Image src="/images/unsplash/logo-genting.png" alt="Genting Logo" width={180} height={180} className="w-[160px] h-[160px] scale-[1.2] object-contain drop-shadow-lg" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-slate-900 ">Pendaftaran Berhasil!</h3>
+                <p className="text-slate-500  text-sm max-w-xs mx-auto">
+                  Silakan periksa email <span className="font-bold text-doccure-teal">{formData.email}</span> untuk memverifikasi akun Anda sebelum masuk.
+                </p>
+              </div>
+              <Button 
+                onClick={() => {
+                  setNeedsConfirmation(false)
+                  setIsSignUp(false)
+                  router.replace('/login')
+                }}
+                className="bg-doccure-teal hover:bg-doccure-teal/90 text-white font-bold px-8 py-6 rounded-xl shadow-md"
+              >
+                Kembali ke Login
+              </Button>
+            </div>
+          ) : (
+            <>
+            <form onSubmit={handleAuth} className="space-y-4">
             {isSignUp && (
               <div className="space-y-2">
                 <div className="relative group">
@@ -176,7 +215,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
                     onChange={handleInputChange}
                     placeholder="Username"
                     required
-                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white outline-none transition-all focus:border-doccure-teal focus:ring-4 focus:ring-doccure-teal/10"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200  bg-white  text-slate-900  outline-none transition-all focus:border-doccure-teal focus:ring-4 focus:ring-doccure-teal/10"
                   />
                 </div>
               </div>
@@ -194,7 +233,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
                   onChange={handleInputChange}
                   placeholder="Email"
                   required
-                  className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white outline-none transition-all focus:border-doccure-teal focus:ring-4 focus:ring-doccure-teal/10"
+                  className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200  bg-white  text-slate-900  outline-none transition-all focus:border-doccure-teal focus:ring-4 focus:ring-doccure-teal/10"
                 />
               </div>
             </div>
@@ -209,7 +248,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
                   onChange={handleInputChange}
                   placeholder="Kata Sandi"
                   required
-                  className="w-full pl-12 pr-12 py-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white outline-none transition-all focus:border-doccure-teal focus:ring-4 focus:ring-doccure-teal/10"
+                  className="w-full pl-12 pr-12 py-4 rounded-xl border border-slate-200  bg-white  text-slate-900  outline-none transition-all focus:border-doccure-teal focus:ring-4 focus:ring-doccure-teal/10"
                 />
                 <button
                   type="button"
@@ -232,7 +271,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
                     onChange={handleInputChange}
                     placeholder="Konfirmasi Kata Sandi"
                     required
-                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white outline-none transition-all focus:border-doccure-teal focus:ring-4 focus:ring-doccure-teal/10"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200  bg-white  text-slate-900  outline-none transition-all focus:border-doccure-teal focus:ring-4 focus:ring-doccure-teal/10"
                   />
                 </div>
               </div>
@@ -253,7 +292,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full py-6 rounded-xl bg-doccure-teal hover:bg-doccure-teal/90 text-white font-bold text-base shadow-lg shadow-doccure-teal/20 transition-all active:scale-[0.98] disabled:opacity-70"
+              className="w-full py-6 rounded-xl bg-doccure-teal hover:bg-doccure-teal/90 text-white font-bold text-base shadow-md transition-all active:scale-[0.98] disabled:opacity-70"
             >
               {loading ? (
                 <Loader2 className="w-6 h-6 animate-spin" />
@@ -265,10 +304,10 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
 
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-slate-100 dark:border-white/5"></span>
+              <span className="w-full border-t border-slate-100 "></span>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-slate-900 px-4 text-slate-400 font-bold tracking-widest transition-colors">Atau</span>
+              <span className="bg-white  px-4 text-slate-400 font-bold tracking-widest transition-colors">Atau</span>
             </div>
           </div>
 
@@ -291,7 +330,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
               }
             }}
             disabled={loading}
-            className="w-full py-6 rounded-xl border border-slate-200 dark:border-white/10 hover:border-doccure-teal/30 hover:bg-slate-50 dark:hover:bg-white/5 transition-all font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center gap-3 active:scale-[0.98]"
+            className="w-full py-6 rounded-xl border border-slate-200  hover:border-doccure-teal/30 hover:bg-slate-50  transition-all font-bold text-slate-700  flex items-center justify-center gap-3 active:scale-[0.98]"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -321,6 +360,8 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
               <span>Daftar sebagai Doctor</span>
             </Link>
           </div>
+          </>
+        )}
         </div>
 
         <div className="hidden md:flex relative p-10 lg:p-12 bg-doccure-dark text-white">

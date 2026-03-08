@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#7067CF",
+  themeColor: "#0F6856",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -27,7 +27,7 @@ export const viewport: Viewport = {
 
 export const dynamic = "force-dynamic";
 
-import { ThemeProvider } from "@/components/theme-provider";
+import { Providers } from "@/components/providers/Providers";
 
 export default function RootLayout({
   children,
@@ -37,17 +37,12 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning className={plusJakartaSans.variable}>
       <body className="font-sans overflow-x-hidden">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
           <main className="relative z-10 w-full min-h-screen transition-colors duration-300">
             {children}
           </main>
           <Toaster />
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -22,7 +22,7 @@ interface RecentConsultationsWidgetProps {
 
 export default function RecentConsultationsWidget({ consultations }: RecentConsultationsWidgetProps) {
   return (
-    <Card className="rounded-[2.5rem] p-8 border-white/50 bg-white/70 backdrop-blur-md shadow-xl shadow-slate-200/50">
+    <Card className="rounded-[2.5rem] p-8 border-white/50 bg-white/70 backdrop-blur-md shadow-lg">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h3 className="text-xl font-black tracking-tight text-slate-900">Riwayat Sesi</h3>
@@ -69,7 +69,7 @@ export default function RecentConsultationsWidget({ consultations }: RecentConsu
                 <Button variant="outline" size="sm" className="flex-1 rounded-xl font-bold h-10 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
                   Detail Rekamanan
                 </Button>
-                <Button size="sm" className="w-10 h-10 rounded-xl bg-white border border-slate-200 p-0 text-slate-400 hover:text-doccure-teal hover:border-doccure-teal/20 transition-all">
+                <Button size="sm" className="w-10 h-10 rounded-xl bg-white border border-slate-200 p-0 text-slate-400 hover:text-cerulean hover:border-cerulean/20 transition-all">
                   <ArrowUpRight className="w-4 h-4" />
                 </Button>
               </div>

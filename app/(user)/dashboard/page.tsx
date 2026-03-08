@@ -31,44 +31,125 @@ import {
 } from '@/constants/dashboard-data'
 
 export default function DashboardPage() {
-  const { loading, user, profile, weekNumber, trimester } = usePregnancyData()
+  const { 
+    loading, 
+    user, 
+    profile, 
+    weekNumber, 
+    trimester, 
+    roadmap, 
+    loadRoadmap,
+    education,
+    loadEducation,
+    consultations,
+    loadConsultations
+  } = usePregnancyData()
   const router = useRouter()
 
   useEffect(() => {
     if (loading) return
-    if (!user) {
+    
+    if (user) {
+      // Pre-load data in background
+      loadRoadmap()
+      loadEducation()
+      loadConsultations()
+    } else {
       router.push('/login')
+      return
     }
-  }, [loading, user, router])
 
-  if (loading) return <DashboardSkeleton />
+    // Redirect to onboarding if profile is incomplete
+    if (profile && !profile.onboarding_completed && profile.role === 'user') {
+      router.push('/onboarding')
+    }
+  }, [loading, user?.id, profile?.onboarding_completed, profile?.role, router, loadRoadmap, loadEducation, loadConsultations])
+
+  if (loading && !profile) {
+    return <DashboardSkeleton />
+  }
 
   // Derived Data
   const firstName = profile?.full_name?.split(' ')[0] || 'Bunda'
   const activeTrimester = trimester || 2
   const currentWeek = weekNumber || profile?.pregnancy_week || 24
-  const currentDay = profile?.current_day || Math.min(1000, Math.max(1, currentWeek * 7))
+  
+  // HPK (1000 Hari Pertama Kehidupan) calculation
+  // Pregnancy is roughly 280 days (40 weeks)
+  const currentDay = Math.min(1000, Math.max(1, currentWeek * 7))
   const daysTo1000 = Math.max(0, 1000 - currentDay)
   const pregnancyProgress = Math.min(100, Math.round((Math.min(currentWeek, 40) / 40) * 100))
   
   const profileFields = [
     profile?.full_name,
+    profile?.username,
+    profile?.avatar_url,
     profile?.pregnancy_week,
+    profile?.pregnancy_month,
     profile?.pregnancy_start_date,
     profile?.due_date,
     profile?.current_weight,
     profile?.height,
+    profile?.onboarding_completed
   ]
   const profileCompletion = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100)
 
-  const dailyTasks = dailyTasksByTrimester[activeTrimester] || dailyTasksByTrimester[2]
-  const reminders = remindersByTrimester[activeTrimester] || remindersByTrimester[2]
-  const relevantEducation = educationByTrimester[activeTrimester] || educationByTrimester[2]
+  // Filter roadmap activities based on current trimester AND NOT completed
+  const completedActivityIds = new Set(
+    roadmap.progress
+      .filter(p => p.status === 'completed')
+      .map(p => p.activity_id)
+  )
+
+  const trimesterActivities = roadmap.activities.filter(act => 
+    activeTrimester >= act.min_trimester && 
+    activeTrimester <= act.max_trimester
+  )
+
+  const isTrimesterCompleted = trimesterActivities.length > 0 && 
+    trimesterActivities.every(act => completedActivityIds.has(act.id))
+
+  const activeActivities = trimesterActivities.filter(act => 
+    !completedActivityIds.has(act.id)
+  )
+
+  const dailyTasks = activeActivities.length > 0
+    ? activeActivities.map(act => act.activity_name).slice(0, 3) 
+    : (isTrimesterCompleted ? [] : (dailyTasksByTrimester[activeTrimester] || dailyTasksByTrimester[2]))
+
+  // Smart Reminders from Education
+  const filteredEducation = education.content
+    .filter(edu => {
+      const eduTrimester = Math.floor((edu.month - 1) / 3) + 1
+      return eduTrimester === activeTrimester
+    })
+    .slice(0, 3)
+
+  const reminders = filteredEducation.length > 0
+    ? filteredEducation.map(edu => ({
+        title: edu.title,
+        week: Math.ceil(edu.day / 7)
+      }))
+    : educationByTrimester[activeTrimester]?.slice(0, 3).map(edu => ({
+        title: edu.title,
+        week: currentWeek // Fallback to current week for legacy constants
+      })) || []
+
+  const relevantEducation = filteredEducation.length > 0
+    ? filteredEducation.slice(0, 2)
+    : educationByTrimester[activeTrimester]?.slice(0, 2) || []
+
+  // Consultation Logic
+  const nextConsultation = consultations.data
+    .filter(c => c.status === 'scheduled')
+    .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())[0]
+
+  const isHealthMonitored = !!(profile?.current_weight && profile?.height)
 
   return (
-    <div className="bg-white dark:bg-slate-900 min-h-screen pb-20 text-slate-900 dark:text-white relative overflow-hidden transition-colors">
+    <div className="bg-white  min-h-screen pb-20 text-slate-900  relative overflow-hidden transition-colors">
       {/* Background Motifs */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05]" 
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03] [0.05]" 
            style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #0f172a 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
       <DashboardHero firstName={firstName} />
@@ -92,12 +173,13 @@ export default function DashboardPage() {
             <DailyTasksCard 
               currentWeek={currentWeek}
               dailyTasks={dailyTasks}
+              isCompleted={isTrimesterCompleted}
             />
 
             {/* Educational Highlights */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {relevantEducation.slice(0, 2).map((edu, idx) => (
-                <div key={edu.title} className="relative overflow-hidden rounded-[28px] group aspect-[4/3] sm:aspect-auto sm:h-64 shadow-lg lg:border-2 border-transparent hover:border-doccure-teal transition-all">
+              {relevantEducation.map((edu, idx) => (
+                <div key={edu.title} className="relative overflow-hidden rounded-3xl group aspect-[4/3] sm:aspect-auto sm:h-64 shadow-lg lg:border-2 border-transparent hover:border-doccure-teal transition-all">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
                   <Image
                     src={idx === 0 ? "/images/unsplash/img_4ba8ae38.png" : "/images/unsplash/img_58db8649.png"}
@@ -108,7 +190,10 @@ export default function DashboardPage() {
                   <div className="absolute inset-x-0 bottom-0 p-6 z-20">
                     <span className="bg-doccure-teal text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full mb-3 inline-block">Materi Baru</span>
                     <h4 className="text-xl font-bold text-white leading-tight mt-1">{edu.title}</h4>
-                    <Link href={edu.href} className="mt-4 inline-flex items-center text-white/80 text-sm font-bold hover:text-white transition-colors group/link">
+                    <Link 
+                      href={'day' in edu ? `/education/${edu.day}` : (edu as any).href} 
+                      className="mt-4 inline-flex items-center text-white/80 text-sm font-bold hover:text-white transition-colors group/link"
+                    >
                       Pelajari Sekarang <ArrowRight className="ml-2 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
                     </Link>
                   </div>
@@ -123,6 +208,7 @@ export default function DashboardPage() {
               fullName={profile?.full_name || ''}
               firstName={firstName}
               profileCompletion={profileCompletion}
+              avatarUrl={profile?.avatar_url}
             />
 
             <RemindersCard 
@@ -130,7 +216,10 @@ export default function DashboardPage() {
               currentWeek={currentWeek}
             />
 
-            <ConsultationCard />
+            <ConsultationCard 
+              nextSchedule={nextConsultation?.scheduled_at}
+              isHealthMonitored={isHealthMonitored}
+            />
 
             <NutritionCard 
               hasWeight={!!profile?.current_weight}

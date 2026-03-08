@@ -32,7 +32,7 @@ export default function FaqContact() {
   const [open, setOpen] = useState<number | null>(1)
 
   return (
-    <section className="py-24 bg-white dark:bg-slate-900 transition-colors overflow-hidden" id="faq">
+    <section className="py-24 bg-white  transition-colors overflow-hidden" id="faq">
       {/* Marquee Strip at top - will be placed higher in page.tsx, skipping here */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-16 items-start">
@@ -43,12 +43,12 @@ export default function FaqContact() {
               <div className="absolute -left-1 w-2.5 h-2.5 bg-doccure-yellow rounded-full" />
               FAQ
             </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-tight mb-4 transition-colors">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900  leading-tight mb-4 transition-colors">
               Blog & Artikel Edukasi
               <span className="text-doccure-teal"> dari Genting</span>
             </h2>
 
-            <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800 transition-colors">
+            <div className="flex flex-col divide-y divide-slate-100  transition-colors">
               {faqs.map((faq, idx) => (
                 <motion.div
                   key={idx}
@@ -59,10 +59,10 @@ export default function FaqContact() {
                     className="w-full flex items-center justify-between text-left gap-4"
                     onClick={() => setOpen(open === idx ? null : idx)}
                   >
-                    <span className={`text-[15px] font-semibold transition-colors ${open === idx ? 'text-doccure-teal' : 'text-slate-800 dark:text-slate-200'}`}>
+                    <span className={`text-[15px] font-semibold transition-colors ${open === idx ? 'text-doccure-teal' : 'text-slate-800 '}`}>
                       {faq.q}
                     </span>
-                    <div className={`flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center border transition-colors ${open === idx ? 'border-doccure-teal/40 text-doccure-teal bg-doccure-teal/5' : 'border-slate-200 dark:border-slate-700 text-slate-400'}`}>
+                    <div className={`flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center border transition-colors ${open === idx ? 'border-doccure-teal/40 text-doccure-teal bg-doccure-teal/5' : 'border-slate-200  text-slate-400'}`}>
                       {open === idx ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                     </div>
                   </button>
@@ -70,7 +70,7 @@ export default function FaqContact() {
                     <motion.p
                       initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-3 text-slate-600 dark:text-slate-400 text-[14px] leading-relaxed pr-10"
+                      className="mt-3 text-slate-600  text-[14px] leading-relaxed pr-10"
                     >
                       {faq.a}
                     </motion.p>
@@ -82,8 +82,8 @@ export default function FaqContact() {
 
           {/* Right: Contact Form Card */}
           <div className="w-full lg:w-1/2">
-            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 p-6 md:p-8 lg:p-10 sticky top-28 transition-colors">
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-6 md:mb-8 transition-colors">
+            <div className="bg-white  rounded-3xl shadow-2xl border border-slate-100  p-6 md:p-8 lg:p-10 sticky top-28 transition-colors">
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900  mb-6 md:mb-8 transition-colors">
                 Butuh bantuan? Kami siap membantu.
               </h3>
 
@@ -91,32 +91,32 @@ export default function FaqContact() {
                 <input
                   type="text"
                   placeholder="Nama"
-                  className="w-full bg-transparent border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-[15px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-doccure-teal transition-colors"
+                  className="w-full bg-transparent border border-slate-200  rounded-xl px-4 py-3 text-[15px] text-slate-900  placeholder:text-slate-400 focus:outline-none focus:border-doccure-teal transition-colors"
                 />
                 <input
                   type="email"
                   placeholder="Email"
-                  className="w-full bg-transparent border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-[15px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-doccure-teal transition-colors"
+                  className="w-full bg-transparent border border-slate-200  rounded-xl px-4 py-3 text-[15px] text-slate-900  placeholder:text-slate-400 focus:outline-none focus:border-doccure-teal transition-colors"
                 />
                 <select
                   defaultValue=""
-                  className="w-full bg-transparent border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-[15px] text-slate-400 focus:outline-none focus:border-doccure-teal transition-colors appearance-none"
+                  className="w-full bg-transparent border border-slate-200  rounded-xl px-4 py-3 text-[15px] text-slate-400 focus:outline-none focus:border-doccure-teal transition-colors appearance-none"
                 >
-                  <option value="" disabled className="dark:bg-slate-800">Kategori Layanan</option>
-                  <option className="dark:bg-slate-800">Konsultasi Dokter</option>
-                  <option className="dark:bg-slate-800">Pantau Tumbuh Kembang</option>
-                  <option className="dark:bg-slate-800">Vision AI</option>
-                  <option className="dark:bg-slate-800">Edukasi Kesehatan</option>
+                  <option value="" disabled className="">Kategori Layanan</option>
+                  <option className="">Konsultasi Dokter</option>
+                  <option className="">Pantau Tumbuh Kembang</option>
+                  <option className="">Vision AI</option>
+                  <option className="">Edukasi Kesehatan</option>
                 </select>
                 <input
                   type="date"
                   placeholder="dd/mm/yyyy"
-                  className="w-full bg-transparent border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-[15px] text-slate-700 dark:text-slate-300 focus:outline-none focus:border-doccure-teal transition-colors"
+                  className="w-full bg-transparent border border-slate-200  rounded-xl px-4 py-3 text-[15px] text-slate-700  focus:outline-none focus:border-doccure-teal transition-colors"
                 />
                 <input
                   type="time"
                   defaultValue="01:00"
-                  className="w-full bg-transparent border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-[15px] text-slate-700 dark:text-slate-300 focus:outline-none focus:border-doccure-teal transition-colors"
+                  className="w-full bg-transparent border border-slate-200  rounded-xl px-4 py-3 text-[15px] text-slate-700  focus:outline-none focus:border-doccure-teal transition-colors"
                 />
                 <Button className="w-full bg-doccure-dark hover:bg-doccure-teal text-white rounded-xl h-13 text-[15px] font-bold mt-2 transition-colors shadow-md">
                   Buat Janji

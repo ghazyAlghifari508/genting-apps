@@ -19,7 +19,7 @@ const mockAppointments = [
     type: 'Telekonsultasi',
     status: 'In Progress',
     avatar: 'RW',
-    color: 'bg-blue-100 text-blue-600',
+    color: 'bg-cerulean/10 text-cerulean',
     condition: 'Pemeriksaan Rutin Kehamilan (Trimester 2)'
   },
   {
@@ -73,7 +73,7 @@ export const AppointmentTimeline = () => {
             onClick={() => setView('timeline')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
               view === 'timeline' 
-                ? 'bg-white text-doccure-teal shadow-sm' 
+                ? 'bg-white text-cerulean shadow-sm' 
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -83,7 +83,7 @@ export const AppointmentTimeline = () => {
             onClick={() => setView('list')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
               view === 'list' 
-                ? 'bg-white text-doccure-teal shadow-sm' 
+                ? 'bg-white text-cerulean shadow-sm' 
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -95,18 +95,18 @@ export const AppointmentTimeline = () => {
       <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-6 before:w-0.5 before:bg-slate-100">
         {mockAppointments.map((apt) => (
           <div key={apt.id} className="relative flex gap-6 group">
-            <div className="absolute left-6 ml-[-5px] mt-1.5 w-2.5 h-2.5 rounded-full border-2 border-white ring-2 ring-doccure-teal/20 bg-doccure-teal z-10" />
+            <div className="absolute left-6 ml-[-5px] mt-1.5 w-2.5 h-2.5 rounded-full border-2 border-white ring-2 ring-cerulean/20 bg-cerulean z-10" />
             
             <div className={`
               flex-1 p-4 rounded-xl border border-slate-100 bg-slate-50/50 
-              hover:bg-white hover:shadow-md hover:border-doccure-teal/20 
+              hover:bg-white hover:shadow-md hover:border-cerulean/20 
               transition-all duration-300 cursor-pointer group-hover:pl-5
             `}>
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
                   <Badge variant={apt.status === 'In Progress' ? 'default' : 'secondary'} 
                     className={`
-                      ${apt.status === 'In Progress' ? 'bg-doccure-teal hover:bg-doccure-teal/90' : 'bg-slate-200 text-slate-600'}
+                      ${apt.status === 'In Progress' ? 'bg-cerulean hover:bg-cerulean/90' : 'bg-slate-200 text-slate-600'}
                     `}
                   >
                     {apt.time}
@@ -133,7 +133,7 @@ export const AppointmentTimeline = () => {
               </div>
 
               {apt.status === 'In Progress' && (
-                <Button size="sm" className="w-full bg-doccure-teal hover:bg-doccure-teal/90 text-white h-8 text-xs font-semibold rounded-lg">
+                <Button size="sm" className="w-full bg-cerulean hover:bg-cerulean/90 text-white h-8 text-xs font-semibold rounded-lg">
                   Lanjutkan Konsultasi
                 </Button>
               )}
@@ -143,7 +143,7 @@ export const AppointmentTimeline = () => {
       </div>
       
       <div className="mt-6 text-center">
-        <Button variant="ghost" className="text-doccure-teal text-sm hover:bg-blue-50">
+        <Button variant="ghost" className="text-cerulean text-sm hover:bg-sea-green/10">
           Lihat Semua Jadwal
         </Button>
       </div>

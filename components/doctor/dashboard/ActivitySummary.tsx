@@ -28,8 +28,8 @@ export const ActivitySummary = React.memo(function ActivitySummary({
       value: todayPatients,
       subtitle: "Total konsultasi",
       icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
+      color: "text-cerulean",
+      bgColor: "bg-cerulean/10",
       trend: null
     },
     {
@@ -71,7 +71,7 @@ export const ActivitySummary = React.memo(function ActivitySummary({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Activity Stats */}
       <div className="lg:col-span-2">
-        <Card className="rounded-[2.5rem] border-white/50 bg-white/70 backdrop-blur-md shadow-xl shadow-slate-200/50 p-6">
+        <Card className="rounded-[2.5rem] border-white/50 bg-white/70 backdrop-blur-md shadow-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-black text-slate-900">Ringkasan Aktivitas</h3>
@@ -121,10 +121,10 @@ export const ActivitySummary = React.memo(function ActivitySummary({
       {/* Upcoming & Messages */}
       <div className="space-y-6">
         {/* Upcoming Appointments */}
-        <Card className="rounded-[2.5rem] border-white/50 bg-white/70 backdrop-blur-md shadow-xl shadow-slate-200/50 p-6">
+        <Card className="rounded-[2.5rem] border-white/50 bg-white/70 backdrop-blur-md shadow-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-black text-slate-900">Janji Temu</h3>
-            <div className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded-full">
+            <div className="bg-cerulean/10 text-cerulean text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">
               {upcomingAppointments}
             </div>
           </div>
@@ -144,7 +144,7 @@ export const ActivitySummary = React.memo(function ActivitySummary({
         </Card>
 
         {/* Unread Messages */}
-        <Card className="rounded-[2.5rem] border-white/50 bg-white/70 backdrop-blur-md shadow-xl shadow-slate-200/50 p-6">
+        <Card className="rounded-[2.5rem] border-white/50 bg-white/70 backdrop-blur-md shadow-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-black text-slate-900">Pesan Baru</h3>
             <div className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full">

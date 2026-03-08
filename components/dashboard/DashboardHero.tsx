@@ -43,7 +43,7 @@ export function DashboardHero({ firstName }: DashboardHeroProps) {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
               <Link href="/roadmap" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto bg-doccure-yellow hover:bg-[#cbe33a] text-doccure-dark rounded-2xl px-10 h-14 font-black text-base shadow-[0_20px_40px_rgba(221,242,71,0.3)] transition-all active:scale-95 group">
+                <Button className="w-full sm:w-auto bg-doccure-yellow hover:bg-[#cbe33a] text-doccure-dark rounded-2xl px-10 h-14 font-black text-base shadow-md transition-all active:scale-95 group">
                   Mulai Aktivitas
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>

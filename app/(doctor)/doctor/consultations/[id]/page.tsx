@@ -14,8 +14,7 @@ import { ConsultationTimer } from '@/components/shared/ConsultationTimer'
 import { MessageBubble } from '@/components/shared/MessageBubble'
 import { useConsultationMessages } from '@/hooks/useConsultationMessages'
 import { useToast } from '@/components/ui/use-toast'
-import { ArrowLeft, Send, Play, CheckCircle, User, Clock, Menu } from 'lucide-react'
-import { DoctorTopHeader } from '@/components/doctor/layout/DoctorTopHeader'
+import { ArrowLeft, Send, User, Clock } from 'lucide-react'
 import Link from 'next/link'
 import type { Consultation } from '@/types/consultation'
 
@@ -70,7 +69,6 @@ export default function DoctorConsultationRoomPage() {
           filter: `id=eq.${id}`
         },
         (payload) => {
-          console.log('[DoctorConsultationRoom] Status change received:', payload)
           if (payload.new) {
             setConsultation(payload.new as Consultation)
             if (payload.new.notes) setNotes(payload.new.notes)
@@ -85,7 +83,6 @@ export default function DoctorConsultationRoomPage() {
   }, [id])
 
   useEffect(() => {
-    console.log('[DoctorChat] Messages updated, scrolling to bottom. Count:', messages.length)
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     if (messages.length > 0 && messages[messages.length - 1].sender_type === 'user') {
       markMessagesAsRead(id, 'doctor').catch(console.error)
@@ -97,9 +94,7 @@ export default function DoctorConsultationRoomPage() {
     const msg = input.trim()
     setInput('')
     try {
-      console.log('[DoctorChat] Sending message:', msg)
       const newMsg = await sendConsultationMessage(id, userId, msg, 'doctor')
-      console.log('[DoctorChat] Message sent successfully:', newMsg)
       if (newMsg) addMessage(newMsg)
     } catch (error) {
       console.error('[DoctorChat] Error sending message:', error)
@@ -173,18 +168,18 @@ export default function DoctorConsultationRoomPage() {
   return (
     <div className="h-screen flex flex-col bg-slate-50">
       {/* Header */}
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 px-4 py-3 flex items-center justify-between shrink-0 transition-colors z-20">
+      <div className="bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between shrink-0 transition-colors z-20">
         <div className="flex items-center gap-2 md:gap-3">
-          <Link href="/doctor/consultations" className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors block lg:hidden">
+          <Link href="/doctor/consultations" className="p-2 hover:bg-slate-50 rounded-full transition-colors block lg:hidden">
             <ArrowLeft size={18} className="text-slate-500" />
           </Link>
           <div className="hidden lg:block">
-            <Link href="/doctor/consultations" className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors block">
+            <Link href="/doctor/consultations" className="p-2 hover:bg-slate-50 rounded-full transition-colors block">
               <ArrowLeft size={20} className="text-slate-400" />
             </Link>
           </div>
           <div>
-            <p className="text-base md:text-xl font-bold text-slate-900 dark:text-white line-clamp-1">{consultation.user?.full_name || 'Pasien'}</p>
+            <p className="text-base md:text-xl font-bold text-slate-900 line-clamp-1">{consultation.user?.full_name || 'Pasien'}</p>
             <div className="scale-75 origin-left">
               <ConsultationStatusBadge status={consultation.status} />
             </div>
@@ -195,7 +190,7 @@ export default function DoctorConsultationRoomPage() {
             <ConsultationTimer startedAt={consultation.started_at} endedAt={consultation.ended_at} />
           </div>
           {consultation.status === 'scheduled' && (
-            <Button onClick={startConsultation} size="sm" className="rounded-xl bg-green-600 hover:bg-green-700 font-bold px-3">
+            <Button onClick={startConsultation} size="sm" className="rounded-xl bg-cerulean hover:bg-cerulean/90 font-bold px-3">
                Mulai
             </Button>
           )}
@@ -212,8 +207,8 @@ export default function DoctorConsultationRoomPage() {
         <div className="hidden lg:flex flex-col w-72 bg-white border-r border-slate-100 p-4 overflow-y-auto">
           <Card className="p-4 rounded-2xl border-0 shadow-sm bg-slate-50 mb-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <User className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 rounded-full bg-cerulean/10 flex items-center justify-center">
+                <User className="w-5 h-5 text-cerulean" />
               </div>
               <div>
                 <p className="font-bold text-sm">{consultation.user?.full_name || 'Pasien'}</p>
@@ -265,16 +260,16 @@ export default function DoctorConsultationRoomPage() {
 
           {/* Input */}
           {consultation.status === 'ongoing' && (
-            <div className="p-3 md:p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 transition-colors">
+            <div className="p-3 md:p-4 bg-white border-t border-slate-100 transition-colors">
               <div className="flex gap-2 max-w-4xl mx-auto">
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
                   placeholder="Ketik pesan..."
-                  className="rounded-2xl flex-1 bg-slate-50 dark:bg-slate-800 border-none h-11 md:h-12 px-4 shadow-inner"
+                  className="rounded-2xl flex-1 bg-slate-50 border-none h-11 md:h-12 px-4 shadow-inner"
                 />
-                <Button onClick={handleSend} disabled={!input.trim()} className="rounded-2xl bg-blue-600 hover:bg-blue-700 w-11 h-11 md:w-12 md:h-12 p-0 flex items-center justify-center shrink-0">
+                <Button onClick={handleSend} disabled={!input.trim()} className="rounded-2xl bg-cerulean hover:bg-cerulean/90 w-11 h-11 md:w-12 md:h-12 p-0 flex items-center justify-center shrink-0">
                   <Send size={18} />
                 </Button>
               </div>

@@ -1,9 +1,10 @@
-import { Leaf, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import Image from "next/image";
 
 const Footer = () => {
   return (
     <footer className="relative overflow-hidden w-full m-0 p-0 transition-colors">
-      <div className="w-full bg-white dark:bg-slate-900 leading-none flex -mb-[1px] transition-colors">
+      <div className="w-full bg-white  leading-none flex -mb-[1px] transition-colors">
         <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full block" preserveAspectRatio="none">
           <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#0F6856" />
         </svg>
@@ -13,13 +14,8 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-9 h-9 rounded-xl bg-[#E8C84A] flex items-center justify-center">
-                  <Leaf className="w-5 h-5 text-[#0F6856]" />
-                </div>
-                <span className="font-extrabold text-xl text-white">
-                  G<span className="text-[#E8C84A]">e</span>nting
-                </span>
+              <div className="flex items-center gap-0 mb-4 -ml-4 overflow-visible">
+                <Image src="/images/unsplash/logo-genting.png" alt="Genting Logo" width={120} height={120} className="w-[110px] h-[110px] scale-[1.3] object-contain" />
               </div>
               <p className="text-sm text-white/50 mb-6 max-w-xs leading-relaxed">
                 Generasi Anti-Stunting - Platform digital untuk memantau tumbuh kembang anak dan mencegah stunting di Indonesia.

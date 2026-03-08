@@ -73,21 +73,21 @@ export const PHASES: PhaseDetail[] = [
   {
     id: 'bayi_0_3',
     label: 'Bayi 0-3 Bulan',
-    color: 'bg-blue-500',
+    color: 'bg-cerulean',
     dayRange: [271, 365],
     description: 'Fase bayi baru lahir, fokus pada ASI eksklusif dan bonding.'
   },
   {
     id: 'bayi_3_12',
     label: 'Bayi 3-12 Bulan',
-    color: 'bg-green-500',
+    color: 'bg-doccure-dark',
     dayRange: [366, 635],
     description: 'Fase mulai MPASI dan perkembangan motorik halus.'
   },
   {
     id: 'anak_1_2',
     label: 'Anak 1-2 Tahun',
-    color: 'bg-purple-500',
+    color: 'bg-grapefruit',
     dayRange: [636, 1000],
     description: 'Fase pertumbuhan cepat dan eksplorasi dunia luar.'
   }
@@ -120,13 +120,15 @@ export function getPhaseInfo(phase: Phase): PhaseInfo {
 export function calculateCurrentDay(
     status: UserStatus,
     pregnancy_month?: number,
-    child_birth_date?: Date
+    child_birth_date?: Date,
+    pregnancy_week?: number
 ): number {
     let current_day: number;
     
     if (status === 'hamil' && pregnancy_month !== undefined) {
-        // Each month approximately 30 days
-        current_day = pregnancy_month * 30;
+        // Precise formula: (Bulan * 4 + (Minggu - 1)) * 7 + 1
+        const week = pregnancy_week || 1;
+        current_day = (pregnancy_month * 4 + (week - 1)) * 7 + 1;
     } else if (status === 'punya_anak' && child_birth_date !== undefined) {
         // Days since birth
         const diffTime = Math.abs(new Date().getTime() - new Date(child_birth_date).getTime());

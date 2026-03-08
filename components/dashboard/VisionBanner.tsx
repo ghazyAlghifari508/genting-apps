@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import NextImage from 'next/image'
 import { Camera, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function VisionBanner() {
   return (
     <section className="mx-auto mt-12 max-w-[1400px] px-4 sm:px-6 lg:px-8">
-      <div className="bg-doccure-teal rounded-[42px] overflow-hidden relative min-h-[400px] flex items-center group/hero">
+      <div className="bg-doccure-teal rounded-3xl overflow-hidden relative min-h-[400px] flex items-center group/hero">
         <div className="absolute inset-0 bg-[url('/images/unsplash/img_be51761e.png')] bg-cover bg-center group-hover/hero:scale-105 transition-transform duration-[4s]" />
         <div className="absolute inset-0 bg-gradient-to-r from-doccure-dark via-doccure-teal/80 to-transparent" />
         <div className="absolute inset-0 bg-black/30" />
@@ -30,24 +31,23 @@ export function VisionBanner() {
           <div className="absolute inset-0 flex items-center justify-center p-12 translate-x-12">
             <div className="relative w-full max-w-[420px] aspect-square">
               {/* Viewfinder Frame */}
-              <div className="absolute top-0 left-0 w-16 h-16 border-t-[3px] border-l-[3px] border-white/60 rounded-tl-3xl shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
-              <div className="absolute top-0 right-0 w-16 h-16 border-t-[3px] border-r-[3px] border-white/60 rounded-tr-3xl shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
-              <div className="absolute bottom-0 left-0 w-16 h-16 border-b-[3px] border-l-[3px] border-white/60 rounded-bl-3xl shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
-              <div className="absolute bottom-0 right-0 w-16 h-16 border-b-[3px] border-r-[3px] border-white/60 rounded-br-3xl shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
+              <div className="absolute top-0 left-0 w-16 h-16 border-t-[3px] border-l-[3px] border-white/60 rounded-tl-3xl" />
+              <div className="absolute top-0 right-0 w-16 h-16 border-t-[3px] border-r-[3px] border-white/60 rounded-tr-3xl" />
+              <div className="absolute bottom-0 left-0 w-16 h-16 border-b-[3px] border-l-[3px] border-white/60 rounded-bl-3xl" />
+              <div className="absolute bottom-0 right-0 w-16 h-16 border-b-[3px] border-r-[3px] border-white/60 rounded-br-3xl" />
 
-              <div className="absolute inset-2 overflow-hidden rounded-xl">
+              <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
                 <motion.div
-                  animate={{ top: ['0%', '98%', '0%'] }}
-                  transition={{ duration: 4, ease: 'easeInOut', repeat: Infinity }}
-                  className="absolute inset-x-0 w-full"
+                  animate={{ top: ['0%', '100%', '0%'] }}
+                  transition={{ duration: 3, ease: 'linear', repeat: Infinity }}
+                  className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-doccure-yellow to-transparent z-20 shadow-[0_0_15px_rgba(251,191,36,0.8)]"
                 >
-                  <div className="h-32 w-full bg-gradient-to-b from-transparent via-doccure-yellow/20 to-transparent absolute top-1/2 -translate-y-1/2 z-10" />
-                  <div className="h-[2px] w-full bg-doccure-yellow shadow-[0_0_20px_rgba(221,242,71,1)] absolute top-1/2 -translate-y-1/2 z-20" />
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-20 bg-gradient-to-b from-transparent via-doccure-yellow/10 to-transparent blur-sm" />
                 </motion.div>
               </div>
 
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-16 h-16 flex items-center justify-center relative shadow-[0_0_30px_rgba(255,255,255,0.1)] rounded-full">
+                <div className="w-16 h-16 flex items-center justify-center relative rounded-full">
                   <div className="w-1.5 h-1.5 bg-doccure-yellow rounded-full animate-ping" />
                   <div className="w-1.5 h-1.5 bg-doccure-yellow rounded-full absolute" />
                   <div className="absolute top-1/2 -left-6 w-4 h-[0.5px] bg-white/70" />

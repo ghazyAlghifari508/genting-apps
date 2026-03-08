@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react';
 import { Search, X } from 'lucide-react';
@@ -24,7 +24,7 @@ export function EducationSearchBar({
   return (
     <div className={cn("relative group", className)}>
       <div className={cn(
-        "relative flex items-center overflow-hidden rounded-[20px] border bg-white/70 backdrop-blur-md transition-all duration-300",
+        "relative flex items-center overflow-hidden rounded-xl border bg-white/70 backdrop-blur-md transition-all duration-300",
         isFocused ? "border-doccure-teal shadow-[0_20px_48px_-12px_rgba(15,23,42,0.12)] ring-4 ring-doccure-teal/10" : "border-slate-200"
       )}>
         <Search className={cn(

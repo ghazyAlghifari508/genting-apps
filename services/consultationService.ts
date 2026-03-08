@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase-server'
 import { assertAuthenticated, handleServiceError } from '@/lib/service-helper'
 import { Consultation, ConsultationConversation, ConsultationMessage, DoctorEarningRecord } from '@/types/consultation'
 
-export async function getUpcomingConsultations(doctorId: string, limit: number = 5) {
+export async function getUpcomingConsultations(doctorId: string, limit: number = 5): Promise<Consultation[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('consultations')
@@ -15,10 +15,10 @@ export async function getUpcomingConsultations(doctorId: string, limit: number =
     .limit(limit)
 
   if (error) handleServiceError(error, 'Gagal mengambil jadwal konsultasi mendatang')
-  return data
+  return (data || []) as Consultation[]
 }
 
-export async function getRecentConsultations(doctorId: string, limit: number = 5) {
+export async function getRecentConsultations(doctorId: string, limit: number = 5): Promise<Consultation[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('consultations')
@@ -29,10 +29,10 @@ export async function getRecentConsultations(doctorId: string, limit: number = 5
     .limit(limit)
 
   if (error) handleServiceError(error, 'Gagal mengambil riwayat konsultasi')
-  return data
+  return (data || []) as Consultation[]
 }
 
-export async function getActiveConsultation(doctorId: string) {
+export async function getActiveConsultation(doctorId: string): Promise<Consultation | null> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('consultations')
@@ -42,7 +42,7 @@ export async function getActiveConsultation(doctorId: string) {
     .single()
 
   if (error && error.code !== 'PGRST116') throw error
-  return data || null
+  return (data || null) as Consultation | null
 }
 
 export async function getTodayEarnings(doctorId: string) {
@@ -113,7 +113,7 @@ export async function getConsultationById(id: string): Promise<Consultation | nu
   return data as Consultation
 }
 
-export async function updateConsultation(id: string, updates: Partial<Consultation>) {
+export async function updateConsultation(id: string, updates: Partial<Consultation>): Promise<Consultation> {
   const user = await assertAuthenticated()
   const supabase = await createClient()
   
@@ -142,7 +142,7 @@ export async function updateConsultation(id: string, updates: Partial<Consultati
     .single()
 
   if (error) handleServiceError(error, 'Gagal memperbarui data konsultasi')
-  return data
+  return data as Consultation
 }
 
 export async function getConsultationMessages(consultationId: string): Promise<ConsultationMessage[]> {
@@ -195,7 +195,7 @@ export async function markMessagesAsRead(consultationId: string, readerType: 'us
 }
 
 
-export async function createConsultation(payload: Partial<Consultation>) {
+export async function createConsultation(payload: Partial<Consultation>): Promise<Consultation> {
   await assertAuthenticated()
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -205,10 +205,10 @@ export async function createConsultation(payload: Partial<Consultation>) {
     .single()
 
   if (error) handleServiceError(error, 'Gagal membuat data konsultasi')
-  return data
+  return data as Consultation
 }
 
-export async function getUserConsultations(userId: string) {
+export async function getUserConsultations(userId: string): Promise<Consultation[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('consultations')
@@ -223,10 +223,10 @@ export async function getUserConsultations(userId: string) {
     .order('scheduled_at', { ascending: false })
 
   if (error) handleServiceError(error, 'Gagal mengambil daftar konsultasi user')
-  return data
+  return (data || []) as Consultation[]
 }
 
-export async function getDoctorConsultations(doctorId: string, filters?: { status?: string, order?: 'asc' | 'desc' }) {
+export async function getDoctorConsultations(doctorId: string, filters?: { status?: string, order?: 'asc' | 'desc' }): Promise<Consultation[]> {
   const supabase = await createClient()
   let query = supabase
     .from('consultations')
@@ -238,18 +238,15 @@ export async function getDoctorConsultations(doctorId: string, filters?: { statu
 
   if (filters?.status && filters.status !== 'all') {
     query = query.eq('status', filters.status)
-  } else {
-    // If 'all', we might want to ensure we don't filter out anything important, 
-    // but the default query already includes everything for that doctor.
   }
 
   const { data, error } = await query.order('scheduled_at', { ascending: filters?.order === 'asc' ? true : false })
 
   if (error) throw error
-  return data
+  return (data || []) as Consultation[]
 }
 
-export async function submitConsultationRating(id: string, rating: number, review?: string) {
+export async function submitConsultationRating(id: string, rating: number, review?: string): Promise<Consultation> {
   const user = await assertAuthenticated()
   const supabase = await createClient()
   
@@ -275,7 +272,7 @@ export async function submitConsultationRating(id: string, rating: number, revie
     .single()
 
   if (error) handleServiceError(error, 'Gagal memberikan rating')
-  return data
+  return data as Consultation
 }
 
 /**

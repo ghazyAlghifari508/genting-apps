@@ -1,19 +1,16 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-
-@custom-variant dark (&:is(.dark *));
 
 :root {
-  /* GENTING Color Palette 3 */
-  --genting-cerulean: 34 124 157;
-  --genting-sea-green: 23 195 178;
-  --genting-grapefruit: 217 119 6;
-  --genting-apricot: 255 203 119;
+  /* GENTING Brand Palette — hijau & kuning */
+  --genting-cerulean: 15 104 86;      /* #0F6856 — brand green (primary) */
+  --genting-sea-green: 221 242 71;    /* #DDF247 — brand lime / bright yellow */
+  --genting-grapefruit: 232 200 74;   /* #E8C84A — brand golden yellow */
+  --genting-apricot: 255 245 180;
   --genting-floral: 255 255 255;
-  /* Doccure Palette */
-  --doccure-dark: 14 94 88;
-  --doccure-teal: 19 122 116;
-  --doccure-yellow: 221 242 71;
+  /* Doccure Palette — admin/doctor dashboard */
+  --doccure-dark: 14 94 88;           /* #0E5E58 — deep green */
+  --doccure-teal: 19 122 116;         /* #137A74 — medium green */
+  --doccure-yellow: 221 242 71;       /* #DDF247 — lime yellow */
   --doccure-light-yellow: 246 252 190;
   --doccure-gray: 246 247 249;
 
@@ -40,8 +37,8 @@
   --accent: 241 245 249;
   --accent-foreground: 15 23 42;
   
-  /* Success - Sea Green */
-  --success: var(--genting-sea-green);
+  /* Success - Doccure Teal (green-family) */
+  --success: var(--doccure-teal);
   --success-foreground: 255 255 255;
   
   /* Warning - Apricot */
@@ -128,20 +125,14 @@
   --color-doccure-light-yellow: rgb(var(--doccure-light-yellow));
   --color-doccure-gray: rgb(var(--doccure-gray));
 
-  /* Medical / Doctor Dashboard Palette */
-  --color-medical-blue: #0066CC;
-  --color-medical-teal: #00A699;
-  --color-medical-green: #4CAF50;
-  --color-medical-red: #E53935;
-  --color-medical-orange: #FF9800;
-  --color-medical-gray: #757575;
-  --color-medical-light-gray: #F5F5F5;
-
   
   /* Backward compatibility aliases */
   --color-lavender: rgb(var(--genting-cerulean));
   --color-green: rgb(var(--genting-sea-green));
   --color-salmon: rgb(var(--genting-grapefruit));
+  
+  /* Font Family - Fixes Next/Font overriding */
+  --font-sans: var(--font-plus-jakarta-sans), system-ui, -apple-system, sans-serif;
   
   --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 3px);
@@ -181,14 +172,6 @@ body {
   box-shadow: 
     0 8px 32px rgba(112, 103, 207, 0.1),
     inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-}
-
-.dark .glass-card {
-  background: rgba(25, 25, 40, 0.8);
-  border: 1px solid rgba(112, 103, 207, 0.2);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 /* Gradient backgrounds */

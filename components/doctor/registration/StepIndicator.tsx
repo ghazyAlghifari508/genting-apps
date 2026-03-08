@@ -15,8 +15,8 @@ export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
               step <= currentStep
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none'
-                : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                ? 'bg-cerulean text-white shadow-lg shadow-cerulean/20 '
+                : 'bg-slate-200  text-slate-500 '
             }`}
           >
             {step}
@@ -24,7 +24,7 @@ export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
           {step < totalSteps && (
             <div
               className={`w-12 h-1 mx-2 rounded transition-colors ${
-                step < currentStep ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'
+                step < currentStep ? 'bg-cerulean' : 'bg-slate-200 '
               }`}
             />
           )}

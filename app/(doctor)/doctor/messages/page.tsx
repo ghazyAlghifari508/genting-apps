@@ -89,7 +89,7 @@ export default function DoctorMessagesPage() {
                 onClick={() => router.push(`/doctor/consultations/${con.consultation_id}`)}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                  <div className="w-12 h-12 rounded-full bg-cerulean/10 text-cerulean flex items-center justify-center font-bold">
                     {getInitials(con.user?.full_name)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -114,8 +114,8 @@ export default function DoctorMessagesPage() {
       </main>
 
       {/* Decorative blobs */}
-      <div className="fixed top-0 right-0 -z-10 w-[500px] h-[500px] bg-doccure-teal/5 rounded-full blur-[120px] -mr-64 -mt-32" />
-      <div className="fixed bottom-0 left-0 -z-10 w-[500px] h-[500px] bg-doccure-teal/5 rounded-full blur-[120px] -ml-64 -mb-32" />
+      <div className="fixed top-0 right-0 -z-10 w-[500px] h-[500px] bg-cerulean/5 rounded-full blur-[120px] -mr-64 -mt-32" />
+      <div className="fixed bottom-0 left-0 -z-10 w-[500px] h-[500px] bg-cerulean/5 rounded-full blur-[120px] -ml-64 -mb-32" />
     </div>
   )
 }

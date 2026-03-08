@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { Flame, Trophy } from 'lucide-react'
 
@@ -12,7 +12,7 @@ export function RoadmapProgress({ completedCount, totalCount, streakDays }: Road
   const progressPercentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 
   return (
-    <div className="rounded-[26px] border border-slate-200/80 bg-white/95 p-4 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
+    <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-4 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
       <div className="flex items-center justify-between">
         <h3 className="inline-flex items-center gap-2 text-base font-bold text-slate-900">
           <Trophy className="h-4 w-4 text-amber-500" />

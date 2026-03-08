@@ -1,365 +1,265 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import {
-  CalendarRange,
   CheckCircle2,
-  Circle,
-  PlayCircle,
-  Route,
-  TrendingUp,
-  Compass
+  Clock,
+  LucideIcon,
+  Zap,
 } from 'lucide-react'
-import { getRoadmapActivities, getUserRoadmapProgress, upsertRoadmapProgress } from '@/services/roadmapService'
-import { getUserProfile } from '@/services/userService'
-import Link from 'next/link'
-import { useAuth } from '@/hooks/useAuth'
+import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/components/ui/use-toast'
+import { usePregnancyData } from '@/hooks/usePregnancyData'
+import { upsertRoadmapProgress } from '@/services/roadmapService'
 import dynamic from 'next/dynamic'
 
 // Components - Lazy Loaded
-const RoadmapHeader = dynamic(() => import('@/components/user/roadmap/RoadmapHeader').then(mod => mod.RoadmapHeader), {
-  loading: () => <Skeleton className="h-[200px] w-full rounded-xl" />
-})
-const CategoryFilters = dynamic(() => import('@/components/user/roadmap/CategoryFilters').then(mod => mod.CategoryFilters), {
-  loading: () => <Skeleton className="h-[80px] w-full rounded-xl mt-4" />
-})
-const RoadmapBoard = dynamic(() => import('@/components/user/roadmap/RoadmapBoard').then(mod => mod.RoadmapBoard), {
-  loading: () => <Skeleton className="h-[600px] w-full rounded-xl mt-8" />
-})
-const RoadmapSidebar = dynamic(() => import('@/components/user/roadmap/RoadmapSidebar').then(mod => mod.RoadmapSidebar), {
-  loading: () => <Skeleton className="h-[400px] w-full rounded-xl mt-8" />
-})
-
-import { ActivityDetailModal } from '@/components/user/roadmap/activity-detail-modal'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ActivityCard } from '@/components/user/roadmap/ActivityCard'
-import { RoadmapProgress } from '@/components/user/roadmap/roadmap-progress'
-
-interface Activity {
-  id: string
-  activity_name: string
-  category: string
-  description: string
-  benefits: string[]
-  difficulty_level: number
-  min_trimester: number
-  max_trimester: number
-  duration_minutes: number
-  frequency_per_week: number
-  instructions: string[]
-  tips: string | null
-  warnings: string | null
-  icon_name: string
-}
-
-interface UserProgress {
-  id: string
-  user_id: string
-  activity_id: string
-  status: 'not_started' | 'in_progress' | 'completed'
-  completion_date: string | null
-  streak_count: number
-}
-
-const difficultyConfig: Record<number, { label: string; color: string; bg: string }> = {
-  1: { label: 'Ringan', color: 'text-sea-green', bg: 'bg-sea-green/10 border-sea-green/20' },
-  2: { label: 'Menengah', color: 'text-amber-600', bg: 'bg-apricot/10 border-apricot/20' },
-  3: { label: 'Tinggi', color: 'text-grapefruit', bg: 'bg-grapefruit/10 border-grapefruit/20' },
-  4: { label: 'Tinggi', color: 'text-grapefruit', bg: 'bg-grapefruit/10 border-grapefruit/20' },
-  5: { label: 'Tinggi', color: 'text-grapefruit', bg: 'bg-grapefruit/10 border-grapefruit/20' },
-}
-
-const defaultDifficulty = { label: 'Umum', color: 'text-slate-600', bg: 'bg-slate-50 border-slate-100' }
-
-const statusConfig = {
-  not_started: { label: 'Belum Mulai', icon: Circle, color: 'text-slate-500', bg: 'bg-slate-100' },
-  in_progress: { label: 'Berjalan', icon: PlayCircle, color: 'text-cerulean', bg: 'bg-cerulean/10' },
-  completed: { label: 'Selesai', icon: CheckCircle2, color: 'text-sea-green', bg: 'bg-sea-green/10' },
-}
+const RoadmapHeader = dynamic(() => import('@/components/user/roadmap/RoadmapHeader').then(mod => mod.RoadmapHeader))
+const CategoryFilters = dynamic(() => import('@/components/user/roadmap/CategoryFilters').then(mod => mod.CategoryFilters))
+const RoadmapBoard = dynamic(() => import('@/components/user/roadmap/RoadmapBoard').then(mod => mod.RoadmapBoard))
+const RoadmapSidebar = dynamic(() => import('@/components/user/roadmap/RoadmapSidebar'))
+const ActivityDetailModal = dynamic(() => import('@/components/user/roadmap/activity-detail-modal').then(mod => ({ default: mod.ActivityDetailModal })))
 
 type CategoryFilter = 'all' | 'exercise' | 'nutrition'
 
-const categoryTabs: Array<{ key: CategoryFilter; label: string }> = [
-  { key: 'all', label: 'Semua' },
-  { key: 'exercise', label: 'Olahraga' },
-  { key: 'nutrition', label: 'Nutrisi' },
-]
+const statusConfig: Record<string, { label: string; icon: LucideIcon; color: string; bg: string }> = {
+  not_started: { label: 'Belum Mulai', icon: Clock, color: 'text-slate-400', bg: 'bg-slate-100' },
+  in_progress: { label: 'Sedang Jalan', icon: Zap, color: 'text-sky-500', bg: 'bg-sky-50' },
+  completed: { label: 'Selesai!', icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+}
 
+const difficultyConfig: Record<number, { label: string; color: string; bg: string }> = {
+  1: { label: 'Mudah', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  2: { label: 'Sedang', color: 'text-amber-600', bg: 'bg-amber-50' },
+  3: { label: 'Tantangan', color: 'text-rose-600', bg: 'bg-rose-50' },
+}
+
+const defaultDifficulty = { label: 'Sedang', color: 'text-slate-600', bg: 'bg-slate-50' }
 
 export default function RoadmapPage() {
-  const [activities, setActivities] = useState<Activity[]>([])
-  const [progress, setProgress] = useState<UserProgress[]>([])
-  const [loading, setLoading] = useState(true)
+  const { profile, loading: dataLoading, roadmap, loadRoadmap, saveDailyJournal } = usePregnancyData()
   const [category, setCategory] = useState<CategoryFilter>('all')
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isCompleting, setIsCompleting] = useState(false)
-  const [trimester, setTrimester] = useState(1)
-  const [pregnancyWeek, setPregnancyWeek] = useState(0)
+  const [currentTrimester, setCurrentTrimester] = useState(profile?.trimester || 1)
   const [journal, setJournal] = useState('')
   const [journalSaved, setJournalSaved] = useState<string | null>(null)
-
-  const { user, loading: authLoading } = useAuth()
-
-  const todayLabel = useMemo(() => {
-    return new Date().toLocaleDateString('id-ID', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    })
-  }, [])
+  const [selectedActivity, setSelectedActivity] = useState<any>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
-    if (authLoading) return
-    if (!user) return
-
-    const loadData = async () => {
-      try {
-        const profile = await getUserProfile(user.id)
-
-        let week = profile?.pregnancy_week || 0
-        if (!week && profile?.due_date) {
-          const dueDate = new Date(profile.due_date)
-          const today = new Date()
-          const diffMs = dueDate.getTime() - today.getTime()
-          const weeksLeft = Math.ceil(diffMs / (7 * 24 * 60 * 60 * 1000))
-          week = Math.max(1, 40 - weeksLeft)
-        }
-        setPregnancyWeek(week)
-
-        let tri = 1
-        if (week > 26) tri = 3
-        else if (week > 12) tri = 2
-        setTrimester(tri)
-
-        const [acts, prog] = await Promise.all([
-          getRoadmapActivities(),
-          getUserRoadmapProgress(user.id),
-        ])
-
-        setActivities(acts || [])
-        setProgress(prog || [])
-      } catch (error) {
-        console.error('Error loading roadmap data:', error)
-      } finally {
-        setLoading(false)
+    if (profile) {
+      if (!currentTrimester && profile.trimester) {
+        const trm = profile.trimester;
+        setTimeout(() => setCurrentTrimester(trm), 0)
+      }
+      const key = `roadmap_journal_${profile.id}_${new Date().toISOString().slice(0, 10)}`
+      const savedJournal = localStorage.getItem(key)
+      if (savedJournal) {
+        setTimeout(() => setJournal(savedJournal), 0)
       }
     }
+  }, [profile, currentTrimester])
 
-    loadData()
-  }, [user, authLoading])
-
-  const eligibleActivities = useMemo(() => {
-    return activities.filter(a => a.min_trimester <= trimester && a.max_trimester >= trimester)
-  }, [activities, trimester])
-
-  const categoryCounts = useMemo(() => {
-    const counts: Record<CategoryFilter, number> = {
-      all: eligibleActivities.length,
-      exercise: 0,
-      nutrition: 0,
+  useEffect(() => {
+    // Rely on Provider's internal guard to prevent loops
+    // We add roadmap.activities.length back to the dependency array to satisfy React's 
+    // hook size check during dev, but our logic ignores it.
+    if (profile && !dataLoading && !roadmap.loading) {
+      loadRoadmap()
     }
+  }, [profile, dataLoading, roadmap.activities.length, roadmap.loading, loadRoadmap])
 
-    for (const activity of eligibleActivities) {
-      if (activity.category === 'exercise') counts.exercise += 1
-      if (activity.category === 'nutrition') counts.nutrition += 1
-    }
-
-    return counts
-  }, [eligibleActivities])
+  const activities = roadmap.activities
+  const progress = roadmap.progress
+  const pregnancyWeek = profile?.pregnancy_week || 0
 
   const filteredActivities = useMemo(() => {
-    if (category === 'all') return eligibleActivities
-    return eligibleActivities.filter(a => a.category === category)
-  }, [eligibleActivities, category])
+    return activities.filter((act) => {
+      const matchTrimester = act.min_trimester <= currentTrimester && act.max_trimester >= currentTrimester
+      const matchCategory = category === 'all' || act.category === category
+      return matchTrimester && matchCategory
+    })
+  }, [activities, currentTrimester, category])
 
-  const getActivityStatus = (activityId: string): 'not_started' | 'in_progress' | 'completed' => {
-    const p = progress.find(p => p.activity_id === activityId)
-    return (p?.status as 'not_started' | 'in_progress' | 'completed') || 'not_started'
-  }
-
-  const completedCount = progress.filter(p => p.status === 'completed').length
-
-  const streakDays = useMemo(() => {
-    const maxStreak = progress.reduce((max, p) => Math.max(max, p.streak_count || 0), 0)
-    return maxStreak
+  const getActivityStatus = useCallback((id: string) => {
+    const actProgress = progress.find((p) => p.activity_id === id)
+    return actProgress?.status || 'not_started'
   }, [progress])
 
   const handleComplete = async (activityId: string) => {
-    setIsCompleting(true)
+    if (!profile) return
     try {
-      if (!user) return
+      const existingProg = progress.find((p) => p.activity_id === activityId)
+      if (existingProg?.status === 'completed') return
 
-      const existingProgress = progress.find(p => p.activity_id === activityId)
-      if (existingProgress?.status === 'completed') return
-
-      const updated = await upsertRoadmapProgress({
-        user_id: user.id,
+      await upsertRoadmapProgress({
+        user_id: profile.id,
         activity_id: activityId,
         status: 'completed',
         completion_date: new Date().toISOString(),
-        streak_count: (existingProgress?.streak_count || 0) + 1,
+        streak_count: (existingProg?.streak_count || 0) + 1,
         last_completed_date: new Date().toISOString().split('T')[0],
       })
-
-      if (existingProgress) {
-        setProgress(prev => prev.map(p => p.id === existingProgress.id ? updated : p))
-      } else {
-        setProgress(prev => [...prev, updated])
-      }
+      
+      await loadRoadmap(true)
+      toast({ title: 'Aktivitas selesai!', description: 'Bagus Bunda, teruskan kebiasaan sehat ini ya.' })
     } catch (error) {
-      console.error('Error updating progress:', error)
-    } finally {
-      setIsCompleting(false)
+      toast({ title: 'Oops!', description: 'Gagal memperbarui aktivitas.', variant: 'destructive' })
     }
   }
 
-  const handleSaveJournal = () => {
-    if (!user) return
-    const key = `roadmap_journal_${user.id}_${new Date().toISOString().slice(0, 10)}`
-    localStorage.setItem(key, journal)
-    setJournalSaved(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))
+  const handleSaveJournal = async () => {
+    if (!profile) return
+    try {
+      await saveDailyJournal({
+        user_id: profile.id,
+        content: journal,
+        date: new Date().toISOString().split('T')[0]
+      })
+      setJournalSaved(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))
+      toast({ title: 'Jurnal disimpan', description: 'Catatan Bunda telah aman tersimpan di database.' })
+    } catch (error) {
+      // Fallback to localStorage if service/table fails
+      const key = `roadmap_journal_${profile.id}_${new Date().toISOString().slice(0, 10)}`
+      localStorage.setItem(key, journal)
+      setJournalSaved(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))
+      toast({ title: 'Jurnal disimpan (Lokal)', description: 'Tersimpan lokal karena kendala koneksi.' })
+    }
   }
 
-  const timelineWeeks = useMemo(() => {
-    const center = Math.max(1, pregnancyWeek || 24)
-    return [center - 2, center - 1, center, center + 1, center + 2].map(w => Math.max(1, w))
-  }, [pregnancyWeek])
-
-  const statusTone = (status: 'not_started' | 'in_progress' | 'completed') => {
-    if (status === 'completed') return 'bg-emerald-500'
-    if (status === 'in_progress') return 'bg-sky-500'
-    return 'bg-slate-300 dark:bg-slate-700'
-  }
-
-  if (loading) {
+  if ((dataLoading || roadmap.loading) && roadmap.activities.length === 0) {
     return (
-      <div className="pb-32 text-slate-900 relative">
-        <section className="w-full bg-white border-b border-slate-100 relative overflow-hidden">
-          <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:px-8 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Skeleton className="h-6 w-32 rounded-lg" />
-                  <Skeleton className="h-6 w-32 rounded-lg" />
-                </div>
-                <Skeleton className="h-12 w-96 rounded-xl" />
-                <Skeleton className="h-6 w-64 rounded-xl" />
-              </div>
+      <div className="bg-slate-50 min-h-screen pb-24 pt-0 transition-colors">
+        {/* Header Skeleton */}
+        <div className="w-full bg-white border-b border-slate-100 p-10">
+          <div className="mx-auto max-w-[1400px] flex flex-col md:flex-row justify-between gap-6">
+            <div className="space-y-4">
+              <Skeleton className="h-4 w-32 rounded-lg" />
+              <Skeleton className="h-12 w-96 rounded-2xl" />
+              <Skeleton className="h-6 w-64 rounded-xl" />
+            </div>
+            <div className="flex gap-4 items-center">
+              <Skeleton className="h-20 w-48 rounded-3xl" />
+              <Skeleton className="h-20 w-48 rounded-3xl" />
             </div>
           </div>
-        </section>
+        </div>
 
-        <section className="mx-auto max-w-[1400px] px-4 -mt-10 sm:px-6 lg:px-8 relative z-30">
-          <div className="rounded-[32px] border border-slate-200/50 bg-white/80 p-5 shadow-[0_24px_54px_rgba(15,23,42,0.1)] backdrop-blur-xl">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex gap-3">
-                <Skeleton className="h-10 w-24 rounded-2xl" />
-                <Skeleton className="h-10 w-24 rounded-2xl" />
-                <Skeleton className="h-10 w-24 rounded-2xl" />
-              </div>
-              <Skeleton className="h-12 w-48 rounded-2xl" />
+        {/* Filters Skeleton */}
+        <div className="mt-8 mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-3xl border border-slate-100 p-4 flex justify-between items-center">
+            <div className="flex gap-4">
+               <Skeleton className="h-10 w-24 rounded-xl" />
+               <Skeleton className="h-10 w-24 rounded-xl" />
+               <Skeleton className="h-10 w-24 rounded-xl" />
             </div>
+            <Skeleton className="h-10 w-48 rounded-xl" />
           </div>
-        </section>
+        </div>
 
-        <section className="mx-auto max-w-[1400px] px-4 mt-12 sm:px-6 lg:px-8">
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
-            <div className="rounded-[40px] border border-slate-100 bg-white p-6 shadow-sm md:p-10">
-              <div className="flex justify-between items-end border-b border-slate-100 pb-8">
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-32 rounded-full" />
-                  <Skeleton className="h-10 w-64 rounded-xl" />
-                </div>
-                <Skeleton className="h-12 w-48 rounded-2xl" />
+        <div className="mt-12 mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded-3xl border border-slate-100 p-8 space-y-6">
+              <div className="flex justify-between items-end mb-8">
+                <Skeleton className="h-8 w-64 rounded-xl" />
+                <Skeleton className="h-10 w-32 rounded-xl" />
               </div>
-              <div className="mt-16 space-y-16">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="grid grid-cols-1 md:grid-cols-[1fr_80px_1fr] items-center gap-8">
-                    <div className={i % 2 === 0 ? 'invisible' : ''}>
-                      <Skeleton className="h-48 w-full rounded-[32px]" />
-                    </div>
-                    <div className="flex justify-center">
-                      <Skeleton className="h-14 w-14 rounded-3xl" />
-                    </div>
-                    <div className={i % 2 !== 0 ? 'invisible' : ''}>
-                      <Skeleton className="h-48 w-full rounded-[32px]" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {[1, 2, 3].map(i => (
+                <Skeleton key={i} className="h-32 w-full rounded-3xl" />
+              ))}
             </div>
-            <aside className="space-y-8">
-              <Skeleton className="h-96 w-full rounded-[36px]" />
-              <Skeleton className="h-80 w-full rounded-[36px]" />
-              <Skeleton className="h-48 w-full rounded-[36px]" />
-            </aside>
           </div>
-        </section>
+          <div className="lg:col-span-1 space-y-6">
+            <Skeleton className="h-96 w-full rounded-[36px]" />
+            <Skeleton className="h-64 w-full rounded-[36px]" />
+          </div>
+        </div>
       </div>
     )
   }
 
+  const todayLabel = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })
+  const currentTrimesterActivities = activities.filter(a => 
+    a.min_trimester <= currentTrimester && a.max_trimester >= currentTrimester
+  )
+  const categoryCounts = {
+    all: currentTrimesterActivities.length,
+    exercise: currentTrimesterActivities.filter(a => a.category === 'exercise').length,
+    nutrition: currentTrimesterActivities.filter(a => a.category === 'nutrition').length
+  }
+  
+  // Create a 5-week sliding window centered on the current pregnancy week
+  const startWeek = Math.max(1, pregnancyWeek - 2)
+  const timelineWeeks = Array.from({length: 5}, (_, i) => startWeek + i).filter(w => w <= 40)
+  
+  const completedCount = progress.filter(p => p.status === 'completed' && currentTrimesterActivities.some(a => a.id === p.activity_id)).length
+  const maxStreak = progress.length > 0 ? Math.max(...progress.map(p => p.streak_count || 0)) : 0
+
   return (
-    <div className="pb-32 text-slate-900 relative">
-      {/* Abstract Background Accents */}
-      <div className="absolute top-[20%] -left-32 w-96 h-96 bg-doccure-teal/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[20%] -right-32 w-80 h-80 bg-doccure-yellow/5 rounded-full blur-[100px] pointer-events-none" />
-
-      <RoadmapHeader todayLabel={todayLabel} />
-
-      <CategoryFilters
+    <div className="min-h-screen bg-slate-50 pb-24 pt-0">
+      <RoadmapHeader 
+        pregnancyWeek={pregnancyWeek} 
+        trimester={currentTrimester} 
+        progress={progress} 
+        activities={currentTrimesterActivities}
+      />
+      
+      <CategoryFilters 
         category={category}
         setCategory={setCategory}
-        categoryTabs={categoryTabs}
+        categoryTabs={[
+          { key: 'all', label: 'Semua' },
+          { key: 'exercise', label: 'Olahraga' },
+          { key: 'nutrition', label: 'Nutrisi' }
+        ]}
         categoryCounts={categoryCounts}
-        trimester={trimester}
-        setTrimester={setTrimester}
+        trimester={currentTrimester}
+        setTrimester={setCurrentTrimester}
       />
 
-      <section className="mx-auto max-w-[1400px] px-4 mt-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
-            <RoadmapBoard
+      <div className="mt-12 mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="lg:col-span-3">
+           <RoadmapBoard 
               filteredActivities={filteredActivities}
               todayLabel={todayLabel}
               getActivityStatus={getActivityStatus}
               statusConfig={statusConfig}
               difficultyConfig={difficultyConfig}
               defaultDifficulty={defaultDifficulty}
-              trimester={trimester}
+              trimester={currentTrimester}
               setSelectedActivity={setSelectedActivity}
               setIsModalOpen={setIsModalOpen}
               handleComplete={handleComplete}
-            />
-
-          <RoadmapSidebar
-            pregnancyWeek={pregnancyWeek}
-            timelineWeeks={timelineWeeks}
-            journal={journal}
-            setJournal={setJournal}
-            handleSaveJournal={handleSaveJournal}
-            journalSaved={journalSaved}
-            completedCount={completedCount}
-            activitiesCount={activities.length}
-            streakDays={streakDays}
-            trimester={trimester}
-          />
+           />
         </div>
-      </section>
+        
+        <div className="lg:col-span-1">
+           <RoadmapSidebar 
+             pregnancyWeek={pregnancyWeek}
+             timelineWeeks={timelineWeeks}
+             journal={journal}
+             setJournal={setJournal}
+             handleSaveJournal={handleSaveJournal}
+             journalSaved={journalSaved}
+             completedCount={completedCount}
+             activitiesCount={currentTrimesterActivities.length}
+             streakDays={maxStreak}
+             trimester={currentTrimester}
+           />
+        </div>
+      </div>
 
       <ActivityDetailModal
         activity={selectedActivity}
         isOpen={isModalOpen}
-        onClose={() => {
+        onClose={() => setIsModalOpen(false)}
+        onComplete={async (id) => {
+          await handleComplete(id)
           setIsModalOpen(false)
-          setSelectedActivity(null)
         }}
-        onComplete={handleComplete}
         status={selectedActivity ? getActivityStatus(selectedActivity.id) : 'not_started'}
-        isLoading={isCompleting}
+        isLoading={roadmap.loading}
       />
     </div>
   )
 }
+

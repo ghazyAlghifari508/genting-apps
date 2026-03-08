@@ -19,6 +19,12 @@ export function useCheckDoctorApproval() {
     if (authLoading || !user) return
     if (checkedUserId === user.id) return
 
+    // Session Guard: If user dismissed approval msg in this session, don't check/redirect
+    if (typeof window !== 'undefined' && sessionStorage.getItem('dismissed_approval_msg')) {
+      setCheckedUserId(user.id)
+      return
+    }
+
     let mounted = true
 
     const checkFlag = async () => {
@@ -37,7 +43,6 @@ export function useCheckDoctorApproval() {
             return
           }
 
-          console.log('[useCheckDoctorApproval] Flag is TRUE, redirecting...')
           router.replace('/onboarding/doctor-approved')
         } else {
           if (mounted) setCheckedUserId(user.id)

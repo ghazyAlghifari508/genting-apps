@@ -12,20 +12,10 @@ export default function DoctorDashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { loading: protecting } = useProtectedRoute(['doctor'])
-  const { checking } = useCheckDoctorApproval()
-
-  if (protecting || checking) {
-    return (
-      <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-8 space-y-6">
-        <Skeleton className="w-20 h-20 rounded-full" />
-        <div className="space-y-2 flex flex-col items-center">
-          <Skeleton className="h-4 w-32 rounded-full" />
-          <Skeleton className="h-3 w-48 rounded-full opacity-50" />
-        </div>
-      </div>
-    )
-  }
+  // Neutral Shell: Always render the structure.
+  // Protecting and checking are still called to trigger side-effects (redirects).
+  useProtectedRoute(['doctor'])
+  useCheckDoctorApproval()
 
   return (
     <div className="min-h-screen bg-[#F5F7FA]">

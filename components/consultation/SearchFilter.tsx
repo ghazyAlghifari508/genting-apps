@@ -20,11 +20,11 @@ export function SearchFilter({
 }: SearchFilterProps) {
   return (
     <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start flex justify-center">
-      <div className="rounded-[32px] sm:rounded-[36px] border border-slate-100 dark:border-white/5 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-sm relative overflow-hidden w-full max-w-2xl mx-auto transition-colors duration-300">
+      <div className="rounded-3xl border border-slate-100  bg-white  p-5 sm:p-6 shadow-sm relative overflow-hidden w-full max-w-2xl mx-auto transition-colors duration-300">
         <div className="absolute -top-4 -right-4 w-16 h-16 bg-slate-50 rounded-full blur-xl" />
         
         <div className="relative z-10">
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Cari Dokter</h2>
+          <h2 className="text-2xl font-black text-slate-900  tracking-tight">Cari Dokter</h2>
 
           <div className="relative mt-6 group">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-doccure-teal transition-colors" />
@@ -32,7 +32,7 @@ export function SearchFilter({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Nama spesialis..."
-              className="h-12 rounded-[20px] border-slate-200 dark:border-white/10 pl-11 bg-white/60 dark:bg-white/5 backdrop-blur-md focus:bg-white dark:focus:bg-slate-800 dark:text-white focus:ring-4 focus:ring-doccure-teal/10 shadow-sm transition-all duration-300"
+              className="h-12 rounded-[20px] border-slate-200  pl-11 bg-white/60  backdrop-blur-md focus:bg-white   focus:ring-4 focus:ring-doccure-teal/10 shadow-sm transition-all duration-300"
             />
           </div>
 
@@ -48,8 +48,8 @@ export function SearchFilter({
                   onClick={() => setCategory(cat)}
                   className={`rounded-xl border px-4 py-2.5 text-xs font-bold transition-all duration-300 ${
                     category === cat
-                      ? 'border-doccure-teal bg-doccure-teal text-white shadow-lg shadow-doccure-teal/15 animate-in zoom-in-95'
-                      : 'border-slate-100 dark:border-white/10 bg-white dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20'
+                      ? 'border-doccure-teal bg-doccure-teal text-white shadow-md animate-in zoom-in-95'
+                      : 'border-slate-100  bg-white  text-slate-500  hover:border-slate-300 '
                   }`}
                 >
                   {cat}

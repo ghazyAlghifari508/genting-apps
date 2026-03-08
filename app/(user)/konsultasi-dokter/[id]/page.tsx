@@ -72,7 +72,6 @@ export default function UserConsultationRoomPage() {
           filter: `id=eq.${id}`
         },
         (payload) => {
-          console.log('[UserConsultationRoom] Status change received:', payload)
           if (payload.new) {
             setConsultation(payload.new as Consultation)
           }
@@ -86,7 +85,6 @@ export default function UserConsultationRoomPage() {
   }, [id])
 
   useEffect(() => {
-    console.log('[UserChat] Messages updated, scrolling. Count:', messages.length)
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     if (messages.length > 0 && messages[messages.length - 1].sender_type === 'doctor') {
       markMessagesAsRead(id, 'user').catch(console.error)
@@ -98,9 +96,7 @@ export default function UserConsultationRoomPage() {
     const message = input.trim()
     setInput('')
     try {
-      console.log('[UserChat] Sending message:', message)
       const newMsg = await sendConsultationMessage(id, userId, message, 'user')
-      console.log('[UserChat] Message sent successfully:', newMsg)
       if (newMsg) addMessage(newMsg)
     } catch (error) {
       console.error('[UserChat] Error sending message:', error)

@@ -3,7 +3,16 @@
 import { createClient } from '@/lib/supabase-server'
 import { getCurrentUser } from '@/lib/auth-server'
 import { EducationContent } from '@/types/education'
-import { CreateRoadmapActivityInput, UpdateRoadmapActivityInput } from '@/types/roadmap'
+import { RoadmapActivity, CreateRoadmapActivityInput, UpdateRoadmapActivityInput } from '@/types/roadmap'
+import { DoctorRegistration, Doctor } from '@/types/doctor'
+
+export interface DashboardStats {
+  totalUsers: number
+  totalDoctors: number
+  pendingVerifications: number
+  totalEducation: number
+  totalRoadmap: number
+}
 
 async function checkAdmin() {
   const user = await getCurrentUser()
@@ -22,7 +31,7 @@ async function checkAdmin() {
 }
 
 // ==================== DASHBOARD ====================
-export async function fetchDashboardStats() {
+export async function fetchDashboardStats(): Promise<DashboardStats> {
   await checkAdmin()
   const supabase = await createClient()
 
@@ -50,7 +59,7 @@ export async function fetchDashboardStats() {
 }
 
 // ==================== DOCTOR APPROVALS ====================
-export async function fetchPendingDoctors() {
+export async function fetchPendingDoctors(): Promise<DoctorRegistration[]> {
   await checkAdmin()
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -60,7 +69,7 @@ export async function fetchPendingDoctors() {
     .order('submitted_at', { ascending: true })
 
   if (error) throw error
-  return data
+  return (data || []) as DoctorRegistration[]
 }
 
 export async function approveDoctor(registrationId: string) {
@@ -137,8 +146,7 @@ export async function approveDoctor(registrationId: string) {
     console.error('[AdminService] Gagal sinkronisasi metadata role:', err)
   }
 
-  // 6. Email notification (Skipped - Email service is currently a stub)
-  console.log(`[AdminService] Doctor approved: ${registration.full_name} (${registration.user_id})`)
+  // Approval persisted in DB — no additional logging needed
 }
 
 export async function rejectDoctor(registrationId: string, userId: string, reason: string) {
@@ -227,7 +235,7 @@ export async function fetchEducationContents(filters?: {
   search?: string
   category?: string
   phase?: string
-}) {
+}): Promise<EducationContent[]> {
   await checkAdmin()
   const supabase = await createClient()
   let query = supabase.from('education_contents').select('*')
@@ -238,7 +246,7 @@ export async function fetchEducationContents(filters?: {
 
   const { data, error } = await query.order('day', { ascending: true })
   if (error) throw error
-  return data
+  return (data || []) as EducationContent[]
 }
 
 export async function fetchEducationById(id: string) {
@@ -261,7 +269,7 @@ export async function deleteEducationContent(id: string) {
 export async function fetchRoadmapActivities(filters?: {
   search?: string
   category?: string
-}) {
+}): Promise<RoadmapActivity[]> {
   await checkAdmin()
   const supabase = await createClient()
   let query = supabase.from('roadmap_activities').select('*')
@@ -271,7 +279,7 @@ export async function fetchRoadmapActivities(filters?: {
 
   const { data, error } = await query.order('created_at', { ascending: false })
   if (error) throw error
-  return data
+  return (data || []) as RoadmapActivity[]
 }
 
 export async function fetchRoadmapById(id: string) {

@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import type { Consultation } from '@/types/consultation'
-import { ArrowLeft, CheckCircle, Stethoscope, Calendar, Clock, CreditCard, ShieldCheck, Loader2, ChevronRight } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Stethoscope, Calendar, Clock, ShieldCheck, ChevronRight } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from '@/components/ui/use-toast'
 import { Card } from '@/components/ui/card'
+import { usePregnancyData } from '@/hooks/usePregnancyData'
 
 declare global {
   interface Window {
@@ -35,6 +36,7 @@ declare global {
 export default function PaymentPage() {
   const { consultationId } = useParams()
   const router = useRouter()
+  const { loadConsultations } = usePregnancyData()
   const [consultation, setConsultation] = useState<Consultation | null>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
@@ -87,16 +89,16 @@ export default function PaymentPage() {
       window.snap.pay(data.token, {
         onSuccess: async (result) => {
           const res = result as { order_id?: string }
-          console.log('Payment success:', result)
           setShowSuccess(true)
           await updateConsultation(consultation.id, { 
             status: 'scheduled',
             payment_status: 'confirmed',
             payment_reference: res.order_id || data.order_id
           })
+          // Sync global context for consultation history
+          loadConsultations(true)
         },
-        onPending: (result) => {
-          console.log('Payment pending:', result)
+        onPending: () => {
           toast({
             title: 'Pembayaran Tertunda',
             description: 'Silakan selesaikan pembayaran sesuai instruksi di popup Midtrans.',
@@ -111,7 +113,7 @@ export default function PaymentPage() {
           })
         },
         onClose: () => {
-          console.log('Payment popup closed')
+          // User closed the popup without completing
         }
       })
     } catch (error: unknown) {
@@ -167,11 +169,9 @@ export default function PaymentPage() {
         data-client-key={clientKey}
         strategy="afterInteractive"
         onLoad={() => {
-          console.log('[PaymentPage] Midtrans Snap loaded')
           setIsSnapLoaded(true)
         }}
         onError={() => {
-          console.error('[PaymentPage] Midtrans Snap failed to load')
           toast({
             title: 'Gagal Memuat Pembayaran',
             description: 'Sistem pembayaran gagal dimuat. Silakan muat ulang halaman.',
@@ -289,7 +289,7 @@ export default function PaymentPage() {
                 <Button 
                   onClick={handlePayment}
                   disabled={processing || !isSnapLoaded}
-                  className="h-12 w-full rounded-xl bg-doccure-teal text-sm font-bold text-white hover:bg-doccure-dark shadow-md shadow-doccure-teal/15 transition-all active:scale-[0.98] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-12 w-full rounded-xl bg-doccure-teal text-sm font-bold text-white hover:bg-doccure-dark shadow-md transition-all active:scale-[0.98] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {processing ? (
                     'Memproses...'

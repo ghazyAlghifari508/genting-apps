@@ -160,15 +160,15 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl transition-colors"
+        className="relative bg-white  rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl transition-colors"
       >
-        <div className="p-6 border-b dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800 transition-colors">
+        <div className="p-6 border-b  flex items-center justify-between bg-slate-50/50  transition-colors">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-doccure-teal/10 flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-doccure-teal" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-slate-800 dark:text-white transition-colors">
+              <h2 className="text-xl font-black text-slate-800  transition-colors">
                 {initialData ? 'Edit Edukasi' : 'Tambah Edukasi'}
               </h2>
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-tight">Kategori: {form.category}</p>
@@ -201,7 +201,7 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
                       max={1000}
                       value={form.day}
                       onChange={(e) => handleDayChange(Number(e.target.value))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 transition-all font-bold transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 transition-all font-bold transition-colors"
                     />
                   </div>
                   <div className="col-span-1">
@@ -212,7 +212,7 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
                       max={34}
                       value={form.month}
                       onChange={(e) => setForm((prev) => ({ ...prev, month: Number(e.target.value) }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 transition-all font-bold text-center transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 transition-all font-bold text-center transition-colors"
                     />
                   </div>
                   <div className="col-span-1">
@@ -229,7 +229,7 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
                     <select
                       value={form.category}
                       onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value as Category }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-bold transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-bold transition-colors"
                     >
                       {categories.map((c) => (
                         <option key={c.value} value={c.value}>{c.label}</option>
@@ -241,7 +241,7 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
                     <select
                       value={form.phase}
                       onChange={(e) => setForm((prev) => ({ ...prev, phase: e.target.value as Phase }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-bold transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-bold transition-colors"
                     >
                       {phases.map((p) => (
                         <option key={p.value} value={p.value}>{p.label}</option>
@@ -257,7 +257,7 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
                     value={form.title}
                     onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
                     placeholder="Judul yang menarik..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 transition-all font-bold placeholder:font-medium transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 transition-all font-bold placeholder:font-medium transition-colors"
                   />
                 </div>
 
@@ -268,7 +268,7 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
                     value={form.thumbnail_url}
                     onChange={(e) => setForm((prev) => ({ ...prev, thumbnail_url: e.target.value }))}
                     placeholder="https://..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 transition-all font-medium transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 transition-all font-medium transition-colors"
                   />
                 </div>
               </section>
@@ -285,7 +285,7 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
                     onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                     placeholder="Ringkasan isi artikel..."
                     rows={2}
-                    className="w-full px-4 py-2.5 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium transition-colors"
                   />
                 </div>
 
@@ -296,7 +296,7 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
                     onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
                     placeholder="Isi lengkap artikel..."
                     rows={6}
-                    className="w-full px-4 py-3 rounded-xl border border-border dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-y font-medium leading-relaxed transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-border  bg-slate-50  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-y font-medium leading-relaxed transition-colors"
                   />
                 </div>
 
@@ -307,7 +307,7 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
                     onChange={(e) => setForm((prev) => ({ ...prev, tips: e.target.value }))}
                     placeholder={"Minum air cukup\nHindari MSG..."}
                     rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl border border-doccure-teal/20 bg-doccure-teal/5 dark:bg-doccure-teal/10 text-sm focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium text-slate-700 dark:text-slate-300 transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-doccure-teal/20 bg-doccure-teal/5  text-sm focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 resize-none font-medium text-slate-700  transition-colors"
                   />
                 </div>
               </section>
@@ -326,7 +326,7 @@ export function EducationModal({ isOpen, onClose, onSuccess, initialData }: Educ
             <Button
               type="submit"
               disabled={saving}
-              className="flex-[2] h-12 rounded-xl bg-doccure-teal hover:bg-[#0f605c] text-white font-black shadow-lg shadow-doccure-teal/30 tracking-tight"
+              className="flex-[2] h-12 rounded-xl bg-doccure-teal hover:bg-[#0f605c] text-white font-black shadow-md tracking-tight"
             >
               {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Save className="w-5 h-5 mr-2" />}
               {initialData ? 'Update Artikel' : 'Publikasikan Artikel'}

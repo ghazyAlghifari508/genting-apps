@@ -46,7 +46,6 @@ export function DoctorScheduleList() {
               filter: `doctor_id=eq.${doc.id}`
             },
             () => {
-              console.log('Consultation changed, refreshing...')
               fetchSchedules()
             }
           )
@@ -67,7 +66,7 @@ export function DoctorScheduleList() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <Card className="p-6 rounded-[2rem] border-none shadow-sm bg-white dark:bg-slate-800 transition-colors">
+        <Card className="p-6 rounded-[2rem] border-none shadow-sm bg-white  transition-colors">
           <div className="flex justify-between items-start mb-6">
             <Skeleton className="h-6 w-32 rounded-lg" />
             <Skeleton className="h-4 w-16 rounded-full" />
@@ -91,18 +90,18 @@ export function DoctorScheduleList() {
 
   return (
     <div className="space-y-6">
-      <Card className="p-6 rounded-[2rem] border-none shadow-sm bg-white dark:bg-slate-800 transition-colors">
+      <Card className="p-6 rounded-[2rem] border-none shadow-sm bg-white  transition-colors">
         <div className="flex justify-between items-start mb-4">
-           <h3 className="text-lg font-bold text-slate-900 dark:text-white transition-colors">Jadwal Konsultasi</h3>
-           <Link href="/doctor/consultations" className="text-xs text-doccure-teal font-bold hover:underline">
+           <h3 className="text-lg font-bold text-slate-900  transition-colors">Jadwal Konsultasi</h3>
+           <Link href="/doctor/consultations" className="text-xs text-cerulean font-bold hover:underline">
              Lihat Semua
            </Link>
         </div>
 
         {schedules.length === 0 ? (
           <div className="text-center py-8">
-            <Calendar className="w-10 h-10 text-slate-200 dark:text-slate-700 mx-auto mb-2" />
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Belum ada jadwal konsultasi.</p>
+            <Calendar className="w-10 h-10 text-slate-200  mx-auto mb-2" />
+            <p className="text-slate-500  text-sm">Belum ada jadwal konsultasi.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -111,26 +110,26 @@ export function DoctorScheduleList() {
                const timeString = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
                
                return (
-                 <div key={schedule.id} className="flex items-center gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-2xl transition-colors cursor-pointer border border-transparent hover:border-slate-100 dark:hover:border-slate-600">
-                    <div className="flex flex-col items-center justify-center w-14 h-14 bg-slate-100 dark:bg-slate-700 rounded-xl shrink-0 transition-colors">
-                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{date.toLocaleDateString('id-ID', { month: 'short' })}</span>
-                       <span className="text-lg font-bold text-slate-900 dark:text-white">{date.getDate()}</span>
+                 <div key={schedule.id} className="flex items-center gap-4 p-3 hover:bg-slate-50  rounded-2xl transition-colors cursor-pointer border border-transparent hover:border-slate-100 ">
+                    <div className="flex flex-col items-center justify-center w-14 h-14 bg-slate-100  rounded-xl shrink-0 transition-colors">
+                       <span className="text-xs font-bold text-slate-500  uppercase">{date.toLocaleDateString('id-ID', { month: 'short' })}</span>
+                       <span className="text-lg font-bold text-slate-900 ">{date.getDate()}</span>
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                       <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate transition-colors">
+                       <h4 className="font-bold text-slate-900  text-sm truncate transition-colors">
                          {schedule.user?.full_name || 'Pasien Tanpa Nama'}
                        </h4>
-                       <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5 transition-colors">
+                       <div className="flex items-center gap-2 text-xs text-slate-500  mt-0.5 transition-colors">
                          <Clock className="w-3 h-3" />
                          {timeString}
-                         <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+                         <span className="w-1 h-1 rounded-full bg-slate-300 " />
                          {schedule.title || 'Konsultasi Umum'}
                        </div>
                     </div>
 
-                    <div className={`px-2 py-1 rounded-lg text-[10px] font-bold ${
-                      schedule.status === 'ongoing' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                     <div className={`px-2 py-1 rounded-lg text-[10px] font-bold ${
+                      schedule.status === 'ongoing' ? 'bg-sea-green/20  text-cerulean ' : 'bg-slate-100  text-slate-500 '
                     }`}>
                       {schedule.status === 'ongoing' ? 'Live' : 'Booked'}
                     </div>
@@ -142,7 +141,7 @@ export function DoctorScheduleList() {
       </Card>
       
       {/* Quick Stat (Contextual) */}
-      <Card className="p-6 rounded-[2rem] border-none shadow-sm bg-gradient-to-br from-doccure-teal to-teal-600 text-white">
+       <Card className="p-6 rounded-[2rem] border-none shadow-sm bg-gradient-to-br from-cerulean to-cerulean/90 text-white">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
                 <Calendar className="w-6 h-6 text-white" />

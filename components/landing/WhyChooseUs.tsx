@@ -29,9 +29,9 @@ const reasons = [
 export default function WhyChooseUs() {
 
   return (
-    <section className="py-24 relative overflow-hidden bg-doccure-light-yellow dark:bg-slate-900 transition-colors" id="why">
+    <section className="py-24 relative overflow-hidden bg-doccure-light-yellow  transition-colors" id="why">
       {/* Decorative horizontal wavy background lines approximation */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none dark:opacity-5" 
+      <div className="absolute inset-0 opacity-20 pointer-events-none " 
            style={{
              backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(221, 242, 71, 0.4) 19px, rgba(221, 242, 71, 0.4) 20px)'
            }}>
@@ -44,7 +44,7 @@ export default function WhyChooseUs() {
             <div className="absolute -left-1 w-2.5 h-2.5 bg-doccure-yellow rounded-full" />
             Kenapa Genting
           </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight transition-colors">
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-900  leading-tight transition-colors">
             Kenapa Orang Tua <span className="text-doccure-teal border-b-[3px] border-doccure-teal pb-1">Memilih Genting</span>
           </h2>
         </div>
@@ -58,7 +58,7 @@ export default function WhyChooseUs() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="bg-[#FEFCE8] dark:bg-slate-800/50 rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all border border-yellow-100/50 dark:border-slate-700 flex flex-col h-full relative overflow-hidden group"
+              className="bg-[#FEFCE8]  rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all border border-yellow-100/50  flex flex-col h-full relative overflow-hidden group"
             >
               {/* Top accent line */}
               <div className="absolute top-0 left-0 w-full h-1 bg-doccure-yellow transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
@@ -66,10 +66,10 @@ export default function WhyChooseUs() {
               <div className="w-14 h-14 bg-doccure-dark rounded-xl flex items-center justify-center text-doccure-yellow mb-8 shadow-md">
                 <reason.icon className="w-7 h-7" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 leading-snug transition-colors">
+              <h3 className="text-lg font-bold text-slate-900  mb-4 leading-snug transition-colors">
                 {reason.title}
               </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mt-auto transition-colors">
+              <p className="text-slate-600  text-sm leading-relaxed mt-auto transition-colors">
                 {reason.desc}
               </p>
             </motion.div>

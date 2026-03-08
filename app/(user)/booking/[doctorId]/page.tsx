@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -113,7 +113,7 @@ export default function BookingPage() {
     }
   }
 
-  if (loading) {
+  if (loading && !doctor) {
     return (
       <div className="space-y-5 pb-32 text-slate-900">
         <section className="w-full pt-8 mb-6 relative">
@@ -307,7 +307,7 @@ export default function BookingPage() {
               <Button
                 onClick={handleSubmit}
                 disabled={!form.date || !form.time || submitting}
-                className="mt-5 h-12 w-full rounded-xl bg-doccure-teal text-sm font-bold text-white hover:bg-doccure-dark shadow-md shadow-doccure-teal/15 transition-all active:scale-[0.98]"
+                className="mt-5 h-12 w-full rounded-xl bg-doccure-teal text-sm font-bold text-white hover:bg-doccure-dark shadow-md transition-all active:scale-[0.98]"
               >
                 {submitting ? 'Memproses...' : 'Lanjut ke Pembayaran'}
                 {!submitting && <ChevronRight className="ml-1.5 h-4 w-4" />}

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React from 'react'
 import Image from 'next/image'
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 
 interface EducationCardProps {
   content: EducationContent
+  viewMode?: 'grid' | 'list'
   isRead?: boolean
   isFavorite?: boolean
   onClick: () => void
@@ -18,6 +19,7 @@ interface EducationCardProps {
 
 export function EducationCard({
   content,
+  viewMode = 'grid',
   isRead,
   isFavorite,
   onClick,
@@ -28,7 +30,7 @@ export function EducationCard({
     return (
       <div
         onClick={onClick}
-        className="group w-full cursor-pointer overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_16px_34px_rgba(15,23,42,0.08)] transition-all duration-200 hover:border-doccure-teal/40"
+        className="group w-full cursor-pointer overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_16px_34px_rgba(15,23,42,0.08)] transition-all duration-200 hover:border-doccure-teal/40"
       >
         <div className="grid md:grid-cols-[1.08fr_0.92fr]">
           <figure className="relative h-60 overflow-hidden bg-slate-100 md:h-full">
@@ -95,9 +97,9 @@ export function EducationCard({
   return (
     <div
       onClick={onClick}
-      className="group w-full cursor-pointer overflow-hidden rounded-[28px] border border-slate-200/60 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_48px_rgba(15,23,42,0.12)] hover:border-doccure-teal/40 hover:-translate-y-2"
+      className="group w-full cursor-pointer overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_48px_rgba(15,23,42,0.12)] hover:border-doccure-teal/40 hover:-translate-y-2"
     >
-      <figure className="relative h-52 w-full overflow-hidden rounded-t-[28px] bg-slate-100">
+      <figure className="relative h-52 w-full overflow-hidden rounded-t-2xl bg-slate-100">
         <div className="absolute inset-0 z-10 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
         <div className="absolute right-4 top-4 z-20 flex gap-2">

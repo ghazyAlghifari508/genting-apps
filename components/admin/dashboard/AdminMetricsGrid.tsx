@@ -8,14 +8,8 @@ import {
   BookOpen
 } from 'lucide-react'
 import { StatCard, StatProgress } from '@/components/doctor/dashboard/StatCard'
+import type { DashboardStats } from '@/services/adminService'
 
-interface AdminStats {
-  totalUsers: number
-  totalDoctors: number
-  pendingVerifications: number
-  totalEducation: number
-  totalRoadmap: number
-}
 
 // Mock Data for Bars
 const MockBars = () => (
@@ -23,7 +17,7 @@ const MockBars = () => (
     {[35, 60, 45, 70, 50, 65, 40, 55, 75, 50, 60, 45, 35, 60, 45, 70, 50, 65, 40, 55, 75, 50, 60].map((h, i) => (
       <div 
         key={i} 
-        className={`w-full rounded-t-sm transition-colors ${i % 2 === 0 ? 'bg-doccure-teal/80' : 'bg-slate-200 dark:bg-slate-700'}`} 
+        className={`w-full rounded-t-sm transition-colors ${i % 2 === 0 ? 'bg-doccure-teal/80' : 'bg-slate-200 '}`} 
         style={{ height: `${h}%` }} 
       />
     ))}
@@ -35,14 +29,14 @@ const MockLines = () => (
     {[20, 40, 30, 50, 35, 55, 25, 45, 60, 40, 50, 35, 20, 40, 30, 50, 35, 55, 25, 45, 60, 40, 50].map((h, i) => (
       <div 
         key={i} 
-        className={`w-full rounded-t-sm transition-colors ${i % 3 === 0 ? 'bg-cerulean/60' : 'bg-slate-200 dark:bg-slate-700'}`} 
+        className={`w-full rounded-t-sm transition-colors ${i % 3 === 0 ? 'bg-cerulean/60' : 'bg-slate-200 '}`} 
         style={{ height: `${h}%` }} 
       />
     ))}
   </div>
 )
 
-export const AdminMetricsGrid = ({ stats }: { stats: AdminStats }) => {
+export const AdminMetricsGrid = ({ stats }: { stats: DashboardStats }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
       {/* 1. Total Users */}
@@ -54,8 +48,8 @@ export const AdminMetricsGrid = ({ stats }: { stats: AdminStats }) => {
         footer={
           <div className="flex justify-between items-end">
             <div className="text-xs">
-              <span className="text-slate-400 dark:text-slate-500">Active</span>
-              <p className="font-bold text-slate-700 dark:text-slate-300 transition-colors">{Math.floor((stats.totalUsers || 0) * 0.8)}</p>
+              <span className="text-slate-400 ">Active</span>
+              <p className="font-bold text-slate-700  transition-colors">{Math.floor((stats.totalUsers || 0) * 0.8)}</p>
             </div>
             <div className="text-xs text-right">
               <span className="text-slate-400">Inactive</span>
@@ -74,8 +68,8 @@ export const AdminMetricsGrid = ({ stats }: { stats: AdminStats }) => {
         footer={
           <div className="flex justify-between items-end">
              <div className="text-xs">
-              <span className="text-slate-400 dark:text-slate-500">Available</span>
-              <p className="font-bold text-slate-700 dark:text-slate-300 transition-colors">{Math.floor((stats.totalDoctors || 0) * 0.9)}</p>
+              <span className="text-slate-400 ">Available</span>
+              <p className="font-bold text-slate-700  transition-colors">{Math.floor((stats.totalDoctors || 0) * 0.9)}</p>
             </div>
             <div className="text-xs text-right">
               <span className="text-slate-400">On Leave</span>
@@ -109,9 +103,9 @@ export const AdminMetricsGrid = ({ stats }: { stats: AdminStats }) => {
         icon={BookOpen}
         footer={
           <div className="mt-2 text-xs font-semibold text-doccure-teal bg-doccure-teal/10 p-2 rounded-xl flex items-center justify-center gap-1">
-            <span className="text-slate-500 dark:text-slate-400 font-medium transition-colors">Articles: {stats.totalEducation}</span>
-            <span className="text-slate-300 dark:text-slate-700 mx-1">|</span>
-            <span className="text-slate-500 dark:text-slate-400 font-medium transition-colors">Roadmaps: {stats.totalRoadmap}</span>
+            <span className="text-slate-500  font-medium transition-colors">Articles: {stats.totalEducation}</span>
+            <span className="text-slate-300  mx-1">|</span>
+            <span className="text-slate-500  font-medium transition-colors">Roadmaps: {stats.totalRoadmap}</span>
           </div>
         }
       />

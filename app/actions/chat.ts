@@ -50,7 +50,7 @@ interface ChatHistoryMessage {
 
 export async function generateAiResponse(history: ChatHistoryMessage[], message: string) {
   try {
-    console.log('Generating AI Response for message:', message);
+
 
     const messages = [
       { role: 'system', content: SYSTEM_INSTRUCTION },

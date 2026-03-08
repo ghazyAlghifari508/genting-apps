@@ -31,7 +31,7 @@ const services = [
 export default function Services() {
 
   return (
-    <section className="py-24 bg-white dark:bg-slate-900 transition-colors duration-300 overflow-hidden" id="services">
+    <section className="py-24 bg-white  transition-colors duration-300 overflow-hidden" id="services">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -41,7 +41,7 @@ export default function Services() {
             <div className="absolute -right-1 w-3 h-3 bg-doccure-yellow rounded-full" />
             Layanan Kami
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-slate-900 dark:text-white leading-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-slate-900  leading-tight">
             Layanan Profesional untuk<br/>
             <span className="text-doccure-teal border-b-2 border-doccure-teal">Pencegahan Stunting</span>
           </h2>
@@ -50,11 +50,11 @@ export default function Services() {
         {/* Carousel / Cards */}
         <div className="relative">
           {/* Navigation buttons (decorative for now, or could scroll) */}
-          <button className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 bg-white dark:bg-slate-800 border dark:border-white/10 rounded-full shadow-lg flex items-center justify-center text-slate-400 z-10 hover:text-doccure-dark dark:hover:text-doccure-teal transition-colors">
+          <button className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 bg-white  border  rounded-full shadow-lg flex items-center justify-center text-slate-400 z-10 hover:text-doccure-dark  transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           
-          <button className="absolute right-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 bg-white dark:bg-slate-800 border dark:border-white/10 rounded-full shadow-lg flex items-center justify-center text-slate-400 z-10 hover:text-doccure-dark dark:hover:text-doccure-teal transition-colors">
+          <button className="absolute right-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 bg-white  border  rounded-full shadow-lg flex items-center justify-center text-slate-400 z-10 hover:text-doccure-dark  transition-colors">
             <ArrowRight className="w-5 h-5" />
           </button>
 
@@ -78,13 +78,13 @@ export default function Services() {
                 />
                 
                 {/* Overlay card */}
-                <div className="absolute bottom-4 left-4 right-4 bg-white/90 dark:bg-slate-900/90 border border-white/50 dark:border-white/10 backdrop-blur-md rounded-2xl p-4 flex gap-4 items-center shadow-lg transform transition-all duration-300">
+                <div className="absolute bottom-4 left-4 right-4 bg-white/90  border border-white/50  backdrop-blur-md rounded-2xl p-4 flex gap-4 items-center shadow-lg transform transition-all duration-300">
                   <div className="w-14 h-14 shrink-0 rounded-xl bg-doccure-teal flex items-center justify-center text-white">
                     <service.icon className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{service.title}</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-tight">{service.desc}</p>
+                    <h3 className="text-lg font-bold text-slate-900  mb-1">{service.title}</h3>
+                    <p className="text-slate-500  text-sm leading-tight">{service.desc}</p>
                   </div>
                 </div>
               </motion.div>

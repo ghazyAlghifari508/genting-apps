@@ -14,19 +14,25 @@ export async function uploadFile(file: File, path: string): Promise<string> {
   const supabase = await createClient()
   
   // Storage upload expects a Blob, File, or ArrayBuffer on the server as well
+  // Attempting to use 'registrations' bucket as it is more standard for this use case.
+  // Note: If you get "Bucket not found", please ensure a bucket named 'registrations' 
+  // exists in your Supabase Storage dashboard and is set to PUBLIC.
+  const bucketName = 'registrations'
+
   const { data, error } = await supabase.storage
-    .from('doctors')
+    .from(bucketName)
     .upload(path, file, { 
       upsert: true,
       contentType: file.type 
     })
 
   if (error) {
+    console.error(`Storage Error [${bucketName}]:`, error)
     handleServiceError(error, 'Gagal mengunggah file ke storage')
   }
 
   const { data: { publicUrl } } = supabase.storage
-    .from('doctors')
+    .from(bucketName)
     .getPublicUrl(data.path)
 
   return publicUrl

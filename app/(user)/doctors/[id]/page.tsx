@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -57,7 +57,7 @@ export default function DoctorPublicProfilePage() {
     load()
   }, [id, router])
 
-  if (loading) {
+  if (loading && !doctor) {
     return (
       <div className="space-y-5 pb-32 text-slate-900">
         <section className="w-full pt-8 mb-6 relative">
@@ -182,7 +182,7 @@ export default function DoctorPublicProfilePage() {
               <p className="mt-3 text-3xl font-bold text-slate-900">Rp {doctor.hourly_rate.toLocaleString('id-ID')}</p>
 
               <Link href={`/booking/${doctor.id}`}>
-                <Button className="mt-5 h-12 w-full rounded-xl bg-doccure-teal text-sm font-bold text-white hover:bg-doccure-dark shadow-md shadow-doccure-teal/15 transition-all active:scale-[0.98]">
+                <Button className="mt-5 h-12 w-full rounded-xl bg-doccure-teal text-sm font-bold text-white hover:bg-doccure-dark shadow-md transition-all active:scale-[0.98]">
                   Booking Sekarang
                   <ChevronRight className="ml-1.5 h-4 w-4" />
                 </Button>

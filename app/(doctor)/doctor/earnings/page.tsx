@@ -1,37 +1,16 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Wallet, TrendingUp, History, Download } from 'lucide-react'
-
-import { getDoctorEarnings } from '@/services/consultationService'
-import { getDoctorByUserId } from '@/services/doctorService'
-import { useAuth } from '@/hooks/useAuth'
+import { useDoctorContext } from '@/components/providers/Providers'
 import type { DoctorEarningRecord } from '@/types/consultation'
 
 export default function DoctorEarningsPage() {
-  const { user } = useAuth()
-  const [earnings, setEarnings] = useState<DoctorEarningRecord[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const load = async () => {
-      if (!user) return
-      try {
-        const doc = await getDoctorByUserId(user.id)
-        if (doc) {
-          const data = await getDoctorEarnings(doc.id)
-          setEarnings(data || [])
-        }
-      } catch (error) {
-        console.error('Error fetching earnings:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
-  }, [user])
+  const doctorContext = useDoctorContext()
+  const earnings = (doctorContext?.earnings || []) as DoctorEarningRecord[]
+  const loading = doctorContext?.loading
 
   const totalEarnings = earnings.reduce((acc, curr) => acc + (curr.total_cost || 0), 0)
 
@@ -41,7 +20,7 @@ export default function DoctorEarningsPage() {
       <main className="space-y-8">
         {/* Stats Card */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-[2.5rem] border-none shadow-xl shadow-blue-200/50 relative overflow-hidden">
+          <Card className="p-6 bg-gradient-to-br from-cerulean to-cerulean/90 text-white rounded-[2.5rem] border-none shadow-xl shadow-cerulean/20 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
             <div className="flex justify-between items-start mb-4 relative z-10">
               <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
@@ -51,14 +30,14 @@ export default function DoctorEarningsPage() {
                 <Download className="w-4 h-4 mr-2" /> Download PDF
               </Button>
             </div>
-            <p className="text-blue-100/80 text-sm font-medium relative z-10">Total Pendapatan Bersih</p>
+            <p className="text-white/70 text-sm font-medium relative z-10">Total Pendapatan Bersih</p>
             <h2 className="text-4xl font-black mt-1 relative z-10">Rp {totalEarnings.toLocaleString('id-ID')}</h2>
           </Card>
 
           <Card className="p-6 bg-white rounded-[2.5rem] border-none shadow-sm flex flex-col justify-center">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-2xl">
-                <TrendingUp className="w-6 h-6 text-green-600" />
+              <div className="p-3 bg-sea-green/20 rounded-2xl">
+                <TrendingUp className="w-6 h-6 text-cerulean" />
               </div>
               <div>
                 <p className="text-slate-400 text-sm font-medium">Sesi Selesai (Dibayar)</p>
@@ -75,7 +54,7 @@ export default function DoctorEarningsPage() {
             <h2 className="text-lg font-bold text-slate-800">Riwayat Transaksi</h2>
           </div>
 
-          {loading ? (
+          {loading && earnings.length === 0 ? (
              <div className="py-20 text-center text-slate-400">Memuat transaksi...</div>
           ) : earnings.length === 0 ? (
             <Card className="p-12 text-center border-dashed border-2 bg-transparent rounded-[2rem]">
@@ -100,7 +79,7 @@ export default function DoctorEarningsPage() {
                     </div>
                     <div className="text-right">
                        <p className="font-black text-slate-900 mb-1">Rp {(tx.total_cost || 0).toLocaleString('id-ID')}</p>
-                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-600 font-bold uppercase tracking-wider">Berhasil</span>
+                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-sea-green/20 text-cerulean font-bold uppercase tracking-wider">Berhasil</span>
                     </div>
                  </div>
                ))}

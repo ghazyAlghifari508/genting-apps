@@ -15,21 +15,27 @@ import {
   Apple,
   Star
 } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { fetchRoadmapActivities, deleteRoadmapActivity } from '@/services/adminService'
+import { deleteRoadmapActivity } from '@/services/adminService'
+import { useAdminContext } from '@/components/providers/Providers'
 import { RoadmapModal } from '@/components/admin/RoadmapModal'
+import { Skeleton } from '@/components/ui/skeleton'
 import { RoadmapActivity } from '@/types/roadmap'
 
 import { AdminTopHeader } from '@/components/admin/AdminTopHeader'
 
 const categoryConfig: Record<string, { label: string; icon: typeof Dumbbell; color: string }> = {
-  exercise: { label: 'Exercise', icon: Dumbbell, color: 'bg-doccure-teal/10 text-doccure-teal' },
-  nutrition: { label: 'Nutrition', icon: Apple, color: 'bg-doccure-yellow-100 text-doccure-yellow-600' },
+  exercise: { label: 'Olahraga', icon: Dumbbell, color: 'bg-doccure-teal/10 text-doccure-teal' },
+  nutrition: { label: 'Nutrisi', icon: Apple, color: 'bg-emerald-50 text-emerald-600' },
+  sleep: { label: 'Tidur', icon: Dumbbell, color: 'bg-indigo-50 text-indigo-600' },
+  mental: { label: 'Mental', icon: Dumbbell, color: 'bg-fuchsia-50 text-fuchsia-600' },
+  checkup: { label: 'Pemeriksaan', icon: Dumbbell, color: 'bg-amber-50 text-amber-600' },
+  bonding: { label: 'Bonding', icon: Dumbbell, color: 'bg-pink-50 text-pink-600' },
 }
 
 export default function RoadmapManagementPage() {
-  const [activities, setActivities] = useState<RoadmapActivity[]>([])
-  const [loading, setLoading] = useState(true)
+  const adminContext = useAdminContext()
+  const [activities, setActivities] = useState<RoadmapActivity[]>((adminContext?.roadmapActivities || []) as RoadmapActivity[])
+  const loading = adminContext?.loading
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -39,8 +45,22 @@ export default function RoadmapManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedActivity, setSelectedActivity] = useState<RoadmapActivity | null>(null)
 
+  // Sync with context if it changes and we are not filtering/searching
+  useEffect(() => {
+    if (!searchQuery && !categoryFilter && adminContext?.roadmapActivities) {
+      setActivities(adminContext.roadmapActivities as RoadmapActivity[])
+    }
+  }, [adminContext?.roadmapActivities, searchQuery, categoryFilter])
+
   const loadData = useCallback(async () => {
+    // If we have data in context and it's the first load (no filters), just use it
+    if (!searchQuery && !categoryFilter && adminContext?.roadmapActivities?.length) {
+      setActivities(adminContext.roadmapActivities as RoadmapActivity[])
+      return
+    }
+
     try {
+      const { fetchRoadmapActivities } = await import('@/services/adminService')
       const data = await fetchRoadmapActivities({
         search: searchQuery || undefined,
         category: categoryFilter || undefined,
@@ -48,35 +68,30 @@ export default function RoadmapManagementPage() {
       setActivities(data as RoadmapActivity[])
     } catch (error) {
       console.error('Error loading roadmap:', error)
-    } finally {
-      setLoading(false)
     }
-  }, [searchQuery, categoryFilter])
+  }, [searchQuery, categoryFilter, adminContext?.roadmapActivities])
 
   useEffect(() => {
     loadData()
   }, [categoryFilter, loadData])
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setLoading(true)
-      loadData()
-    }, 300)
-    return () => clearTimeout(timeout)
-  }, [searchQuery, loadData])
 
   const handleDelete = async () => {
     if (!deleteId) return
     try {
       setDeleting(true)
       await deleteRoadmapActivity(deleteId)
-      setActivities((prev) => prev.filter((a) => a.id !== deleteId))
+      await adminContext?.loadAdminData(true)
       setDeleteId(null)
     } catch (error) {
       console.error('Error deleting roadmap:', error)
     } finally {
       setDeleting(false)
     }
+  }
+
+  const handleSuccess = async () => {
+    await adminContext?.loadAdminData(true)
+    setIsModalOpen(false)
   }
 
   const handleCreate = () => {
@@ -110,7 +125,7 @@ export default function RoadmapManagementPage() {
 
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100/50 dark:border-white/5 shadow-sm items-center justify-between transition-colors">
+              <div key={i} className="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl bg-white  border border-slate-100/50  shadow-sm items-center justify-between transition-colors">
                 <div className="flex items-center gap-4 flex-1">
                   <Skeleton className="w-12 h-12 rounded-xl" />
                   <div className="space-y-2">
@@ -143,7 +158,7 @@ export default function RoadmapManagementPage() {
         </div>
         <Button 
           onClick={handleCreate}
-          className="rounded-full bg-doccure-teal hover:bg-[#0f605c] text-white px-6 h-12 font-bold shadow-lg shadow-doccure-teal/30"
+          className="rounded-full bg-doccure-teal hover:bg-[#0f605c] text-white px-6 h-12 font-bold shadow-md"
         >
           <Plus className="w-5 h-5 mr-2" />
           <span>Tambah Aktivitas</span>
@@ -160,25 +175,29 @@ export default function RoadmapManagementPage() {
               placeholder="Cari aktivitas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-all transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200  bg-white  text-sm text-slate-900  focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 font-medium transition-all transition-colors"
             />
           </div>
           <div className="w-full sm:w-auto">
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-bold text-slate-600 dark:text-slate-300 shadow-sm transition-colors"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200  bg-white  text-sm focus:outline-none focus:ring-2 focus:ring-doccure-teal/30 appearance-none cursor-pointer font-bold text-slate-600  shadow-sm transition-colors"
             >
               <option value="">Semua Kategori</option>
-              <option value="exercise">Exercise</option>
-              <option value="nutrition">Nutrition</option>
+              <option value="exercise">Olahraga</option>
+              <option value="nutrition">Nutrisi</option>
+              <option value="sleep">Tidur</option>
+              <option value="mental">Mental</option>
+              <option value="checkup">Pemeriksaan</option>
+              <option value="bonding">Bonding</option>
             </select>
           </div>
         </div>
 
         {/* Activity List */}
         {activities.length === 0 ? (
-          <Card className="p-12 rounded-2xl border-0 shadow-sm bg-white dark:bg-slate-800 text-center mt-6 transition-colors">
+          <Card className="p-12 rounded-2xl border-0 shadow-sm bg-white  text-center mt-6 transition-colors">
             <Route className="w-16 h-16 text-slate-200 mx-auto mb-4" />
             <p className="font-bold text-slate-800 text-lg">Belum ada aktivitas roadmap</p>
             <p className="text-sm text-slate-500 font-medium mt-1">Klik &quot;Tambah Aktivitas&quot; untuk membuat aktivitas baru.</p>
@@ -199,7 +218,7 @@ export default function RoadmapManagementPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03 }}
                 >
-                  <Card className="p-4 rounded-2xl border-0 shadow-sm bg-white dark:bg-slate-800 hover:shadow-md transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
+                  <Card className="p-4 rounded-2xl border-0 shadow-sm bg-white  hover:shadow-md transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${config.color}`}>
                         <IconComponent className="w-6 h-6" />
@@ -207,7 +226,7 @@ export default function RoadmapManagementPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <p className="font-bold text-slate-900 truncate text-base">{activity.activity_name}</p>
-                          <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-50 dark:bg-white/5 px-2 py-0.5 rounded-md transition-colors">
+                          <span className="text-[10px] font-black text-slate-400  uppercase tracking-widest bg-slate-50  px-2 py-0.5 rounded-md transition-colors">
                             Trimester {activity.min_trimester}-{activity.max_trimester}
                           </span>
                         </div>
@@ -222,11 +241,6 @@ export default function RoadmapManagementPage() {
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${config.color}`}>
                           {config.label}
                         </span>
-                        {activity.xp_reward && (
-                          <span className="text-xs font-black text-doccure-teal px-2 py-0.5 bg-doccure-teal/5 rounded-md">
-                            +{activity.xp_reward} XP
-                          </span>
-                        )}
                         <div className="flex items-center hidden sm:flex">
                           {[1, 2, 3, 4, 5].map((i) => (
                             <Star
@@ -269,7 +283,7 @@ export default function RoadmapManagementPage() {
             <RoadmapModal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
-              onSuccess={loadData}
+              onSuccess={handleSuccess}
               initialData={selectedActivity}
             />
           )}
@@ -282,10 +296,10 @@ export default function RoadmapManagementPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="relative bg-white dark:bg-slate-800 rounded-[2rem] p-6 w-full max-w-sm shadow-2xl transition-colors"
+              className="relative bg-white  rounded-[2rem] p-6 w-full max-w-sm shadow-2xl transition-colors"
             >
-              <h3 className="text-lg font-black text-slate-800 dark:text-white mb-2 transition-colors">Hapus Aktivitas?</h3>
-              <p className="text-sm border-l-2 pl-3 border-doccure-teal/50 text-slate-600 dark:text-slate-400 mb-6 font-medium leading-relaxed transition-colors">
+              <h3 className="text-lg font-black text-slate-800  mb-2 transition-colors">Hapus Aktivitas?</h3>
+              <p className="text-sm border-l-2 pl-3 border-doccure-teal/50 text-slate-600  mb-6 font-medium leading-relaxed transition-colors">
                 Aktivitas yang dihapus tidak dapat dikembalikan. Yakin ingin menghapus roadmap ini?
               </p>
               <div className="flex gap-3">

@@ -16,41 +16,41 @@ const quickAccessItems = [
     title: 'Mulai Konsultasi',
     description: 'Tangani antrian pasien sekarang',
     icon: Stethoscope,
-    color: 'bg-doccure-teal',
-    textColor: 'text-doccure-teal',
-    borderColor: 'border-doccure-teal/20',
+    color: 'bg-cerulean',
+    textColor: 'text-cerulean',
+    borderColor: 'border-cerulean/20',
     href: '/doctor/consultations',
-    gradient: 'from-doccure-teal/10 to-transparent'
+    gradient: 'from-cerulean/10 to-transparent'
   },
   {
     title: 'Jadwal Praktik',
     description: 'Atur ketersediaan waktu Anda',
     icon: CalendarDays,
-    color: 'bg-doccure-teal',
-    textColor: 'text-doccure-teal',
-    borderColor: 'border-doccure-teal/20',
+    color: 'bg-cerulean',
+    textColor: 'text-cerulean',
+    borderColor: 'border-cerulean/20',
     href: '/doctor/schedule',
-    gradient: 'from-doccure-teal/10 to-transparent'
+    gradient: 'from-cerulean/10 to-transparent'
   },
   {
     title: 'Pesan Pasien',
     description: '3 pesan baru belum dibaca',
     icon: MessageSquareText,
-    color: 'bg-doccure-teal',
-    textColor: 'text-doccure-teal',
-    borderColor: 'border-doccure-teal/20',
+    color: 'bg-cerulean',
+    textColor: 'text-cerulean',
+    borderColor: 'border-cerulean/20',
     href: '/doctor/messages',
-    gradient: 'from-doccure-teal/10 to-transparent'
+    gradient: 'from-cerulean/10 to-transparent'
   },
   {
     title: 'Laporan Keuangan',
     description: 'Ringkasan pendapatan bulan ini',
     icon: FileBarChart,
-    color: 'bg-medical-orange',
-    textColor: 'text-medical-orange',
-    borderColor: 'border-medical-orange/20',
+    color: 'bg-sea-green',
+    textColor: 'text-cerulean',
+    borderColor: 'border-sea-green/20',
     href: '/doctor/earnings',
-    gradient: 'from-medical-orange/10 to-transparent'
+    gradient: 'from-sea-green/10 to-transparent'
   }
 ]
 

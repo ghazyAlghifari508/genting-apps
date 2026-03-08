@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React from 'react'
 import { motion } from 'framer-motion'
@@ -18,19 +18,10 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { LucideIcon } from 'lucide-react'
-
-interface Activity {
-  id: string
-  activity_name: string
-  category: string
-  description: string
-  difficulty_level: number
-  duration_minutes: number
-  frequency_per_week: number
-}
+import type { RoadmapActivity } from '@/types/roadmap'
 
 interface ActivityCardProps {
-  activity: Activity
+  activity: RoadmapActivity
   index: number
   status: 'not_started' | 'in_progress' | 'completed'
   statusInfo: { label: string; icon: LucideIcon; color: string; bg: string }
@@ -45,37 +36,37 @@ const categoryConfig: Record<string, { label: string; icon: LucideIcon; tone: st
     label: 'Olahraga',
     icon: Dumbbell,
     tone: 'from-sky-500/16 via-sky-500/6 to-transparent',
-    chip: 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-500/20',
+    chip: 'bg-sky-50 text-sky-700 border-sky-200   ',
   },
   nutrition: {
     label: 'Nutrisi',
     icon: Salad,
     tone: 'from-emerald-500/16 via-emerald-500/6 to-transparent',
-    chip: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
+    chip: 'bg-emerald-50 text-emerald-700 border-emerald-200   ',
   },
   sleep: {
     label: 'Tidur',
     icon: BedDouble,
     tone: 'from-indigo-500/16 via-indigo-500/6 to-transparent',
-    chip: 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20',
+    chip: 'bg-indigo-50 text-indigo-700 border-indigo-200   ',
   },
   mental: {
     label: 'Mental',
     icon: Brain,
     tone: 'from-fuchsia-500/16 via-fuchsia-500/6 to-transparent',
-    chip: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 dark:bg-fuchsia-500/10 dark:text-fuchsia-400 dark:border-fuchsia-500/20',
+    chip: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200   ',
   },
   checkup: {
     label: 'Pemeriksaan',
     icon: ClipboardPlus,
     tone: 'from-amber-500/16 via-amber-500/6 to-transparent',
-    chip: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
+    chip: 'bg-amber-50 text-amber-800 border-amber-200   ',
   },
   bonding: {
     label: 'Bonding',
     icon: HeartHandshake,
     tone: 'from-amber-500/16 via-amber-500/6 to-transparent',
-    chip: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
+    chip: 'bg-amber-50 text-amber-700 border-amber-200   ',
   },
 }
 
@@ -107,10 +98,10 @@ export const ActivityCard = React.memo(({
       transition={{ delay: index * 0.06 }}
     >
       <div
-        className={`group relative cursor-pointer overflow-hidden rounded-[24px] border transition-all duration-300 ${
+        className={`group relative cursor-pointer overflow-hidden rounded-3xl border transition-all duration-300 ${
           isCompleted
-            ? 'border-emerald-200/80 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-500/5'
-            : 'border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 hover:-translate-y-0.5 hover:border-doccure-teal/40 hover:shadow-[0_16px_30px_rgba(15,23,42,0.08)]'
+            ? 'border-emerald-200/80  bg-emerald-50/50 '
+            : 'border-slate-200  bg-white  hover:-translate-y-0.5 hover:border-doccure-teal/40 hover:shadow-[0_16px_30px_rgba(15,23,42,0.08)]'
         }`}
         onClick={onClick}
       >
@@ -119,19 +110,19 @@ export const ActivityCard = React.memo(({
         <div className="relative p-7 flex flex-col h-full">
           <div className="flex items-start justify-between gap-4 mb-5">
             <div className="flex items-start gap-4">
-              <div className={`shrink-0 flex h-14 w-14 items-center justify-center rounded-[20px] border shadow-sm ${category.chip} dark:bg-white/5 dark:border-white/10 dark:text-white`}>
+              <div className={`shrink-0 flex h-14 w-14 items-center justify-center rounded-2xl border shadow-sm ${category.chip}   `}>
                 <CategoryIcon className="h-6 w-6" />
               </div>
               <div className="flex-1 pt-1">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <span className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${category.chip} dark:bg-white/5 dark:border-white/10 dark:text-white/70`}>
+                  <span className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${category.chip}   `}>
                     {category.label}
                   </span>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                     Trimester {trimester}
                   </span>
                 </div>
-                <h3 className={`text-2xl font-black leading-tight text-slate-900 dark:text-white tracking-tight ${isCompleted ? 'line-through opacity-50' : ''}`}>
+                <h3 className={`text-2xl font-black leading-tight text-slate-900  tracking-tight ${isCompleted ? 'line-through opacity-50' : ''}`}>
                   {activity.activity_name}
                 </h3>
               </div>
@@ -142,7 +133,7 @@ export const ActivityCard = React.memo(({
                 e.stopPropagation()
                 onComplete()
               }}
-              className="mt-1 shrink-0 rounded-xl p-2 text-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-white/5 hover:text-doccure-teal active:scale-90 border border-transparent hover:border-slate-200 dark:hover:border-white/10"
+              className="mt-1 shrink-0 rounded-xl p-2 text-slate-300 transition-all hover:bg-slate-50  hover:text-doccure-teal active:scale-90 border border-transparent hover:border-slate-200 "
               aria-label="Tandai selesai"
               title="Tandai selesai"
             >
@@ -156,19 +147,19 @@ export const ActivityCard = React.memo(({
               {statusInfo.label}
             </div>
 
-            <p className="line-clamp-3 text-[15px] font-medium leading-relaxed text-slate-600 dark:text-slate-400 opacity-90">
+            <p className="line-clamp-3 text-[15px] font-medium leading-relaxed text-slate-600  opacity-90">
               {activity.description}
             </p>
 
             <div className="flex flex-wrap items-center gap-2.5 pt-2">
               {activity.duration_minutes > 0 && (
-                <div className="inline-flex items-center gap-2 rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 px-3 py-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                <div className="inline-flex items-center gap-2 rounded-xl border border-slate-100  bg-slate-50/50  px-3 py-1.5 text-[11px] font-bold text-slate-500 ">
                   <Clock className="h-4 w-4 text-doccure-teal" />
                   {activity.duration_minutes}m
                 </div>
               )}
               {activity.frequency_per_week > 0 && (
-                <div className="inline-flex items-center gap-2 rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 px-3 py-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                <div className="inline-flex items-center gap-2 rounded-xl border border-slate-100  bg-slate-50/50  px-3 py-1.5 text-[11px] font-bold text-slate-500 ">
                   <Calendar className="h-4 w-4 text-doccure-teal" />
                   {activity.frequency_per_week}x/pk
                 </div>
@@ -180,11 +171,11 @@ export const ActivityCard = React.memo(({
             </div>
           </div>
 
-          <div className="mt-8 flex items-center justify-end border-t border-slate-50 dark:border-white/5 pt-5">
+          <div className="mt-8 flex items-center justify-end border-t border-slate-50  pt-5">
             <Button
               size="sm"
               variant="default"
-              className="h-10 px-6 rounded-xl bg-slate-900 dark:bg-white hover:bg-black dark:hover:bg-slate-200 text-[12px] font-black uppercase tracking-widest text-white dark:text-slate-900 shadow-md active:scale-95 transition-all group/btn"
+              className="h-10 px-6 rounded-xl bg-slate-900  hover:bg-black  text-[12px] font-black uppercase tracking-widest text-white  shadow-md active:scale-95 transition-all group/btn"
               onClick={(e) => {
                 e.stopPropagation()
                 onClick()

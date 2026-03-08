@@ -1,53 +1,47 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { DoctorTopHeader } from '@/components/doctor/layout/DoctorTopHeader'
 import { MetricsGrid } from '@/components/doctor/dashboard/MetricsGrid'
 import { AppointmentTrendChart } from '@/components/doctor/dashboard/AppointmentTrendChart'
 import { DoctorScheduleList } from '@/components/doctor/dashboard/DoctorScheduleList'
 import { ConsultationHistoryList } from '@/components/doctor/dashboard/ConsultationHistoryList'
 import { MessagesWidget } from '@/components/doctor/dashboard/MessagesWidget'
-import { getDoctorStats, getDoctorByUserId } from '@/services/doctorService'
-import { useAuth } from '@/hooks/useAuth'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useDoctorContext } from '@/components/providers/Providers'
 
-interface DoctorDashboardStats {
-  totalPatients: number;
-  activeConsultations: number;
-  todayAppointments: { total: number; completed: number; upcoming: number; };
-  monthlyRevenue: number;
-  weeklyTrend?: { name: string; value: number; }[];
-  statusSummary?: { completed: number; pending: number; };
-}
 
 export default function DoctorDashboardPage() {
-  const { user } = useAuth()
-  const [stats, setStats] = useState<DoctorDashboardStats | null>(null)
+  const doctorContext = useDoctorContext()
+  const stats = doctorContext?.stats
+  const loading = doctorContext?.loading
 
-  useEffect(() => {
-    if (!user) return
-    const loadData = async () => {
-      try {
-        const doc = await getDoctorByUserId(user.id)
-        if (doc) {
-          const s = await getDoctorStats(doc.id)
-          setStats(s as DoctorDashboardStats)
-        }
-      } catch (err) {
-        console.error('Error loading stats:', err)
-      }
-    }
-    loadData()
-  }, [user])
+  if (loading && !stats) {
+    return (
+      <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
+        <DoctorTopHeader />
+        <div className="space-y-6">
+          <Skeleton className="h-12 w-48 rounded-xl" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Skeleton className="lg:col-span-2 h-96 rounded-2xl" />
+            <Skeleton className="h-96 rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
-      <DoctorTopHeader />
 
       {/* Page Title */}
       <h1 className="text-3xl font-bold text-slate-800 mb-6">Overview</h1>
 
       {/* 1. Metrics Row */}
-      <MetricsGrid stats={stats} />
+      <MetricsGrid stats={stats || null} />
 
       {/* 2. Main Grid: Charts & Schedule */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

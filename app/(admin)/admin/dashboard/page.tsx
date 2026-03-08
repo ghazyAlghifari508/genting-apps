@@ -1,49 +1,28 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { fetchDashboardStats } from '@/services/adminService'
 import { AdminMetricsGrid } from '@/components/admin/dashboard/AdminMetricsGrid'
 import { AdminRiskDistributionChart } from '@/components/admin/dashboard/AdminRiskDistributionChart'
 import { PendingApprovalList } from '@/components/admin/dashboard/PendingApprovalList'
 import { RecentActivityList } from '@/components/admin/dashboard/RecentActivityList'
 import { AdminTopHeader } from '@/components/admin/AdminTopHeader'
+import { useAdminContext } from '@/components/providers/Providers'
 
-interface Stats {
-  totalUsers: number
-  totalDoctors: number
-  pendingVerifications: number
-  totalEducation: number
-  totalRoadmap: number
-}
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState<Stats>({
+  const adminContext = useAdminContext()
+  const stats = adminContext?.stats || {
     totalUsers: 0,
     totalDoctors: 0,
     pendingVerifications: 0,
     totalEducation: 0,
     totalRoadmap: 0,
-  })
-  const [loading, setLoading] = useState(true)
+  }
+  const loading = adminContext?.loading
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await fetchDashboardStats()
-        setStats(data || { totalUsers: 0, totalDoctors: 0, pendingVerifications: 0, totalEducation: 0, totalRoadmap: 0 })
-      } catch (error) {
-        console.error('Error loading stats:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
-  }, [])
-
-  if (loading) {
+  if (loading && adminContext?.stats === null) {
     return (
-      <div className="p-8 max-w-[1600px] mx-auto min-h-screen bg-white dark:bg-slate-900 transition-colors">
+      <div className="p-8 max-w-[1600px] mx-auto min-h-screen bg-white  transition-colors">
         {/* Header Skeleton */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
            <Skeleton className="h-12 w-full max-w-xl rounded-[2rem]" />
@@ -76,13 +55,12 @@ export default function AdminDashboardPage() {
     )
   }
 
-
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
       <AdminTopHeader showSearch={true} />
 
       {/* Page Title */}
-      <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-6 transition-colors">Admin Overview</h1>
+      <h1 className="text-3xl font-bold text-slate-800  mb-6 transition-colors">Admin Overview</h1>
 
       {/* 1. Metrics Row */}
       <AdminMetricsGrid stats={stats} />
