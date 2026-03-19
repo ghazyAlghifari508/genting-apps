@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Star, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 interface ProfileCardProps {
   fullName: string
@@ -57,8 +58,8 @@ export function ProfileCard({ fullName, firstName, profileCompletion, avatarUrl 
         </div>
       </div>
 
-      <Button variant="outline" className="w-full border-slate-200  text-slate-700  font-bold h-11 rounded-xl shadow-sm hover:bg-slate-50  transition-colors">
-        Edit Profil Lengkap
+      <Button asChild variant="outline" className="w-full border-slate-200  text-slate-700  font-bold h-11 rounded-xl shadow-sm hover:bg-slate-50  transition-colors">
+        <Link href="/profile">Edit Profil Lengkap</Link>
       </Button>
     </div>
   )

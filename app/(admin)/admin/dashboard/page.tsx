@@ -25,7 +25,8 @@ export default function AdminDashboardPage() {
       <div className="p-8 max-w-[1600px] mx-auto min-h-screen bg-white  transition-colors">
         {/* Header Skeleton */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-           <Skeleton className="h-12 w-full max-w-xl rounded-[2rem]" />
+           {/* Space where search bar used to be */}
+           <div className="hidden lg:block flex-1" />
            <div className="flex items-center gap-4">
              <Skeleton className="h-12 w-12 rounded-full" />
              <Skeleton className="h-12 w-12 rounded-full" />
@@ -57,10 +58,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
-      <AdminTopHeader showSearch={true} />
-
-      {/* Page Title */}
-      <h1 className="text-3xl font-bold text-slate-800  mb-6 transition-colors">Admin Overview</h1>
+      <AdminTopHeader title="Admin Overview" />
 
       {/* 1. Metrics Row */}
       <AdminMetricsGrid stats={stats} />

@@ -1,53 +1,27 @@
 'use client'
 
 import React from 'react'
-import { Search, Bell, Calendar } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface DoctorTopHeaderProps {
   title?: string
-  showSearch?: boolean
+  isLoading?: boolean
 }
 
-export function DoctorTopHeader({ title, showSearch = true }: DoctorTopHeaderProps) {
-  return (
-    <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-      {/* Search or Title Section */}
-      <div className="flex items-center gap-3 w-full max-w-xl">
-        {showSearch ? (
-          <div className="relative flex-1">
-             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-             <Input 
-               placeholder="Search" 
-               className="pl-12 h-12 rounded-[2rem] border-none bg-white  shadow-sm text-slate-700  transition-colors"
-             />
-          </div>
-        ) : (
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800  transition-colors truncate">{title}</h1>
-        )}
+export function DoctorTopHeader({ title, isLoading = false }: DoctorTopHeaderProps) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-between mb-8">
+        <Skeleton className="h-10 w-64 rounded-xl" />
       </div>
+    )
+  }
 
-      {/* Actions */}
-      <div className="flex items-center gap-4 w-full md:w-auto justify-end">
-         <button className="p-3 bg-white  rounded-full text-slate-500  hover:bg-slate-50  shadow-sm transition-colors">
-           <Bell className="w-5 h-5" />
-         </button>
-         <button className="p-3 bg-white  rounded-full text-slate-500  hover:bg-slate-50  shadow-sm transition-colors">
-           <div className="w-5 h-5 rounded-full border border-slate-300  flex items-center justify-center">
-             <span className="text-xs">?</span>
-           </div>
-         </button>
-         
-         <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white  rounded-full shadow-sm text-sm text-slate-600  font-bold border border-transparent  transition-colors">
-            <Calendar className="w-4 h-4" />
-            October 23, 2025
-         </div>
-         
-         <Button className="rounded-full bg-cerulean hover:bg-[#0c594a] text-white px-6 h-12 font-bold shadow-lg shadow-cerulean/20  transition-all active:scale-95">
-           Generate Report
-         </Button>
-      </div>
+  return (
+    <div className="flex items-center justify-between mb-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-slate-800 transition-colors truncate">
+        {title || 'Dashboard'}
+      </h1>
     </div>
   )
 }

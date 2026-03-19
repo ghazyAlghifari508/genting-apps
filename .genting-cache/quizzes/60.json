@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Pada bulan keberapa jantung janin mulai berdenyut?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "answer": 1
+  },
+  {
+    "question": "Mengapa periode ini disebut sensitif?",
+    "options": [
+      "Karena janin tidak memiliki organ vital",
+      "Karena paparan zat berbahaya dapat berdampak serius",
+      "Karena janin mulai bergerak",
+      "Karena plasenta belum terbentuk"
+    ],
+    "answer": 1
+  },
+  {
+    "question": "Apa yang harus dihindari selama periode ini?",
+    "options": [
+      "Paparan zat berbahaya",
+      "Makanan berlemak",
+      "Olahraga berat",
+      "Minum alkohol"
+    ],
+    "answer": 0
+  }
+]

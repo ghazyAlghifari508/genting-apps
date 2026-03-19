@@ -7,7 +7,6 @@ import { motion } from 'framer-motion'
 import {
   ArrowLeft,
   Bookmark,
-  Share2,
   Clock,
   BookOpen,
   CheckCircle2,
@@ -33,6 +32,7 @@ import { EducationContent, getPhaseInfo, UserProgress } from '@/types/education'
 import { cn } from '@/lib/utils'
 import { usePregnancyData } from '@/hooks/usePregnancyData'
 import { Skeleton } from '@/components/ui/skeleton'
+import { QuizModal } from '@/components/user/education/QuizModal'
 
 export default function EducationDetail() {
   const router = useRouter()
@@ -48,6 +48,7 @@ export default function EducationDetail() {
   const [allProgress, setAllProgress] = useState<UserProgress[]>([])
   const [relatedContents, setRelatedContents] = useState<EducationContent[]>([])
   const [totalLessons, setTotalLessons] = useState(0)
+  const [isQuizOpen, setIsQuizOpen] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
@@ -93,6 +94,13 @@ export default function EducationDetail() {
 
   const handleToggleRead = async () => {
     if (!userId) return
+    
+    // If not read yet, trigger quiz
+    if (!isRead) {
+      setIsQuizOpen(true)
+      return
+    }
+
     const newRead = !isRead
     try {
       await toggleReadStatus(userId, day, newRead)
@@ -109,6 +117,24 @@ export default function EducationDetail() {
       loadEducation(true)
     } catch (error) {
       console.error('Error toggling read status:', error)
+    }
+  }
+
+  const handleQuizSuccess = async () => {
+    if (!userId) return
+    try {
+      await toggleReadStatus(userId, day, true)
+      setIsRead(true)
+      setAllProgress(prev => {
+        const exists = prev.some(p => p.day === day)
+        if (exists) {
+          return prev.map(p => p.day === day ? { ...p, is_read: true } : p)
+        }
+        return [...prev, { id: '', user_id: userId, day, is_read: true, is_favorite: isFavorite }]
+      })
+      loadEducation(true)
+    } catch (error) {
+      console.error('Error marking as read after quiz:', error)
     }
   }
 
@@ -277,9 +303,6 @@ export default function EducationDetail() {
                   >
                     <Bookmark className={cn('mr-1.5 h-3.5 w-3.5', isFavorite && 'fill-current')} />
                     {isFavorite ? 'Favorit' : 'Favorit'}
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-8 rounded-lg border-slate-200 px-2.5 text-xs font-bold">
-                    <Share2 className="mr-1 h-3 w-3" /> Bagikan
                   </Button>
                 </div>
               </div>
@@ -454,6 +477,15 @@ export default function EducationDetail() {
           </motion.aside>
         </div>
       </div>
+      {/* ─── QUIZ MODAL ─── */}
+      <QuizModal
+        isOpen={isQuizOpen}
+        onClose={() => setIsQuizOpen(false)}
+        onSuccess={handleQuizSuccess}
+        content={content.content}
+        title={content.title}
+        day={day}
+      />
     </div>
   )
 }

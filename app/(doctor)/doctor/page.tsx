@@ -19,7 +19,7 @@ export default function DoctorDashboardPage() {
   if (loading && !stats) {
     return (
       <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
-        <DoctorTopHeader />
+        <DoctorTopHeader isLoading />
         <div className="space-y-6">
           <Skeleton className="h-12 w-48 rounded-xl" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -36,9 +36,7 @@ export default function DoctorDashboardPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
-
-      {/* Page Title */}
-      <h1 className="text-3xl font-bold text-slate-800 mb-6">Overview</h1>
+      <DoctorTopHeader title="Overview" />
 
       {/* 1. Metrics Row */}
       <MetricsGrid stats={stats || null} />

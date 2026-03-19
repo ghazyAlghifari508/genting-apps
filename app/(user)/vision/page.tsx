@@ -136,6 +136,9 @@ export default function VisionPage() {
     setScanState('analyzing')
     setError(null)
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 120000)
+
     try {
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       const formData = new FormData()
@@ -145,10 +148,14 @@ export default function VisionPage() {
       const response = await fetch('/api/ai/analyze-food', {
         method: 'POST',
         body: formData,
+        signal: controller.signal
       })
 
+      clearTimeout(timeoutId)
+
       if (!response.ok) {
-        throw new Error('Gagal menganalisis gambar Bunda. Silakan coba lagi nanti ya. ??')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Gagal menganalisis gambar Bunda. Silakan coba lagi nanti ya. 🙏')
       }
 
       const data = await response.json()
@@ -343,7 +350,7 @@ export default function VisionPage() {
                               </div>
                               <div>
                                 <p className="text-white font-bold text-lg">Pilih Foto Makanan</p>
-                                <p className="text-white/40 text-xs mt-1">PNG, JPG up to 5MB</p>
+                                <p className="text-white/40 text-xs mt-1">PNG, JPG, WebP up to 5MB</p>
                               </div>
                             </div>
                           )}
@@ -446,6 +453,11 @@ export default function VisionPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="bg-doccure-teal text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl">Verified Analysis</span>
+                      {analysis && (analysis as any).isFallback ? (
+                        <span className="bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl border border-amber-200">Local Safety</span>
+                      ) : (
+                        <span className="bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl border border-emerald-200">AI Powered</span>
+                      )}
                     </div>
                     <h2 className="text-4xl lg:text-5xl font-black text-slate-900  leading-tight tracking-tighter">
                       Profil Nutrisi <br/>

@@ -81,8 +81,8 @@ export default function VideoHighlight() {
                   <X className="w-4 h-4" />
                 </button>
                 <iframe
-                  src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
-                  title="Genting+ Demo Video"
+                  src="https://www.youtube.com/embed/NU_MDQ2iNYE?autoplay=1"
+                  title="Video Informasi & Edukasi Pencegahan Stunting"
                   className="w-full h-full border-0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen

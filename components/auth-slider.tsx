@@ -158,7 +158,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
           </Link>
 
           <div className="flex items-center gap-0 text-doccure-teal mb-10 -ml-4 overflow-visible">
-            <Image src="/images/unsplash/logo-genting.png" alt="Genting Logo" width={130} height={130} className="w-[100px] h-[100px] scale-[1.3] object-contain drop-shadow-sm" />
+            <Image src="/images/unsplash/logo-rembg.png" alt="Genting Logo" width={130} height={130} className="w-[100px] h-[100px] scale-[1.3] object-contain drop-shadow-sm" />
           </div>
 
           <div className="mb-8">
@@ -182,7 +182,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
           {needsConfirmation ? (
             <div className="flex flex-col items-center justify-center py-10 text-center space-y-6 animate-in fade-in zoom-in duration-500">
               <div className="mb-2 flex items-center justify-center overflow-visible">
-                <Image src="/images/unsplash/logo-genting.png" alt="Genting Logo" width={180} height={180} className="w-[160px] h-[160px] scale-[1.2] object-contain drop-shadow-lg" />
+                <Image src="/images/unsplash/logo-rembg.png" alt="Genting Logo" width={180} height={180} className="w-[160px] h-[160px] scale-[1.2] object-contain drop-shadow-lg" />
               </div>
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold text-slate-900 ">Pendaftaran Berhasil!</h3>

@@ -3,26 +3,42 @@ import { generateText } from 'ai'
 import { z } from 'zod'
 import { createClient } from '@supabase/supabase-js'
 
+export const maxDuration = 60 
+
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
 const FoodAnalysisSchema = z.object({
-  foodName: z.string().describe('Nama makanan yang terdeteksi dalam bahasa Indonesia'),
-  calories: z.number().describe('Perkiraan kalori dalam kcal'),
-  protein: z.number().describe('Perkiraan protein dalam gram'),
-  carbs: z.number().describe('Perkiraan karbohidrat dalam gram'),
-  fat: z.number().describe('Perkiraan lemak dalam gram'),
-  iron: z.number().describe('Perkiraan zat besi dalam mg'),
-  zinc: z.number().describe('Perkiraan zinc dalam mg'),
-  calcium: z.number().describe('Perkiraan kalsium dalam mg'),
-  folicAcid: z.number().describe('Perkiraan asam folat dalam mcg'),
-  vitaminA: z.number().describe('Perkiraan vitamin A dalam mcg'),
-  stuntingNutritionScore: z.number().min(0).max(100).describe('Skor nutrisi anti-stunting 0-100, berdasarkan kandungan protein, zat besi, zinc, dan nutrisi penting lainnya'),
-  tip: z.string().describe('Tips singkat dalam bahasa Indonesia tentang makanan ini untuk pencegahan stunting, maksimal 2 kalimat'),
-  isHealthy: z.boolean().describe('Apakah makanan ini baik untuk ibu hamil'),
+  foodName: z.string(),
+  calories: z.number(),
+  protein: z.number(),
+  carbs: z.number(),
+  fat: z.number(),
+  iron: z.number(),
+  zinc: z.number(),
+  calcium: z.number(),
+  folicAcid: z.number(),
+  vitaminA: z.number(),
+  stuntingNutritionScore: z.number().min(0).max(100),
+  tip: z.string(),
+  isHealthy: z.boolean(),
 })
+
+type FoodAnalysis = z.infer<typeof FoodAnalysisSchema>
+
+// Helper to extract JSON from AI response
+function extractJSON(text: string): Record<string, unknown> | null {
+  try {
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+    return JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+  } catch (error) {
+    console.error('[analyze-food] JSON Parse Error:', error);
+    return null;
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -37,19 +53,15 @@ export async function POST(req: Request) {
       )
     }
 
-    // Convert image to base64
     const bytes = await image.arrayBuffer()
     const base64 = Buffer.from(bytes).toString('base64')
     const mimeType = image.type || 'image/jpeg'
 
-    const prompt = `Kamu adalah ahli gizi Indonesia. Analisis foto makanan ini untuk ibu hamil yang ingin mencegah stunting.
-
-PENTING: Semua jawaban WAJIB dalam BAHASA INDONESIA. Nama makanan HARUS dalam bahasa Indonesia (contoh: "Bubur Ayam", "Nasi Goreng", "Soto Betawi", bukan nama Inggris).
-
-Keluarkan HASIL HANYA DALAM FORMAT JSON yang valid tanpa markdown formatting (jangan pakai \`\`\`json).
-Struktur JSON harus persis seperti ini:
+    const prompt = `Analisis foto makanan ini untuk ibu hamil (pencegahan stunting). 
+Sangat Penting: Kembalikan respon HANYA dalam format JSON mentah tanpa teks tambahan.
+JSON harus memiliki struktur:
 {
-  "foodName": "Nama makanan dalam Bahasa Indonesia (string)",
+  "foodName": "Nama Makanan (Bahasa Indonesia)",
   "calories": 0,
   "protein": 0,
   "carbs": 0,
@@ -59,47 +71,57 @@ Struktur JSON harus persis seperti ini:
   "calcium": 0,
   "folicAcid": 0,
   "vitaminA": 0,
-  "stuntingNutritionScore": 0,
-  "tip": "Tips singkat dalam Bahasa Indonesia (string)",
-  "isHealthy": true
+  "stuntingNutritionScore": 0-100,
+  "tip": "Tips singkat max 2 kalimat",
+  "isHealthy": true/false
 }
+Jika bukan makanan, isi foodName: "Bukan Makanan" dan isHealthy: false.`
 
-Berikan estimasi nutrisi yang akurat berdasarkan porsi standar makanan Indonesia.
-Jika bukan gambar makanan, berikan foodName: "Bukan Makanan", nilai 0, dan isHealthy: false.`
+    // STRATEGI: MULTI-RETRY & AUTO-ROUTER (Anti-429)
+    let aiResponse = null;
+    let lastError = null;
+    const modelAttempts = [
+      'openrouter/free',
+      'nvidia/nemotron-nano-12b-v2-vl:free',
+      'google/gemma-3-12b-it:free'
+    ];
 
-    const { text: jsonString } = await generateText({
-      model: openrouter('nvidia/nemotron-nano-12b-v2-vl:free'),
-      messages: [
-        {
-          role: 'user',
-          content: [
+    for (let i = 0; i < modelAttempts.length; i++) {
+      try {
+        console.info(`[analyze-food] Attempt ${i + 1} with ${modelAttempts[i]}...`);
+        const { text } = await generateText({
+          model: openrouter(modelAttempts[i]),
+          messages: [
             {
-              type: 'text',
-              text: prompt,
-            },
-            {
-              type: 'image',
-              image: new URL(`data:${mimeType};base64,${base64}`),
+              role: 'user',
+              content: [
+                { type: 'text', text: prompt },
+                { type: 'image', image: `data:${mimeType};base64,${base64}` },
+              ],
             },
           ],
-        },
-      ],
-    })
-
-    // Parse JSON manually
-    let analysis: z.infer<typeof FoodAnalysisSchema>;
-    try {
-      // Clean potential markdown code blocks
-      const cleanJson = jsonString.replace(/```json/g, '').replace(/```/g, '').trim();
-      analysis = FoodAnalysisSchema.parse(JSON.parse(cleanJson));
-    } catch {
-      console.error('[analyze-food] Failed to parse AI response');
-      throw new Error('Gagal memproses hasil analisis AI');
+        });
+        aiResponse = text;
+        if (aiResponse) break;
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        console.error(`[analyze-food] Attempt ${i + 1} failed:`, lastError.message);
+        // Jika 429, tunggu sebentar sebelum lanjut ke model berikutnya
+        if (lastError.message?.includes('429')) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
     }
 
-    // Save to database if user is logged in
+    if (!aiResponse) throw lastError || new Error('All model attempts failed');
+
+    const rawJson = extractJSON(aiResponse);
+    if (!rawJson) throw new Error('Model returned no valid JSON');
+    const analysis = FoodAnalysisSchema.parse(rawJson);
+
+    // Save to database
     let scanId: string | null = null
-    if (userId) {
+    if (userId && analysis) {
       try {
         const { data, error } = await supabaseAdmin
           .from('food_scans')
@@ -122,27 +144,40 @@ Jika bukan gambar makanan, berikan foodName: "Bukan Makanan", nilai 0, dan isHea
           .select('id')
           .single()
 
-        if (!error && data) {
-          scanId = data.id
-        }
+        if (!error && data) scanId = data.id
       } catch (dbErr) {
         console.error('[analyze-food] DB save error:', dbErr)
       }
     }
 
     return new Response(
-      JSON.stringify({ success: true, analysis, scanId }),
+      JSON.stringify({ success: true, analysis, scanId, isFallback: false }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[analyze-food] Error:', errorMessage);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error('[analyze-food] AI Failure, using safety stub:', errorMsg);
     
+    // Safety Stub biar gak CRASH/500
+    const safetyAnalysis = {
+      foodName: "AI Sedang Sibuk 🙏",
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+      iron: 0,
+      zinc: 0,
+      calcium: 0,
+      folicAcid: 0,
+      vitaminA: 0,
+      stuntingNutritionScore: 0,
+      tip: "Maaf Bun, server AI sedang penuh antrean. Silakan coba lagi sebentar lagi ya! Bunda tetap bisa makan sehat demi si kecil. ❤️",
+      isHealthy: true
+    }
+
     return new Response(
-      JSON.stringify({ 
-        error: `Gagal menganalisis gambar Bunda. Silakan coba lagi nanti ya. 🙏`,
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: true, analysis: safetyAnalysis, isFallback: true }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
   }
 }

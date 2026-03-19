@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Pada usia berapa embrio berhasil menempel pada dinding rahim?",
+    "options": [
+      "1 minggu",
+      "2 minggu",
+      "1 bulan",
+      "3 bulan"
+    ],
+    "answer": 2
+  },
+  {
+    "question": "Apa ukuran janin pada minggu ke-4?",
+    "options": [
+      "seukuran kacang polong",
+      "seukuran biji sesawi",
+      "seukuran buah jeruk",
+      "seukuran bola tenis"
+    ],
+    "answer": 1
+  },
+  {
+    "question": "Salah satu organ vital janin yang mulai terbentuk pada minggu ke-4 adalah?",
+    "options": [
+      "jantung",
+      "otak",
+      "tabung saraf",
+      "tulang"
+    ],
+    "answer": 2
+  }
+]

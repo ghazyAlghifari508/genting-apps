@@ -33,7 +33,7 @@ export default function RegisterDoctorPage() {
   })
   
   const { toast } = useToast()
-  const { user } = useAuth()
+  const { user: _user } = useAuth() // Prefixed with underscore if we want to keep it for potential future use but silence lint, or just remove.
   const router = useRouter()
 
   const handleSubmit = async () => {

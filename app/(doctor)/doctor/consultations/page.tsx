@@ -10,7 +10,6 @@ import { ConsultationStatusBadge } from '@/components/shared/ConsultationStatus'
 import { RatingStars } from '@/components/shared/RatingStars'
 import { Search, Users, Clock, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-import type { Consultation } from '@/types/consultation'
 
 const STATUS_TABS: { label: string; value: string }[] = [
   { label: 'Semua', value: 'all' },

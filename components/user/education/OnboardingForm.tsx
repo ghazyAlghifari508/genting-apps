@@ -131,7 +131,7 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
           <div className="flex items-center gap-2 mb-10">
             <div className="flex items-center justify-center h-12 overflow-visible">
               <Image 
-                src="/images/unsplash/logo-genting.png" 
+                src="/images/unsplash/logo-rembg.png" 
                 alt="Genting Logo" 
                 width={100} 
                 height={100} 

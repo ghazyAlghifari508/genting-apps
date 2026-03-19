@@ -53,10 +53,6 @@ export function DoctorCard({ doctor, index }: DoctorCardProps) {
                     <Clock className="h-4 w-4 text-slate-400" />
                     <span className="text-[11px] font-black text-slate-700 ">{doctor.years_of_experience || 5} Thn Pengalaman</span>
                  </div>
-                 <div className="flex items-center gap-2 rounded-xl bg-amber-50  px-3 py-1.5 border border-amber-100  shadow-sm">
-                    <Sparkles className="h-4 w-4 text-amber-500" />
-                    <span className="text-[11px] font-black text-amber-700">4.9/5 Rating</span>
-                 </div>
               </div>
             </div>
           </div>

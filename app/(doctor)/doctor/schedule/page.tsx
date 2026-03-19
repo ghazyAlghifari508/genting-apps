@@ -66,10 +66,8 @@ export default function DoctorSchedulePage() {
 
   if (loading && schedules.length === 0) {
     return (
-      <div className="p-8 max-w-[1600px] mx-auto min-h-screen">
-        <div className="flex items-center justify-between mb-6 max-w-3xl mx-auto">
-           <Skeleton className="h-10 w-48 rounded-lg" />
-        </div>
+      <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
+        <DoctorTopHeader title="Jadwal Praktik" isLoading />
         <main className="max-w-3xl mx-auto space-y-4">
            {[1, 2, 3].map(i => (
              <Skeleton key={i} className="h-48 w-full rounded-[2.5rem]" />
@@ -81,7 +79,7 @@ export default function DoctorSchedulePage() {
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
-      <DoctorTopHeader title="Jadwal Praktik" showSearch={false} />
+      <DoctorTopHeader title="Jadwal Praktik" isLoading={loading} />
 
       <main className="space-y-4">
         {DAY_NAMES.map((dayName, dayIndex) => {

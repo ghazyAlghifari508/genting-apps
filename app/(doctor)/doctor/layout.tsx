@@ -5,7 +5,6 @@ import { DoctorSidebar } from '@/components/doctor/layout/DoctorSidebar'
 import { DoctorMobileHeader } from '@/components/doctor/layout/DoctorMobileHeader'
 import { useCheckDoctorApproval } from '@/hooks/useCheckDoctorApproval'
 import { useProtectedRoute } from '@/hooks/useProtectedRoute'
-import { Skeleton } from '@/components/ui/skeleton'
 
 export default function DoctorDashboardLayout({
   children,

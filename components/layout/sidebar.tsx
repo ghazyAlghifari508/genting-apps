@@ -40,7 +40,7 @@ export function DashboardSidebar() {
       <div className="flex-1 flex flex-col bg-white/70  backdrop-blur-3xl rounded-3xl border border-white/50  shadow-2xl shadow-cerulean/5 overflow-hidden transition-colors duration-300">
         <div className="p-8">
           <Link href="/dashboard" className="flex items-center gap-0 group overflow-visible -ml-4">
-            <Image src="/images/unsplash/logo-genting.png" alt="Genting Logo" width={100} height={100} className="w-[90px] h-[90px] scale-[1.3] object-contain transition-all group-hover:scale-110 group-hover:rotate-3 drop-shadow-md" />
+            <Image src="/images/unsplash/logo-rembg.png" alt="Genting Logo" width={100} height={100} className="w-[90px] h-[90px] scale-[1.3] object-contain transition-all group-hover:scale-110 group-hover:rotate-3 drop-shadow-md" />
           </Link>
         </div>
 

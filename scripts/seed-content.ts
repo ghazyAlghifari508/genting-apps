@@ -23,10 +23,64 @@ async function seed() {
 
     console.log("Seeding Education Contents...");
     const educationItems = [
-      // PHASE: Kehamilan
-      { day: 1, phase: 'kehamilan', month: 1, title: 'Keajaiban Awal: Pembuahan', description: 'Memahami proses luar biasa di minggu pertama.', category: 'kesehatan', content: 'Minggu pertama kehamilan sebenarnya adalah masa menstruasi terakhir Anda. Tubuh sedang bersiap untuk ovulasi dan pembuahan yang akan datang.', tips: ['Mulai konsumsi asam folat 400mcg harian', 'Hentikan kebiasaan merokok dan alkohol', 'Catat tanggal haid terakhir dengan teliti'] },
-      { day: 14, phase: 'kehamilan', month: 1, title: 'Nutrisi Penting Trimester Pertama', description: 'Zink dan Protein untuk pembelahan sel.', category: 'nutrisi', content: 'Pada fase ini, pembelahan sel terjadi sangat cepat. Protein berkualitas tinggi dan Zink sangat dibutuhkan untuk mendukung proses ini.', tips: ['Konsumsi telur matang sempurna', 'Tambahkan kacang-kacangan dalam menu harian', 'Tetap terhidrasi dengan air putih'] },
-      { day: 30, phase: 'kehamilan', month: 1, title: 'Mengelola Morning Sickness', description: 'Tips menghadapi mual dan muntah di pagi hari.', category: 'kesehatan', content: 'Mual adalah tanda hormon kehamilan bekerja. Jahe dan porsi makan kecil namun sering dapat membantu meredakan gejala.', tips: ['Makan biskuit gandum saat bangun tidur', 'Hindari bau-bauan yang tajam', 'Konsultasi jika muntah terlalu sering'] },
+      //- PHASE: Kehamilan
+      { 
+        day: 1, 
+        phase: 'kehamilan', 
+        month: 1, 
+        title: 'Minggu 1: Persiapan Rumah Si Kecil', 
+        description: 'Perjalanan 1000 hari dimulai dengan persiapan tubuh Bunda yang luar biasa.', 
+        category: 'kesehatan', 
+        content: `Minggu pertama kehamilan sebenarnya dihitung dari hari pertama haid terakhir Bunda. Tubuh sedang melakukan "pembersihan" dan persiapan besar-besaran untuk menyambut pembuahan.
+
+### Apa yang Terjadi?
+Dinding rahim melepaskan lapisan lamanya dan mulai membangun kembali lapisan yang lebih kaya nutrisi dan oksigen. Hormon Estrogen mulai meningkat untuk merangsang sel telur baru yang akan dilepaskan minggu depan.
+
+### Tips Nutrisi Utama
+Meskipun Bunda mungkin belum merasa hamil, asupan **Asam Folat** sudah harus dimulai sekarang. Asam folat sangat penting untuk perkembangan saraf pusat bayi di masa paling awal.
+
+### Aktivitas Hari Ini
+Cobalah untuk berjalan santai di pagi hari dan mulai kurangi asupan kafein. Jaga pikiran agar tetap tenang karena kondisi emosional Bunda berpengaruh pada keseimbangan hormon.`, 
+        tips: ['Mulai konsumsi asam folat 400mcg harian', 'Hentikan kebiasaan merokok dan alkohol', 'Catat tanggal haid terakhir dengan teliti'] 
+      },
+      { 
+        day: 14, 
+        phase: 'kehamilan', 
+        month: 1, 
+        title: 'Minggu 2: Pertemuan Sel Telur & Sperma', 
+        description: 'Momen magis pembuahan dan awal dari kehidupan baru.', 
+        category: 'perkembangan', 
+        content: `Ini adalah waktu ovulasi! Jika sperma bertemu dengan sel telur, pembuahan pun terjadi. Sel tunggal yang terbentuk akan mulai membelah diri dengan sangat cepat.
+
+### Keajaiban Kecil
+Sel yang baru terbentuk (Zigot) mengandung seluruh instruksi genetik untuk warna mata, tinggi badan, hingga senyum Si Kecil nanti. Zigot ini akan menempuh perjalanan dari saluran tuba menuju rahim untuk menempel (implantasi).
+
+### Nutrisi Penunjang
+Protein hewani dan nabati sangat dibutuhkan untuk mendukung pembelahan sel yang sangat cepat ini. Pastikan asupan Zinc Bunda tercukupi untuk kualitas sel yang optimal.
+
+### Pesan untuk Bunda
+Selamat! Secara biologis, keajaiban telah dimulai. Jaga suhu tubuh agar tidak terlalu panas (hindari sauna atau mandi air panas berlebih) untuk menjaga stabilitas sel yang sedang membelah.`, 
+        tips: ['Konsumsi telur matang sempurna', 'Tambahkan kacang-kacangan dalam menu harian', 'Tetap terhidrasi dengan air putih'] 
+      },
+      { 
+        day: 30, 
+        phase: 'kehamilan', 
+        month: 1, 
+        title: 'Minggu 4: Menempel di Rumah yang Nyaman', 
+        description: 'Si Kecil kini menetap di rahim dan mulai menarik nutrisi dari Bunda.', 
+        category: 'kesehatan', 
+        content: `Pada usia satu bulan ini, embrio telah berhasil menempel pada dinding rahim. Bunda mungkin merasakan "flek implantasi" atau mual ringan.
+
+### Perkembangan Janin
+Ukuran Si Kecil masih seukuran biji sesawi, namun organ-organ vital seperti jantung dan otak sudah mulai menunjukkan tanda kehidupan awal dalam bentuk tabung saraf.
+
+### Menghadapi Gejala Awal
+Rasa lelah yang luar biasa dan mual (morning sickness) adalah tanda kadar hormon HCG yang meningkat. Hormon ini sangat penting untuk memastikan janin aman di dalam sana.
+
+### Tips Nyaman Bunda
+Makanlah dalam porsi kecil namun sering (6x sehari) untuk menjaga perut tidak kosong. Jahe hangat bisa menjadi teman setia untuk meredakan mual di pagi hari.`, 
+        tips: ['Makan biskuit gandum saat bangun tidur', 'Hindari bau-bauan yang tajam', 'Konsultasi jika muntah terlalu sering'] 
+      },
       { day: 60, phase: 'kehamilan', month: 2, title: 'Pembentukan Organ Vital', description: 'Jantung dan saraf Si Kecil mulai terbentuk.', category: 'perkembangan', content: 'Di bulan kedua, jantung janin mulai berdenyut. Ini adalah periode sensitif di mana paparan zat berbahaya harus dihindari sepenuhnya.', tips: ['Lakukan pemeriksaan ANC pertama', 'Hindari paparan asap rokok', 'Minum vitamin prenatal secara rutin'] },
       { day: 90, phase: 'kehamilan', month: 3, title: 'Kesehatan Gigi Saat Hamil', description: 'Mencegah radang gusi akibat perubahan hormon.', category: 'kesehatan', content: 'Hormon kehamilan dapat membuat gusi lebih sensitif. Infeksi gusi yang parah dapat berdampak pada kesehatan kehamilan.', tips: ['Gunakan sikat gigi berbulu halus', 'Rutin flossing', 'Lakukan pemeriksaan gigi ringan'] },
       { day: 120, phase: 'kehamilan', month: 4, title: 'Bonding Melalui Suara', description: 'Si Kecil mulai bisa mendengar detak jantung Bunda.', category: 'stimulasi', content: 'Pada trimester kedua, sistem pendengaran janin berkembang. Mulailah berbicara atau membacakan buku untuk Si Kecil.', tips: ['Bicaralah dengan lembut pada perut', 'Putar musik yang menenangkan', 'Ajak Ayah untuk ikut berkomunikasi'] },

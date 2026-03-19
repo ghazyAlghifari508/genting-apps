@@ -100,7 +100,7 @@ export default function DoctorApprovalsPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen bg-white  transition-colors">
-      <AdminTopHeader title="Doctor Approvals" showSearch={false} />
+      <AdminTopHeader title="Doctor Approvals" />
 
       <div className="mb-6">
         <p className="text-sm text-slate-500  transition-colors">Verifikasi pendaftaran dokter baru</p>

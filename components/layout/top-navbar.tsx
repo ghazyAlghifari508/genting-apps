@@ -98,13 +98,13 @@ export function TopNavbar() {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 ${isLanding ? 'bg-doccure-dark' : (isDashboardArea || scrolled ? 'bg-doccure-dark shadow-md' : 'bg-transparent')} transition-colors duration-200`}>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`h-20 flex items-center justify-between ${isDashboardArea ? 'lg:grid lg:grid-cols-[auto_1fr_auto]' : ''} items-center`}>
+        <div className="h-20 flex lg:grid lg:grid-cols-3 items-center justify-between transition-all duration-200">
           
           {/* Logo */}
           <div className="flex items-center">
             <Link href={logoHref} className="flex items-center gap-2 group shrink-0">
               <div className="flex items-center justify-center transition-transform group-hover:scale-105 h-16 overflow-visible">
-                <Image src="/images/unsplash/logo-genting.png" alt="Genting Logo" width={120} height={120} className="w-[90px] h-[90px] scale-[1.4] object-contain drop-shadow-md" />
+                <Image src="/images/unsplash/logo-white.png" alt="Genting Logo" width={120} height={120} className="w-[90px] h-[90px] scale-[1.4] object-contain drop-shadow-md" />
               </div>
             </Link>
           </div>
@@ -131,7 +131,7 @@ export function TopNavbar() {
           </div>
 
           {/* User Actions - Desktop & Mobile */}
-          <div className="flex items-center gap-4 sm:gap-6 shrink-0 lg:ml-0">
+          <div className="flex items-center justify-end gap-4 sm:gap-6 shrink-0">
             {/* User Account / Auth - Desktop */}
             <div className="hidden lg:flex items-center gap-6">
               {!user && !isDashboardArea ? (
@@ -153,7 +153,7 @@ export function TopNavbar() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="flex items-center hover:opacity-80 transition-all outline-none">
-                        <Avatar className="h-10 w-10 border-2 border-white/20 shadow-sm ring-offset-2 ring-offset-doccure-dark active:scale-95 transition-transform">
+                        <Avatar className="h-10 w-10 border-2 border-white/20 shadow-sm ring-offset-2 ring-offset-genting-cerulean active:scale-95 transition-transform">
                           <AvatarImage src={user.user_metadata?.avatar_url} />
                           <AvatarFallback className="bg-slate-100 text-slate-400">
                             <User className="h-6 w-6" />
@@ -168,14 +168,14 @@ export function TopNavbar() {
                       <div className="space-y-1">
                         <Link href={role === 'doctor' ? '/doctor/profile' : '/profile'}>
                           <DropdownMenuItem className="rounded-2xl px-4 py-3.5 cursor-pointer font-bold focus:bg-slate-50 text-[#1e293b] transition-colors">
-                            <User className="mr-3 h-5 w-5 text-doccure-teal" />
+                            <User className="mr-3 h-5 w-5 text-genting-cerulean" />
                             <span className="text-[15px]">Profil</span>
                           </DropdownMenuItem>
                         </Link>
                         
                         <Link href="/riwayat-transaksi">
                           <DropdownMenuItem className="rounded-2xl px-4 py-3.5 cursor-pointer font-bold focus:bg-slate-50 text-[#1e293b] transition-colors">
-                            <HistoryIcon className="mr-3 h-5 w-5 text-doccure-teal" />
+                            <HistoryIcon className="mr-3 h-5 w-5 text-genting-cerulean" />
                             <span className="text-[15px]">Riwayat Transaksi</span>
                           </DropdownMenuItem>
                         </Link>
@@ -209,7 +209,7 @@ export function TopNavbar() {
                     <div className="flex items-center justify-between">
                       <SheetTitle className="text-left">
                         <div className="flex items-center overflow-visible">
-                          <Image src="/images/unsplash/logo-genting.png" alt="Genting Logo" width={100} height={100} className="w-[80px] h-[80px] scale-[1.3] object-contain drop-shadow-md" />
+                          <Image src="/images/unsplash/logo-white.png" alt="Genting Logo" width={100} height={100} className="w-[80px] h-[80px] scale-[1.3] object-contain drop-shadow-md" />
                         </div>
                       </SheetTitle>
                     </div>

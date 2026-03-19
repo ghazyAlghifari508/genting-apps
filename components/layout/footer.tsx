@@ -15,7 +15,7 @@ const Footer = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-0 mb-4 -ml-4 overflow-visible">
-                <Image src="/images/unsplash/logo-genting.png" alt="Genting Logo" width={120} height={120} className="w-[110px] h-[110px] scale-[1.3] object-contain" />
+                <Image src="/images/unsplash/logo-white.png" alt="Genting Logo" width={120} height={120} className="w-[110px] h-[110px] scale-[1.3] object-contain" />
               </div>
               <p className="text-sm text-white/50 mb-6 max-w-xs leading-relaxed">
                 Generasi Anti-Stunting - Platform digital untuk memantau tumbuh kembang anak dan mencegah stunting di Indonesia.

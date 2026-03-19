@@ -23,6 +23,7 @@ import {
   deleteChat,
   saveUserMessage,
   saveAiMessage,
+  getMessages,
 } from '@/app/actions/chat';
 
 interface Message {
@@ -45,26 +46,43 @@ export function AiChatFloating() {
   const [isTyping, setIsTyping] = useState(false);
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialize user ID and load chats when panel opens
+  // Load chats when panel opens
   useEffect(() => {
-    const storedUserId = localStorage.getItem('chat_user_id');
-    const currentUserId = storedUserId || `anon-${Date.now()}`;
-    if (!storedUserId) localStorage.setItem('chat_user_id', currentUserId);
-    setUserId(currentUserId);
-    if (isOpen) loadChats(currentUserId);
+    if (isOpen) {
+      loadChats();
+    }
   }, [isOpen]);
+
+  // Load messages when a chat is selected
+  useEffect(() => {
+    if (!selectedChatId) return;
+    
+    const loadMessages = async () => {
+      try {
+        const data = await getMessages(selectedChatId);
+        setMessages(data.map((m: any) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content
+        })));
+      } catch (err) {
+        console.error('Failed to load messages:', err);
+      }
+    };
+
+    loadMessages();
+  }, [selectedChatId]);
 
   // Auto scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const loadChats = async (uid: string) => {
+  const loadChats = async () => {
     try {
-      const data = await getChats(uid);
+      const data = await getChats();
       setChats(data);
     } catch (err) {
       console.error('Failed to load chats:', err);
@@ -73,7 +91,7 @@ export function AiChatFloating() {
 
   const handleCreateNewChat = async () => {
     try {
-      const newChat = await createChat(userId, 'Diskusi Baru');
+      const newChat = await createChat('Diskusi Baru');
       if (newChat) {
         setChats([newChat, ...chats]);
         setSelectedChatId(newChat.id);
@@ -88,7 +106,7 @@ export function AiChatFloating() {
   const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
     e.stopPropagation();
     try {
-      await deleteChat(chatId, userId);
+      await deleteChat(chatId);
       setChats(chats.filter(c => c.id !== chatId));
       if (selectedChatId === chatId) {
         setSelectedChatId(null);

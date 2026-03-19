@@ -1,8 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Search, Bell, Calendar, Menu, LayoutDashboard, Stethoscope, BookOpen, Route, ShieldAlert, User, LogOut } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Calendar, Menu, LayoutDashboard, Stethoscope, BookOpen, Route, ShieldAlert, User, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -19,7 +18,6 @@ import Image from 'next/image'
 
 interface AdminTopHeaderProps {
   title?: string
-  showSearch?: boolean
 }
 
 const adminMenuItems = [
@@ -29,7 +27,7 @@ const adminMenuItems = [
   { icon: Route, label: 'Manage Roadmap', href: '/admin/roadmap' },
 ]
 
-export function AdminTopHeader({ title, showSearch = true }: AdminTopHeaderProps) {
+export function AdminTopHeader({ title }: AdminTopHeaderProps) {
   const pathname = usePathname()
   const { user, signOut } = useAuth()
   const currentDate = new Date().toLocaleDateString('id-ID', {
@@ -118,33 +116,17 @@ export function AdminTopHeader({ title, showSearch = true }: AdminTopHeaderProps
           </SheetContent>
         </Sheet>
 
-        {showSearch ? (
-          <div className="h-12 relative flex-1">
-             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400  transition-colors" />
-             <Input 
-               placeholder="Search data..." 
-               className="pl-12 h-12 rounded-[2rem] border-none bg-white  shadow-sm text-slate-700  transition-all transition-colors"
-             />
-          </div>
-        ) : (
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800  transition-colors">{title}</h1>
-        )}
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 transition-colors">
+          {title}
+        </h1>
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-4 w-full md:w-auto justify-end">
-         <button className="p-3 bg-white  rounded-full text-slate-500  hover:bg-slate-50  shadow-sm relative transition-colors">
-           <Bell className="w-5 h-5" />
-         </button>
-         
-         <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white  rounded-full shadow-sm text-sm text-slate-600  font-bold transition-colors">
+         <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm text-sm text-slate-600 font-bold transition-colors">
             <Calendar className="w-4 h-4 text-doccure-teal" />
             {currentDate}
          </div>
-         
-         <Button className="rounded-full bg-doccure-teal hover:bg-[#0f605c] text-white px-6 h-12 font-bold shadow-md transition-colors">
-           Export
-         </Button>
       </div>
     </div>
   )

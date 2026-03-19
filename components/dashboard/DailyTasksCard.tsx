@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
-import { Sparkles, Users, ChevronDown, TrendingUp, CheckCircle2, PartyPopper } from 'lucide-react'
+import { Sparkles, ChevronDown, TrendingUp, CheckCircle2, PartyPopper } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 interface DailyTasksCardProps {
   currentWeek: number
@@ -72,8 +73,8 @@ export function DailyTasksCard({ currentWeek, dailyTasks, isCompleted }: DailyTa
             <TrendingUp className="w-4 h-4 text-emerald-500" />
             <span>Streak: 5 Hari</span>
           </div>
-          <Button variant="ghost" className="text-doccure-teal font-bold hover:bg-doccure-teal/5  rounded-xl transition-colors">
-            Lihat Riwayat Agenda
+          <Button asChild variant="ghost" className="text-doccure-teal font-bold hover:bg-doccure-teal/5  rounded-xl transition-colors">
+            <Link href="/roadmap">Lihat Roadmap</Link>
           </Button>
         </div>
       </div>

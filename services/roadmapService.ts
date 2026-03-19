@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
-import { getCurrentUser } from '@/lib/auth-server'
+import { assertAuthenticated, handleServiceError } from '@/lib/service-helper'
 import { RoadmapActivity, UserRoadmapProgress } from '@/types/roadmap'
 
 export async function getRoadmapActivities(): Promise<RoadmapActivity[]> {
@@ -11,7 +11,7 @@ export async function getRoadmapActivities(): Promise<RoadmapActivity[]> {
     .select('*')
     .order('difficulty_level', { ascending: true })
   
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil daftar aktivitas roadmap')
   return (data || []) as RoadmapActivity[]
 }
 
@@ -22,7 +22,7 @@ export async function getUserRoadmapProgress(userId: string): Promise<UserRoadma
     .select('*')
     .eq('user_id', userId)
   
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil progres roadmap user')
   return (data || []) as UserRoadmapProgress[]
 }
 
@@ -34,8 +34,10 @@ export async function upsertRoadmapProgress(payload: {
   streak_count: number
   last_completed_date: string
 }): Promise<UserRoadmapProgress> {
-  const user = await getCurrentUser()
-  if (!user || user.id !== payload.user_id) throw new Error('Unauthorized')
+  const user = await assertAuthenticated()
+  if (user.id !== payload.user_id) {
+    throw new Error('Akses ditolak: Anda hanya dapat memperbarui progres Anda sendiri')
+  }
 
   const supabase = await createClient()
   
@@ -73,7 +75,7 @@ export async function upsertRoadmapProgress(payload: {
       .single()
   }
 
-  if (result.error) throw result.error
+  if (result.error) handleServiceError(result.error, 'Gagal memperbarui progres roadmap')
   return result.data as UserRoadmapProgress
 }
 
@@ -82,8 +84,10 @@ export async function saveDailyJournal(payload: {
   content: string
   date: string
 }) {
-  const user = await getCurrentUser()
-  if (!user || user.id !== payload.user_id) throw new Error('Unauthorized')
+  const user = await assertAuthenticated()
+  if (user.id !== payload.user_id) {
+    throw new Error('Akses ditolak: Anda hanya dapat menyimpan jurnal Anda sendiri')
+  }
 
   const supabase = await createClient()
   
@@ -100,6 +104,19 @@ export async function saveDailyJournal(payload: {
     .select()
     .single()
 
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal menyimpan jurnal harian')
+  return data
+}
+
+export async function getDailyJournal(userId: string, date: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('user_journals')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('journal_date', date)
+    .maybeSingle()
+
+  if (error) handleServiceError(error, 'Gagal mengambil jurnal harian')
   return data
 }

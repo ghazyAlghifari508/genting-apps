@@ -1,0 +1,9 @@
+.next
+node_modules
+.agents
+public
+.genting-cache
+lint-output.txt
+benchmark-before.json
+unused-files-report.json
+scripts/detect-unused.js

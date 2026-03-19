@@ -26,7 +26,7 @@ export function RemindersCard({ reminders, currentWeek }: RemindersCardProps) {
           >
             <Bell className="w-5 h-5 text-doccure-yellow" />
           </motion.div>
-          Smart Reminders
+          Konten Edukasi
         </h3>
         
         <div className="space-y-4 transition-colors">

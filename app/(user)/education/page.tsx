@@ -19,7 +19,6 @@ import {
   EducationContent,
 } from '@/types/education'
 import {
-  toggleReadStatus,
   toggleFavoriteStatus
 } from '@/services/educationService'
 import { calculateReadingStreak } from '@/lib/education-utils'

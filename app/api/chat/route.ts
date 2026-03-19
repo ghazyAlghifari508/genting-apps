@@ -32,29 +32,31 @@ export async function POST(req: NextRequest) {
     { role: 'user', content: message },
   ]
 
-  // Stream directly from OpenRouter to the client
-  const upstream = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || ''}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://genting-app.vercel.app',
-      'X-Title': 'Genting App',
-    },
-    body: JSON.stringify({
-      model: 'openrouter/free',
-      messages,
-      stream: true, // <-- enable streaming
-    }),
-  })
+  const upstreamFetch = async (model: string) => {
+    return await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || ''}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://genting-app.vercel.app',
+        'X-Title': 'Genting App',
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        stream: true,
+      }),
+    })
+  }
+
+  const upstream = await upstreamFetch('openrouter/free')
 
   if (!upstream.ok) {
     const err = await upstream.text()
-    console.error('OpenRouter error:', err)
-    return NextResponse.json({ error: 'AI error' }, { status: 500 })
+    console.error('[chat] Final fallback failed:', err)
+    return NextResponse.json({ error: 'Sistem sedang sibuk, silakan coba lagi ya Bun. 🙏' }, { status: 500 })
   }
 
-  // Forward the SSE stream directly to the browser
   return new Response(upstream.body, {
     headers: {
       'Content-Type': 'text/event-stream',

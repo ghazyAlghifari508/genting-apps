@@ -3,7 +3,6 @@
 import { ReactNode } from 'react'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { useProtectedRoute } from '@/hooks/useProtectedRoute'
-import { Skeleton } from '@/components/ui/skeleton'
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   // Neutral Shell: Always render the structure.

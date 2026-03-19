@@ -11,7 +11,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/use-toast'
 import { usePregnancyData } from '@/hooks/usePregnancyData'
 import { upsertRoadmapProgress } from '@/services/roadmapService'
+import type { RoadmapActivity } from '@/types/roadmap'
 import dynamic from 'next/dynamic'
+import confetti from 'canvas-confetti'
 
 // Components - Lazy Loaded
 const RoadmapHeader = dynamic(() => import('@/components/user/roadmap/RoadmapHeader').then(mod => mod.RoadmapHeader))
@@ -37,27 +39,38 @@ const difficultyConfig: Record<number, { label: string; color: string; bg: strin
 const defaultDifficulty = { label: 'Sedang', color: 'text-slate-600', bg: 'bg-slate-50' }
 
 export default function RoadmapPage() {
-  const { profile, loading: dataLoading, roadmap, loadRoadmap, saveDailyJournal } = usePregnancyData()
+  const { profile, loading: dataLoading, roadmap, loadRoadmap, saveDailyJournal, getDailyJournal } = usePregnancyData()
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [currentTrimester, setCurrentTrimester] = useState(profile?.trimester || 1)
   const [journal, setJournal] = useState('')
   const [journalSaved, setJournalSaved] = useState<string | null>(null)
-  const [selectedActivity, setSelectedActivity] = useState<any>(null)
+  const [selectedActivity, setSelectedActivity] = useState<RoadmapActivity | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     if (profile) {
-      if (!currentTrimester && profile.trimester) {
-        const trm = profile.trimester;
-        setTimeout(() => setCurrentTrimester(trm), 0)
+      const fetchJournal = async () => {
+        const today = new Date().toISOString().slice(0, 10)
+        const key = `roadmap_journal_${profile.id}_${today}`
+        
+        // 1. Cek LocalStorage dulu (cepat)
+        const local = localStorage.getItem(key)
+        if (local) setJournal(local)
+
+        // 2. Tarik dari DB (sumber kebenaran)
+        try {
+          const dbJournal = await getDailyJournal(profile.id, today)
+          if (dbJournal?.content) {
+            setJournal(dbJournal.content)
+            localStorage.setItem(key, dbJournal.content)
+          }
+        } catch (error) {
+          console.warn('Sync journal error:', error)
+        }
       }
-      const key = `roadmap_journal_${profile.id}_${new Date().toISOString().slice(0, 10)}`
-      const savedJournal = localStorage.getItem(key)
-      if (savedJournal) {
-        setTimeout(() => setJournal(savedJournal), 0)
-      }
+      fetchJournal()
     }
-  }, [profile, currentTrimester])
+  }, [profile, getDailyJournal])
 
   useEffect(() => {
     // Rely on Provider's internal guard to prevent loops
@@ -101,25 +114,41 @@ export default function RoadmapPage() {
       })
       
       await loadRoadmap(true)
+      
+      // Edutainment: Confetti Burst!
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.7 },
+        colors: ['#007E85', '#FFB800', '#FF5B5B', '#48BB78'],
+        zIndex: 9999
+      })
+
       toast({ title: 'Aktivitas selesai!', description: 'Bagus Bunda, teruskan kebiasaan sehat ini ya.' })
     } catch (error) {
+      console.error('Error completing activity:', error)
       toast({ title: 'Oops!', description: 'Gagal memperbarui aktivitas.', variant: 'destructive' })
     }
   }
 
   const handleSaveJournal = async () => {
     if (!profile) return
+    const today = new Date().toISOString().split('T')[0]
+    const key = `roadmap_journal_${profile.id}_${today}`
+
     try {
       await saveDailyJournal({
         user_id: profile.id,
         content: journal,
-        date: new Date().toISOString().split('T')[0]
+        date: today
       })
+      // Always sync to local storage on success too
+      localStorage.setItem(key, journal)
       setJournalSaved(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))
       toast({ title: 'Jurnal disimpan', description: 'Catatan Bunda telah aman tersimpan di database.' })
     } catch (error) {
+      console.error('Error saving journal to DB:', error)
       // Fallback to localStorage if service/table fails
-      const key = `roadmap_journal_${profile.id}_${new Date().toISOString().slice(0, 10)}`
       localStorage.setItem(key, journal)
       setJournalSaved(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))
       toast({ title: 'Jurnal disimpan (Lokal)', description: 'Tersimpan lokal karena kendala koneksi.' })

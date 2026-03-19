@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
-import { getCurrentUser } from '@/lib/auth-server'
+import { assertRole, handleServiceError } from '@/lib/service-helper'
 import { EducationContent } from '@/types/education'
 import { RoadmapActivity, CreateRoadmapActivityInput, UpdateRoadmapActivityInput } from '@/types/roadmap'
 import { DoctorRegistration, Doctor } from '@/types/doctor'
@@ -14,25 +14,11 @@ export interface DashboardStats {
   totalRoadmap: number
 }
 
-async function checkAdmin() {
-  const user = await getCurrentUser()
-  
-  if (!user) {
-    console.warn('[AdminService] checkAdmin: No user found in session')
-    throw new Error('Unauthorized: No user session found')
-  }
-
-  if (user.role !== 'admin') {
-    console.warn(`[AdminService] Unauthorized access attempt by ${user.email} (${user.id}) with role: ${user.role}`)
-    throw new Error('Unauthorized: Admin access required')
-  }
-
-  return user
-}
+// Role check handled by assertRole('admin')
 
 // ==================== DASHBOARD ====================
 export async function fetchDashboardStats(): Promise<DashboardStats> {
-  await checkAdmin()
+  await assertRole('admin')
   const supabase = await createClient()
 
   const [
@@ -60,7 +46,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 
 // ==================== DOCTOR APPROVALS ====================
 export async function fetchPendingDoctors(): Promise<DoctorRegistration[]> {
-  await checkAdmin()
+  await assertRole('admin')
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('doctor_registrations')
@@ -73,7 +59,7 @@ export async function fetchPendingDoctors(): Promise<DoctorRegistration[]> {
 }
 
 export async function approveDoctor(registrationId: string) {
-  const admin = await checkAdmin()
+  const admin = await assertRole('admin')
   const supabase = await createClient()
 
   // 1. Get the registration
@@ -150,7 +136,7 @@ export async function approveDoctor(registrationId: string) {
 }
 
 export async function rejectDoctor(registrationId: string, userId: string, reason: string) {
-  const admin = await checkAdmin()
+  const admin = await assertRole('admin')
   const supabase = await createClient()
 
   // 1. Update registration status
@@ -188,7 +174,7 @@ export async function rejectDoctor(registrationId: string, userId: string, reaso
 
 // ==================== GENERIC CRUD HELPERS ====================
 async function getTable(name: string) {
-  await checkAdmin()
+  await assertRole('admin')
   const supabase = await createClient()
   return supabase.from(name)
 }
@@ -197,8 +183,7 @@ async function fetchById(table: string, id: string) {
   const query = await getTable(table)
   const { data, error } = await query.select('*').eq('id', id).single()
   if (error) {
-    console.error(`Error fetching ${table} by id:`, error)
-    return null
+    handleServiceError(error, `Gagal mengambil data ${table} berdasarkan ID`)
   }
   return data
 }
@@ -209,7 +194,7 @@ async function createItem<TItem extends Record<string, unknown>, TResult = TItem
 ): Promise<TResult> {
   const query = await getTable(table)
   const { data, error } = await query.insert([item]).select().single()
-  if (error) throw error
+  if (error) handleServiceError(error, `Gagal menambahkan item ke ${table}`)
   return data as TResult
 }
 
@@ -220,14 +205,14 @@ async function updateItem<TItem extends Record<string, unknown>, TResult = TItem
 ): Promise<TResult> {
   const query = await getTable(table)
   const { data, error } = await query.update(item).eq('id', id).select().single()
-  if (error) throw error
+  if (error) handleServiceError(error, `Gagal memperbarui item di ${table}`)
   return data as TResult
 }
 
 async function deleteItem(table: string, id: string) {
   const query = await getTable(table)
   const { error } = await query.delete().eq('id', id)
-  if (error) throw error
+  if (error) handleServiceError(error, `Gagal menghapus item dari ${table}`)
 }
 
 // ==================== EDUCATION CRUD ====================
@@ -236,7 +221,7 @@ export async function fetchEducationContents(filters?: {
   category?: string
   phase?: string
 }): Promise<EducationContent[]> {
-  await checkAdmin()
+  await assertRole('admin')
   const supabase = await createClient()
   let query = supabase.from('education_contents').select('*')
 
@@ -245,7 +230,7 @@ export async function fetchEducationContents(filters?: {
   if (filters?.search) query = query.ilike('title', `%${filters.search}%`)
 
   const { data, error } = await query.order('day', { ascending: true })
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil data edukasi')
   return (data || []) as EducationContent[]
 }
 
@@ -270,7 +255,7 @@ export async function fetchRoadmapActivities(filters?: {
   search?: string
   category?: string
 }): Promise<RoadmapActivity[]> {
-  await checkAdmin()
+  await assertRole('admin')
   const supabase = await createClient()
   let query = supabase.from('roadmap_activities').select('*')
 
@@ -278,7 +263,7 @@ export async function fetchRoadmapActivities(filters?: {
   if (filters?.search) query = query.ilike('activity_name', `%${filters.search}%`)
 
   const { data, error } = await query.order('created_at', { ascending: false })
-  if (error) throw error
+  if (error) handleServiceError(error, 'Gagal mengambil data roadmap')
   return (data || []) as RoadmapActivity[]
 }
 

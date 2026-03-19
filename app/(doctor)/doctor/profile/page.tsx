@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { Save, User, Stethoscope, DollarSign } from 'lucide-react'
 import { SPECIALIZATIONS } from '@/types/doctor'
 import { useDoctorContext } from '@/components/providers/Providers'
+import { DoctorTopHeader } from '@/components/doctor/layout/DoctorTopHeader'
 
 export default function DoctorProfilePage() {
   const doctorContext = useDoctorContext()
@@ -77,9 +78,7 @@ export default function DoctorProfilePage() {
   if (loading && !doc) {
     return (
       <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
-        <div className="flex items-center justify-end mb-6">
-           <Skeleton className="h-12 w-36 rounded-full" />
-        </div>
+        <DoctorTopHeader title="Pengaturan Profil" isLoading />
 
         <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
           <Card className="p-5 rounded-2xl border-0 shadow-sm bg-white space-y-3">
@@ -115,10 +114,9 @@ export default function DoctorProfilePage() {
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
-      <div className="flex items-center justify-between mb-6">
-        <div className="md:hidden">
-            {/* Empty space to balance flex justify-between if needed, or just let it be handled by DoctorTopHeader */}
-        </div>
+      <DoctorTopHeader title="Pengaturan Profil" isLoading={loading} />
+      
+      <div className="flex items-center justify-end mb-6">
         <Button onClick={handleSave} disabled={saving} className="rounded-full bg-cerulean hover:bg-[#0c594a] text-white px-6 h-12 font-bold shadow-md ml-auto transition-all">
           <Save size={18} className="mr-2" />{saving ? 'Menyimpan...' : 'Simpan Profil'}
         </Button>

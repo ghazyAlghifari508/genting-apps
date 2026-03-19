@@ -61,21 +61,28 @@ export async function generateAiResponse(history: ChatHistoryMessage[], message:
       { role: 'user', content: message },
     ];
 
-    // Direct fetch — bypasses AI SDK /responses endpoint issue.
-    // OpenRouter only supports /chat/completions, not /responses.
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || ''}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://genting-app.vercel.app',
-        'X-Title': 'Genting App',
-      },
-      body: JSON.stringify({
-        model: 'openrouter/free',
-        messages,
-      }),
-    });
+    const upstreamFetch = async (model: string) => {
+      return await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || ''}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://genting-app.vercel.app',
+          'X-Title': 'Genting App',
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+        }),
+      });
+    }
+
+    let res = await upstreamFetch('openrouter/free');
+
+    if (!res.ok) {
+      console.warn('[chat-action] openrouter/free failed, attempting fallback...');
+      res = await upstreamFetch('google/gemma-3-4b-it:free');
+    }
 
     if (!res.ok) {
       const err = await res.text();
@@ -91,12 +98,16 @@ export async function generateAiResponse(history: ChatHistoryMessage[], message:
   }
 }
 
-export async function getChats(userId: string) {
+export async function getChats() {
   const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
   const { data, error } = await supabase
     .from('chats')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', user.id)
     .order('updated_at', { ascending: false })
   
   if (error) throw error
@@ -105,6 +116,19 @@ export async function getChats(userId: string) {
 
 export async function getMessages(chatId: string) {
   const supabase = await createClient()
+
+  // Verify chat ownership
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: chat } = await supabase
+    .from('chats')
+    .select('user_id')
+    .eq('id', chatId)
+    .single()
+
+  if (!chat || chat.user_id !== user.id) throw new Error('Chat not found or access denied')
+
   const { data, error } = await supabase
     .from('messages')
     .select('*')
@@ -115,11 +139,15 @@ export async function getMessages(chatId: string) {
   return data
 }
 
-export async function createChat(userId: string, title: string = 'Diskusi Baru') {
+export async function createChat(title: string = 'Diskusi Baru') {
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
   const { data, error } = await supabase
     .from('chats')
-    .insert([{ user_id: userId, title }])
+    .insert([{ user_id: user.id, title }])
     .select()
     .single()
   
@@ -128,13 +156,17 @@ export async function createChat(userId: string, title: string = 'Diskusi Baru')
   return data
 }
 
-export async function deleteChat(chatId: string, userId: string) {
+export async function deleteChat(chatId: string) {
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
   const { error } = await supabase
     .from('chats')
     .delete()
     .eq('id', chatId)
-    .eq('user_id', userId)
+    .eq('user_id', user.id)
   
   if (error) throw error
   revalidatePath('/dashboard')
@@ -142,6 +174,19 @@ export async function deleteChat(chatId: string, userId: string) {
 
 export async function saveUserMessage(chatId: string, content: string) {
   const supabase = await createClient()
+
+  // Verify chat ownership
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: chat } = await supabase
+    .from('chats')
+    .select('user_id')
+    .eq('id', chatId)
+    .single()
+
+  if (!chat || chat.user_id !== user.id) throw new Error('Chat not found or access denied')
+
   const { data, error } = await supabase
     .from('messages')
     .insert([{ chat_id: chatId, role: 'user', content }])
@@ -161,6 +206,19 @@ export async function saveUserMessage(chatId: string, content: string) {
 
 export async function saveAiMessage(chatId: string, content: string) {
   const supabase = await createClient()
+
+  // Verify chat ownership
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: chat } = await supabase
+    .from('chats')
+    .select('user_id')
+    .eq('id', chatId)
+    .single()
+
+  if (!chat || chat.user_id !== user.id) throw new Error('Chat not found or access denied')
+
   const { data, error } = await supabase
     .from('messages')
     .insert([{ chat_id: chatId, role: 'assistant', content }])

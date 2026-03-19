@@ -26,7 +26,6 @@ import { ArrowRight } from 'lucide-react'
 // Data & Helpers
 import { 
   dailyTasksByTrimester, 
-  remindersByTrimester, 
   educationByTrimester 
 } from '@/constants/dashboard-data'
 
@@ -59,11 +58,10 @@ export default function DashboardPage() {
       return
     }
 
-    // Redirect to onboarding if profile is incomplete
     if (profile && !profile.onboarding_completed && profile.role === 'user') {
       router.push('/onboarding')
     }
-  }, [loading, user?.id, profile?.onboarding_completed, profile?.role, router, loadRoadmap, loadEducation, loadConsultations])
+  }, [loading, user, profile, router, loadRoadmap, loadEducation, loadConsultations])
 
   if (loading && !profile) {
     return <DashboardSkeleton />

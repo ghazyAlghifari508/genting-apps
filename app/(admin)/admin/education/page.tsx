@@ -170,7 +170,7 @@ export default function EducationManagementPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen">
-      <AdminTopHeader title="Manage Edukasi" showSearch={false} />
+      <AdminTopHeader title="Manage Edukasi" />
 
       {/* Top Header Row with Actions */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">

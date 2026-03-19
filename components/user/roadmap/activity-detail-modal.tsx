@@ -29,7 +29,7 @@ interface Activity {
   instructions: string[]
   tips: string | null
   warnings: string | null
-  icon_name: string
+  icon_name?: string | null
 }
 
 interface ActivityDetailModalProps {

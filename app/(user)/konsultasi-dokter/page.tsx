@@ -44,34 +44,35 @@ export default function KonsultasiDokterPage() {
     loadConsultations()
   }, [profile, dataLoading, loadConsultations])
 
-  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([])
+  const [apiFilteredDoctors, setApiFilteredDoctors] = useState<Doctor[] | null>(null)
 
   useEffect(() => {
-    let active = true
+    if (!search && category === 'Semua') {
+      setApiFilteredDoctors(null)
+      return
+    }
 
-    const filterDoctors = async () => {
+    let active = true
+    const fetchFilteredDoctors = async () => {
       try {
         const data = await getDoctors({
           specialization: category !== 'Semua' ? category : undefined,
           search: search || undefined,
         })
-
-        if (active) {
-          setFilteredDoctors(data || [])
-        }
+        if (active) setApiFilteredDoctors(data || [])
       } catch (error) {
         console.error('Error filtering doctors:', error)
       }
     }
 
-    if (!search && category === 'Semua') {
-      setFilteredDoctors(doctors)
-    } else {
-      filterDoctors()
-    }
-    
+    fetchFilteredDoctors()
     return () => { active = false }
-  }, [category, search, doctors])
+  }, [category, search])
+
+  const filteredDoctors = useMemo(() => {
+    if (!search && category === 'Semua') return doctors
+    return apiFilteredDoctors || []
+  }, [search, category, doctors, apiFilteredDoctors])
 
   const categories = useMemo(() => ['Semua', ...SPECIALIZATIONS], [])
 

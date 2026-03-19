@@ -12,7 +12,7 @@ const AiChatFloating = dynamic(
 )
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { loading } = useProtectedRoute(['user'])
+  useProtectedRoute(['user'])
   const pathname = usePathname()
   const isReplicaDashboard =
     pathname === '/dashboard' ||

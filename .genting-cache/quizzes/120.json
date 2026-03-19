@@ -1,0 +1,35 @@
+[
+  {
+    "question": "Pada trimester kedua, sistem pendengaran janin berkembang. Apa yang disarankan untuk ibu agar memulai interaksi dengan janin?",
+    "options": [
+      "Berjalan-jalan di luar rumah",
+      "Berbicara atau membacakan buku",
+      "Makan makanan berlemak",
+      "Menonton TV",
+      "Menyanyi dengan volume tinggi"
+    ],
+    "answer": 1
+  },
+  {
+    "question": "Mengapa berbicara atau membacakan buku kepada janin pada trimester kedua penting?",
+    "options": [
+      "Untuk meningkatkan pertumbuhan tulang",
+      "Untuk merangsang perkembangan sistem pendengaran",
+      "Untuk mengurangi stres ibu",
+      "Untuk mempercepat detak jantung janin",
+      "Untuk mempersiapkan janin untuk belajar bahasa setelah lahir"
+    ],
+    "answer": 0
+  },
+  {
+    "question": "Manakah dari berikut ini yang merupakan manfaat dari bonding melalui suara bagi janin?",
+    "options": [
+      "Meningkatkan daya ingat ibu",
+      "Membantu janin mengenali suara ibu",
+      "Mengurangi risiko diabetes ibu",
+      "Mempercepat proses kelahiran",
+      "Meningkatkan berat badan janin"
+    ],
+    "answer": 2
+  }
+]

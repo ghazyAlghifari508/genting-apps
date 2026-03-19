@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react'
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { User, Session } from '@supabase/supabase-js'
 import { getUserProfile } from '@/services/userService'
@@ -110,6 +110,7 @@ interface UserContextType {
   loadDoctors: (force?: boolean) => Promise<void>
   resetState: () => void
   saveDailyJournal: (payload: { user_id: string; content: string; date: string }) => Promise<void>
+  getDailyJournal: (userId: string, date: string) => Promise<any>
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -279,6 +280,11 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
     await saveJournal(payload)
   }, [])
 
+  const getDailyJournal = useCallback(async (userId: string, date: string) => {
+    const { getDailyJournal: fetchJournal } = await import('@/services/roadmapService')
+    return await fetchJournal(userId, date)
+  }, [])
+
   const refreshProfile = useCallback(() => loadData(true), [loadData])
 
   useEffect(() => {
@@ -290,26 +296,34 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
   const weekNumber = profile?.pregnancy_week || 0
   const trimester = profile?.trimester || calculateTrimester(weekNumber)
 
+  const userContextValue = useMemo(() => ({ 
+    profile, 
+    role,
+    loading: authLoading || profileLoading, 
+    error, 
+    weekNumber, 
+    trimester,
+    refreshProfile,
+    roadmap,
+    education,
+    consultations,
+    doctors,
+    loadRoadmap,
+    loadEducation,
+    loadConsultations,
+    loadDoctors,
+    resetState,
+    saveDailyJournal,
+    getDailyJournal
+  }), [
+    profile, role, authLoading, profileLoading, error, weekNumber, trimester, 
+    refreshProfile, roadmap, education, consultations, doctors, 
+    loadRoadmap, loadEducation, loadConsultations, loadDoctors, 
+    resetState, saveDailyJournal, getDailyJournal
+  ])
+
   return (
-    <UserContext.Provider value={{ 
-      profile, 
-      role,
-      loading: authLoading || profileLoading, 
-      error, 
-      weekNumber, 
-      trimester,
-      refreshProfile,
-      roadmap,
-      education,
-      consultations,
-      doctors,
-      loadRoadmap,
-      loadEducation,
-      loadConsultations,
-      loadDoctors,
-      resetState,
-      saveDailyJournal
-    }}>
+    <UserContext.Provider value={userContextValue}>
       {children}
     </UserContext.Provider>
   )
@@ -394,8 +408,18 @@ export function DoctorDataProvider({ children }: { children: React.ReactNode }) 
     }
   }, [authLoading, isDoctor, loadDoctorData])
 
+  const doctorContextValue = useMemo(() => ({ 
+    doctor, 
+    stats, 
+    consultations, 
+    schedules, 
+    earnings, 
+    loading: authLoading || (isDoctor && loading), 
+    loadDoctorData 
+  }), [doctor, stats, consultations, schedules, earnings, authLoading, isDoctor, loading, loadDoctorData])
+
   return (
-    <DoctorContext.Provider value={{ doctor, stats, consultations, schedules, earnings, loading: authLoading || (isDoctor && loading), loadDoctorData }}>
+    <DoctorContext.Provider value={doctorContextValue}>
       {children}
     </DoctorContext.Provider>
   )
@@ -469,15 +493,17 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, [authLoading, isAdmin, loadAdminData])
 
+  const adminContextValue = useMemo(() => ({ 
+    stats, 
+    pendingDoctors, 
+    educationContents, 
+    roadmapActivities, 
+    loading: authLoading || (isAdmin && loading), 
+    loadAdminData 
+  }), [stats, pendingDoctors, educationContents, roadmapActivities, authLoading, isAdmin, loading, loadAdminData])
+
   return (
-    <AdminContext.Provider value={{ 
-      stats, 
-      pendingDoctors, 
-      educationContents, 
-      roadmapActivities, 
-      loading: authLoading || (isAdmin && loading), 
-      loadAdminData 
-    }}>
+    <AdminContext.Provider value={adminContextValue}>
       {children}
     </AdminContext.Provider>
   )
