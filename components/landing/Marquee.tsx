@@ -8,8 +8,8 @@ const items = [
   'Vision AI - Scan Nutrisi',
   'Roadmap Kehamilan',
   'Edukasi Interaktif',
-  'Pantau Tumbuh Kembang',
-  'Jadwal Imunisasi',
+  'Genting Vision AI',
+  'Roadmap 1000 HPK',
   'Rekomendasi Gizi'
 ]
 

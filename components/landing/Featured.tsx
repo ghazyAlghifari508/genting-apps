@@ -1,26 +1,26 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Stethoscope, Activity, BookOpen } from 'lucide-react'
+import { Stethoscope, BookOpen, Route } from 'lucide-react'
 
 export default function Featured() {
   const services = [
     {
       icon: Stethoscope,
       title: 'Konsultasi Dokter',
-      description: 'Konsultasi langsung dengan dokter spesialis anak untuk tumbuh kembang optimal.',
+      description: 'Terhubung langsung dengan dokter ahli untuk pendampingan kesehatan Bunda & si Kecil.',
       gradient: 'from-[#0F6856]/80 to-[#0F6856]/40'
     },
     {
-      icon: Activity,
-      title: 'Pantau Tumbuh Kembang',
-      description: 'Pantau tinggi badan, berat badan, dan lingkar kepala anak secara berkala.',
+      icon: Route,
+      title: 'Peta Jalan 1000 HPK',
+      description: 'Panduan harian adaptif selama 1000 hari pertama kehidupan untuk cegah stunting.',
       gradient: 'from-[#0F6856]/80 to-[#0F6856]/40'
     },
     {
       icon: BookOpen,
-      title: 'Edukasi Kesehatan',
-      description: 'Konten edukatif tentang nutrisi, imunisasi, dan pencegahan stunting.',
+      title: 'Edukasi Stunting',
+      description: 'Materi terstruktur dan teruji untuk pengetahuan nutrisi ibu hamil dan keluarga.',
       gradient: 'from-[#0F6856]/80 to-[#0F6856]/40'
     }
   ]

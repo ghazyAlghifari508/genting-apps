@@ -18,12 +18,12 @@ export default function HowItWork() {
     {
       icon: BookOpen,
       title: 'Edukasi Interaktif',
-      description: 'Konten edukasi terstruktur tentang nutrisi, imunisasi, dan tumbuh kembang anak.',
+      description: 'Konten edukasi terstruktur tentang nutrisi, pola asuh, dan pencegahan stunting.',
     },
     {
       icon: Stethoscope,
       title: 'Konsultasi Dokter Online',
-      description: 'Reservasi dan konsultasi langsung dengan dokter spesialis anak terverifikasi.',
+      description: 'Reservasi dan konsultasi langsung dengan dokter terverifikasi untuk pendampingan aktif.',
     }
   ]
 

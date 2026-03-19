@@ -6,15 +6,15 @@ import Image from 'next/image'
 export default function BlogSection() {
   const posts = [
     {
-      category: 'Tumbuh Kembang',
+      category: 'Edukasi',
       date: '21 Feb 2026',
-      title: 'Tips Memantau Pertumbuhan Anak di 1000 Hari Pertama',
+      title: 'Langkah Cerdas di 1000 Hari Pertama Kehidupan',
       img: '/images/unsplash/img_fcb70719.png' // Using an alternative baby/parenting photo
     },
     {
-      category: 'Imunisasi',
+      category: 'Pencegahan',
       date: '10 Feb 2026',
-      title: 'Kenapa Jadwal Imunisasi Tepat Waktu Itu Penting',
+      title: 'Pentingnya Nutrisi Molekuler dalam Pencegahan Stunting',
       img: '/images/unsplash/img_92c6c82b.png'
     },
     {
@@ -39,7 +39,7 @@ export default function BlogSection() {
               <span className="text-doccure-teal"> dari Genting</span>
             </h2>
             <p className="text-slate-600  text-[15px] leading-relaxed max-w-md mb-8 transition-colors">
-              Dapatkan insight praktis seputar nutrisi, tumbuh kembang, dan pencegahan stunting
+              Dapatkan insight praktis seputar nutrisi, 1000 HPK, dan pencegahan stunting
               untuk mendukung kesehatan anak.
             </p>
             <Link href="/education" className="inline-flex items-center gap-2 text-sm font-bold text-doccure-teal hover:underline">

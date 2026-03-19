@@ -6,9 +6,9 @@ import { CheckCircle2, Target } from 'lucide-react'
 
 const features = [
   "Konsultasi dokter online",
-  "Pantau tumbuh kembang",
+  "Vision AI - Scan Nutrisi",
   "Edukasi interaktif",
-  "Deteksi dini stunting"
+  "Roadmap 1000 HPK"
 ]
 
 export default function AboutUs() {

@@ -10,15 +10,15 @@ export default function Faq() {
   const faqs = [
     {
       question: 'Usia berapa saja yang bisa dipantau di Genting?',
-      answer: 'Genting dapat digunakan untuk memantau tumbuh kembang anak dari usia 0 hingga 5 tahun (balita), serta mendampingi ibu hamil selama masa kehamilan melalui fitur Roadmap.'
+      answer: 'Genting dirancang khusus untuk mendampingi ibu hamil dan orang tua selama periode krusial 1000 Hari Pertama Kehidupan (HPK) melalui fitur Peta Jalan cerdas.'
     },
     {
-      question: 'Bagaimana cara membaca grafik pertumbuhan anak?',
-      answer: 'Grafik pertumbuhan di Genting menggunakan standar WHO. Area hijau menandakan pertumbuhan normal, kuning berisiko, dan merah membutuhkan perhatian medis segera. Anda bisa berkonsultasi langsung dengan dokter untuk penjelasan lebih lanjut.'
+      question: 'Apa itu fitur Peta Jalan 1000 HPK?',
+      answer: 'Peta Jalan 1000 HPK adalah panduan harian adaptif yang memberikan tugas dan edukasi sesuai fase kehamilan hingga anak usia 2 tahun untuk memastikan tumbuh kembang optimal.'
     },
     {
       question: 'Apakah saya bisa konsultasi secara online?',
-      answer: 'Ya! Anda bisa melakukan reservasi dan konsultasi langsung dengan dokter spesialis anak yang terverifikasi melalui fitur Konsultasi Dokter di aplikasi Genting.'
+      answer: 'Ya! Anda bisa melakukan reservasi dan konsultasi langsung dengan dokter ahli yang terverifikasi melalui fitur Konsultasi Dokter di aplikasi Genting.'
     },
     {
       question: 'Apakah data medis anak saya aman?',
@@ -105,7 +105,7 @@ export default function Faq() {
                 <select className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0F6856]/20 focus:border-[#0F6856] transition-colors bg-white appearance-none">
                   <option value="">Pilih Kategori</option>
                   <option value="konsultasi">Konsultasi Dokter</option>
-                  <option value="tumbuh-kembang">Pantau Tumbuh Kembang</option>
+                  <option value="roadmap">Peta Jalan 1000 HPK</option>
                   <option value="vision">Vision AI</option>
                   <option value="lainnya">Lainnya</option>
                 </select>

@@ -7,7 +7,7 @@ const reasons = [
   {
     icon: Stethoscope,
     title: 'Konsultasi Dokter Terverifikasi',
-    desc: 'Reservasi dan konsultasi langsung dengan dokter spesialis anak.'
+    desc: 'Reservasi dan konsultasi langsung dengan dokter ahli terverifikasi.'
   },
   {
     icon: ShieldCheck,
@@ -21,8 +21,8 @@ const reasons = [
   },
   {
     icon: HeartHandshake,
-    title: 'Perawatan Anak Menyeluruh',
-    desc: 'Dari nutrisi, imunisasi, hingga tumbuh kembang terpantau.'
+    title: 'Pendampingan 1000 HPK',
+    desc: 'Pemantauan intensif dari nutrisi hingga kesehatan setiap fase kehidupan.'
   }
 ]
 

@@ -18,7 +18,7 @@ const Footer = () => {
                 <Image src="/images/unsplash/logo-white.png" alt="Genting Logo" width={120} height={120} className="w-[110px] h-[110px] scale-[1.3] object-contain" />
               </div>
               <p className="text-sm text-white/50 mb-6 max-w-xs leading-relaxed">
-                Generasi Anti-Stunting - Platform digital untuk memantau tumbuh kembang anak dan mencegah stunting di Indonesia.
+                Generasi Anti-Stunting - Platform digital untuk mendampingi masa 1000 Hari Pertama Kehidupan (HPK) dan mencegah stunting di Indonesia.
               </p>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2 text-white/50">
@@ -49,7 +49,7 @@ const Footer = () => {
             <div>
               <h4 className="font-bold text-white mb-4">Layanan</h4>
               <ul className="space-y-2.5">
-                {["Konsultasi Dokter", "Pantau Tumbuh Kembang", "Vision AI", "Edukasi Kesehatan", "Roadmap Kehamilan"].map((link, j) => (
+                {["Konsultasi Dokter", "Peta Jalan 1000 HPK", "Genting Vision AI", "Edukasi Stunting"].map((link, j) => (
                   <li key={j}>
                     <a href="#" className="text-sm text-white/50 hover:text-[#E8C84A] transition-colors">
                       {link}
@@ -61,7 +61,7 @@ const Footer = () => {
 
             <div>
               <h4 className="font-bold text-white mb-4">Berlangganan</h4>
-              <p className="text-sm text-white/50 mb-4">Dapatkan tips kesehatan anak terbaru langsung di email Anda.</p>
+              <p className="text-sm text-white/50 mb-4">Dapatkan tips kesehatan Bunda & Si Kecil terbaru langsung di email Anda.</p>
               <div className="flex gap-2">
                 <input
                   type="email"

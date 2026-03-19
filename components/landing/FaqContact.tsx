@@ -8,15 +8,15 @@ import { Button } from '@/components/ui/button'
 const faqs = [
   {
     q: 'Usia berapa saja yang bisa dipantau di Genting?',
-    a: 'Genting dapat digunakan untuk memantau tumbuh kembang anak dari usia 0 hingga 5 tahun (balita), serta mendampingi ibu hamil melalui fitur Roadmap.'
+    a: 'Genting dirancang khusus untuk mendampingi ibu hamil dan orang tua selama periode krusial 1000 Hari Pertama Kehidupan (HPK) melalui fitur Peta Jalan cerdas.'
   },
   {
-    q: 'Bagaimana cara membaca grafik pertumbuhan anak?',
-    a: 'Grafik pertumbuhan menggunakan standar WHO. Area hijau menandakan pertumbuhan normal, kuning berisiko, dan merah membutuhkan perhatian medis segera.'
+    q: 'Apa itu fitur Peta Jalan 1000 HPK?',
+    a: 'Peta Jalan 1000 HPK adalah panduan harian adaptif yang memberikan tugas dan edukasi sesuai fase kehamilan hingga anak usia 2 tahun untuk memastikan tumbuh kembang optimal.'
   },
   {
     q: 'Apakah saya bisa konsultasi secara online?',
-    a: 'Ya. Anda bisa melakukan reservasi dan konsultasi langsung dengan dokter spesialis anak terverifikasi melalui fitur Konsultasi Dokter.'
+    a: 'Ya. Anda bisa melakukan reservasi dan konsultasi langsung dengan dokter ahli terverifikasi melalui fitur Konsultasi Dokter.'
   },
   {
     q: 'Apakah data medis anak saya aman?',
@@ -104,7 +104,7 @@ export default function FaqContact() {
                 >
                   <option value="" disabled className="">Kategori Layanan</option>
                   <option className="">Konsultasi Dokter</option>
-                  <option className="">Pantau Tumbuh Kembang</option>
+                  <option className="">Peta Jalan 1000 HPK</option>
                   <option className="">Vision AI</option>
                   <option className="">Edukasi Kesehatan</option>
                 </select>

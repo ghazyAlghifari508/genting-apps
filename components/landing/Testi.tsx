@@ -7,21 +7,21 @@ const testimonials = [
   {
     name: 'Sarah Wijaya',
     location: 'Jakarta',
-    content: 'Aplikasi Genting sangat membantu saya memantau gizi anak. Fitur konsultasi dokternya cepat dan dokternya ramah banget! Sekarang saya lebih tenang soal tumbuh kembang si kecil.',
+    content: 'Aplikasi Genting sangat membantu saya memantau gizi di masa 1000 HPK. Fitur konsultasi dokternya cepat dan dokternya ramah banget! Sekarang saya lebih tenang soal tumbuh kembang si kecil.',
     rating: 5,
     initials: 'SW'
   },
   {
     name: 'Rina Kartika',
     location: 'Bandung',
-    content: 'Sangat praktis! Saya bisa cek pertumbuhan anak, scan makanan dengan Vision AI, dan konsultasi gizi langsung dari HP. Sangat recommended untuk para orang tua.',
+    content: 'Sangat praktis! Saya bisa cek peta jalan 1000 HPK, scan makanan dengan Vision AI, dan konsultasi gizi langsung dari HP. Sangat recommended untuk para orang tua.',
     rating: 5,
     initials: 'RK'
   },
   {
     name: 'Dewi Sartika',
     location: 'Surabaya',
-    content: 'Fitur roadmap kehamilan sangat membantu saya melewati trimester demi trimester. Edukasi tentang stunting juga sangat informatif dan mudah dipahami.',
+    content: 'Fitur Peta Jalan 1000 HPK sangat membantu saya melewati trimester demi trimester. Edukasi tentang stunting juga sangat informatif dan mudah dipahami.',
     rating: 4,
     initials: 'DS'
   }

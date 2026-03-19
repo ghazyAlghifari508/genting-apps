@@ -51,8 +51,8 @@ export default function Hero() {
             className="flex-1"
           >
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[4rem] font-bold text-white mb-6 leading-[1.2] lg:leading-[1.15] tracking-tight">
-              Perawatan Aman untuk<br className="hidden sm:block"/>
-              Kesehatan Anak<br className="hidden sm:block"/>
+              Pendampingan Cerdas<br className="hidden sm:block"/>
+              Masa 1000 HPK<br className="hidden sm:block"/>
               dengan <span className="text-doccure-yellow relative inline-block">
                 Nutrisi
                 {/* Yellow underline svg */}
@@ -63,7 +63,7 @@ export default function Hero() {
             </h1>
             
             <p className="text-white/80 text-sm md:text-[15px] mb-8 md:mb-10 max-w-md mx-auto lg:mx-0 leading-relaxed">
-              Konsultasi terpercaya untuk ibu dan anak mencegah stunting, dengan keahlian dokter spesialis dan kepedulian pada setiap tahap pertumbuhan.
+              Konsultasi terpercaya untuk ibu dan anak mencegah stunting, dengan keahlian dokter terpercaya dan kepedulian pada setiap tahap pertumbuhan.
             </p>
 
             <Link href="#services">

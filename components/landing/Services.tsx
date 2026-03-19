@@ -2,29 +2,29 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Baby, ArrowUpCircle, ShieldPlus } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Stethoscope, Route, Camera } from 'lucide-react'
 
 const services = [
   {
     id: 1,
-    title: 'Konsultasi Dokter Anak',
-    desc: 'Konsultasi cepat dengan dokter spesialis anak terverifikasi.',
+    title: 'Konsultasi Dokter',
+    desc: 'Terhubung dengan dokter ahli untuk pendampingan aktif.',
     img: '/images/unsplash/img_e9813f12.png',
-    icon: Baby
+    icon: Stethoscope
   },
   {
     id: 2,
-    title: 'Pantau Tumbuh Kembang',
-    desc: 'Pantau berat, tinggi, dan lingkar kepala secara berkala.',
+    title: 'Peta Jalan 1000 HPK',
+    desc: 'Langkah harian cerdas sesuai fase kehamilan dan pertumbuhan.',
     img: '/images/unsplash/img_75c5898e.png',
-    icon: ArrowUpCircle
+    icon: Route
   },
   {
     id: 3,
-    title: 'Imunisasi & Nutrisi',
-    desc: 'Dukungan jadwal imunisasi dan rekomendasi gizi seimbang.',
+    title: 'Analisis Nutrisi (Vision AI)',
+    desc: 'Analisis nutrisi molekuler instan dengan teknologi GENTING Vision.',
     img: '/images/unsplash/img_37c60b0d.png',
-    icon: ShieldPlus
+    icon: Camera
   }
 ]
 

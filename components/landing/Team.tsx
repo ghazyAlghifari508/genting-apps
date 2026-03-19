@@ -6,22 +6,22 @@ import { Linkedin, Twitter, Facebook } from 'lucide-react'
 
 const professionals = [
   {
-    name: 'Dokter Spesialis Anak',
-    role: 'Konsultan Tumbuh Kembang',
+    name: 'Dokter Ahli',
+    role: 'Konsultan 1000 HPK',
     img: '/images/unsplash/doctor-clean-rbg.png',
     bgColor: 'bg-indigo-400',
     imgClass: 'h-[95%] w-auto object-contain object-bottom'
   },
   {
-    name: 'Dokter Gizi Anak',
+    name: 'Dokter Gizi',
     role: 'Konsultan Nutrisi',
     img: '/images/unsplash/foto2-rbg.png',
     bgColor: 'bg-lime-400',
     imgClass: 'h-[110%] w-auto object-contain'
   },
   {
-    name: 'Dokter Imunisasi',
-    role: 'Konsultan Imunisasi',
+    name: 'Ahli Medis',
+    role: 'Konsultan Kesehatan',
     img: '/images/unsplash/foto3-rbg.png',
     bgColor: 'bg-sky-400',
     imgClass: 'h-[90%] w-auto object-contain object-bottom mb-[-5px]'
