@@ -52,8 +52,8 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    // 2. Doctor Protection
-    if (path.startsWith('/doctor')) {
+    // 2. Doctor Protection (Strict check to avoid matching /doctors)
+    if (path === '/doctor' || path.startsWith('/doctor/')) {
       if (!user) return NextResponse.redirect(new URL('/login', request.url))
       if (role !== 'doctor' && role !== 'doctor-pending') {
         console.warn(`Unauthorized Doctor Access Attempt: [${user?.email}] [Role: ${role}] Path: ${path}`)
@@ -62,7 +62,16 @@ export async function middleware(request: NextRequest) {
     }
 
     // 3. User Route Protection (Home Dashboard, Profile, etc.)
-    const userOnlyPaths = ['/dashboard', '/profile', '/roadmap', '/vision', '/konsultasi-dokter']
+    const userOnlyPaths = [
+      '/dashboard', 
+      '/profile', 
+      '/roadmap', 
+      '/vision', 
+      '/konsultasi-dokter',
+      '/doctors',
+      '/booking',
+      '/riwayat-transaksi'
+    ]
     const isUserPath = userOnlyPaths.some(p => path.startsWith(p))
 
     if (isUserPath) {
