@@ -67,7 +67,11 @@ export async function middleware(request: NextRequest) {
 
     if (isUserPath) {
       if (!user) return NextResponse.redirect(new URL('/login', request.url))
-      if (role !== 'user') {
+      
+      // Allow 'authenticated' (Supabase default) or 'user' roles for user paths
+      const isUserOrAuth = role === 'user' || role === 'authenticated' || !role;
+      
+      if (!isUserOrAuth) {
         // Redirect Admin and Doctor to their own dashboards if they try to access user pages
         if (role === 'admin') return NextResponse.redirect(new URL('/admin', request.url))
         if (role === 'doctor' || role === 'doctor-pending') return NextResponse.redirect(new URL('/doctor', request.url))

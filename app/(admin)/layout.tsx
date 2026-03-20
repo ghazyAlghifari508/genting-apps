@@ -6,11 +6,11 @@ import { useProtectedRoute } from '@/hooks/useProtectedRoute'
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   // Protecting and checking are called to trigger side-effects (redirects).
-  const { role, loading, isProfileLoaded } = useProtectedRoute(['admin'])
+  const { role, loading, isProfileLoaded } = useProtectedRoute(['admin', 'super-admin'])
 
-  // Strict UI Guard: Only render content if confirmed as Admin.
+  // Strict UI Guard: Only render content if confirmed as Admin or Super-Admin.
   // We wait until isProfileLoaded is true to be 100% sure of the role.
-  if (loading || !isProfileLoaded || role !== 'admin') {
+  if (loading || !isProfileLoaded || (role !== 'admin' && role !== 'super-admin')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F5F7FA]">
         <div className="flex flex-col items-center gap-4">

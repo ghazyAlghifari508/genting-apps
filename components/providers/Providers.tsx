@@ -198,7 +198,7 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
   // Note: purposefully removed 'profile' from dependencies to stabilize. 
   // We use lastFetchedId ref to check if a new fetch is needed.
 
-  const role = profile?.role || user?.user_metadata?.role || null
+  const role = profile?.role || user?.user_metadata?.role || (user ? 'user' : null)
   const isProfileLoaded = !!profile || (!profileLoading && !!user)
   const loadRoadmap = useCallback(async (force = false) => {
     if (!userId) return

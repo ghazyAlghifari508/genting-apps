@@ -12,7 +12,7 @@ export default function DoctorDashboardLayout({
   children: React.ReactNode
 }) {
   // Protecting and checking are called to trigger side-effects (redirects).
-  const { role, loading: authLoading, isProfileLoaded } = useProtectedRoute(['doctor'])
+  const { role, loading: authLoading, isProfileLoaded } = useProtectedRoute(['doctor', 'doctor-pending'])
   const { checking: approvalChecking } = useCheckDoctorApproval()
 
   const isLoading = authLoading || approvalChecking || !isProfileLoaded

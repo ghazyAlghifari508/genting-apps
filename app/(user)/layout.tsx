@@ -12,10 +12,10 @@ const AiChatFloating = dynamic(
 )
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { role, loading, isProfileLoaded } = useProtectedRoute(['user'])
+  const { role, loading, isProfileLoaded } = useProtectedRoute(['user', 'authenticated'])
 
-  // Strict UI Guard: Only render content if confirmed as User.
-  if (loading || !isProfileLoaded || role !== 'user') {
+  // Strict UI Guard: Only render content if confirmed as User or Authenticated (new user).
+  if (loading || !isProfileLoaded || (role !== 'user' && role !== 'authenticated')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-4">

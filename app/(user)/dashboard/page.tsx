@@ -58,7 +58,9 @@ export default function DashboardPage() {
       return
     }
 
-    if (profile && !profile.onboarding_completed && profile.role === 'user') {
+    // New User / Incomplete Profile Protection
+    // If no profile exists OR onboarding isn't completed for a normal user
+    if ((!profile && !loading) || (profile && !profile.onboarding_completed && profile.role === 'user')) {
       router.push('/onboarding')
     }
   }, [loading, user, profile, router, loadRoadmap, loadEducation, loadConsultations])
