@@ -77,7 +77,6 @@ JSON harus memiliki struktur:
 }
 Jika bukan makanan, isi foodName: "Bukan Makanan" dan isHealthy: false.`
 
-    // STRATEGI: MULTI-RETRY & AUTO-ROUTER (Anti-429)
     let aiResponse = null;
     let lastError = null;
     const modelAttempts = [
@@ -88,77 +87,75 @@ Jika bukan makanan, isi foodName: "Bukan Makanan" dan isHealthy: false.`
 
     for (let i = 0; i < modelAttempts.length; i++) {
       try {
-        console.info(`[analyze-food] Attempt ${i + 1} with ${modelAttempts[i]}...`);
-        const { text } = await generateText({
-          model: openrouter(modelAttempts[i]),
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'text', text: prompt },
-                { type: 'image', image: `data:${mimeType};base64,${base64}` },
-              ],
-            },
-          ],
-        });
-        aiResponse = text;
-        if (aiResponse) break;
+        const modelId = modelAttempts[i];
+        console.info(`[analyze-food] [Attempt ${i+1}/${modelAttempts.length}] Using: ${modelId}`);
+        
+        const result = (await Promise.race([
+          generateText({
+            model: openrouter(modelId),
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: prompt },
+                  { type: 'image', image: `data:${mimeType};base64,${base64}` },
+                ],
+              },
+            ],
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Model timeout (30s)')), 30000))
+        ])) as { text: string };
+
+        if (!result || !result.text || result.text.trim().length === 0) {
+          console.warn(`[analyze-food] Model ${modelId} returned empty response.`);
+          continue;
+        }
+
+        aiResponse = result.text;
+        console.info(`[analyze-food] Model ${modelId} success! Length: ${aiResponse.length}`);
+        break;
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
-        console.error(`[analyze-food] Attempt ${i + 1} failed:`, lastError.message);
-        // Jika 429, tunggu sebentar sebelum lanjut ke model berikutnya
-        if (lastError.message?.includes('429')) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        }
+        console.error(`[analyze-food] Attempt ${i+1} (${modelAttempts[i]}) failed:`, lastError.message);
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 
-    if (!aiResponse) throw lastError || new Error('All model attempts failed');
+    if (!aiResponse) {
+      console.error('[analyze-food] All models exhausted. Last error:', lastError?.message);
+      throw lastError || new Error('Antrean server sedang penuh. Silakan coba lagi ya, Bun! 🙏');
+    }
 
     const rawJson = extractJSON(aiResponse);
-    if (!rawJson) throw new Error('Model returned no valid JSON');
-    const analysis = FoodAnalysisSchema.parse(rawJson);
-
-    // Save to database
-    let scanId: string | null = null
-    if (userId && analysis) {
-      try {
-        const { data, error } = await supabaseAdmin
-          .from('food_scans')
-          .insert({
-            user_id: userId,
-            food_name: analysis.foodName,
-            calories: analysis.calories,
-            protein: analysis.protein,
-            carbs: analysis.carbs,
-            fat: analysis.fat,
-            iron: analysis.iron,
-            zinc: analysis.zinc,
-            calcium: analysis.calcium,
-            folic_acid: analysis.folicAcid,
-            vitamin_a: analysis.vitaminA,
-            stunting_nutrition_score: analysis.stuntingNutritionScore,
-            tip: analysis.tip,
-            is_healthy: analysis.isHealthy,
-          })
-          .select('id')
-          .single()
-
-        if (!error && data) scanId = data.id
-      } catch (dbErr) {
-        console.error('[analyze-food] DB save error:', dbErr)
-      }
+    if (!rawJson) {
+      console.error('[analyze-food] Failed to find JSON in response:', aiResponse.substring(0, 100) + '...');
+      throw new Error('Gagal mengekstraksi data nutrisi. Silakan coba lagi sebentar lagi.');
     }
 
+    const analysis = FoodAnalysisSchema.parse({
+      foodName: rawJson.foodName || "Makanan Terdeteksi",
+      calories: Number(rawJson.calories) || 0,
+      protein: Number(rawJson.protein) || 0,
+      carbs: Number(rawJson.carbs) || 0,
+      fat: Number(rawJson.fat) || 0,
+      iron: Number(rawJson.iron) || 0,
+      zinc: Number(rawJson.zinc) || 0,
+      calcium: Number(rawJson.calcium) || 0,
+      folicAcid: Number(rawJson.folicAcid) || 0,
+      vitaminA: Number(rawJson.vitaminA) || 0,
+      stuntingNutritionScore: Number(rawJson.stuntingNutritionScore) || 50,
+      tip: typeof rawJson.tip === 'string' ? rawJson.tip : "Bunda tetap semangat jaga asupan gizi si Kecil ya!",
+      isHealthy: rawJson.isHealthy === undefined ? true : Boolean(rawJson.isHealthy)
+    });
+
     return new Response(
-      JSON.stringify({ success: true, analysis, scanId, isFallback: false }),
+      JSON.stringify({ success: true, analysis, isFallback: false }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error('[analyze-food] AI Failure, using safety stub:', errorMsg);
     
-    // Safety Stub biar gak CRASH/500
     const safetyAnalysis = {
       foodName: "AI Sedang Sibuk 🙏",
       calories: 0,
@@ -176,7 +173,7 @@ Jika bukan makanan, isi foodName: "Bukan Makanan" dan isHealthy: false.`
     }
 
     return new Response(
-      JSON.stringify({ success: true, analysis: safetyAnalysis, isFallback: true }),
+      JSON.stringify({ success: false, analysis: safetyAnalysis, isFallback: true }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
   }

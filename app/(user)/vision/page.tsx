@@ -84,34 +84,17 @@ export default function VisionPage() {
   const [expandedScanId, setExpandedScanId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [lastScanId, setLastScanId] = useState<string | null>(null)
+  const [isFallback, setIsFallback] = useState<boolean>(false)
 
-  const loadHistory = useCallback(async () => {
-    try {
-      setHistoryLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      const { data, error: fetchError } = await supabase
-        .from('food_scans')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20)
-      if (!fetchError && data) setScanHistory(data)
-    } catch { /* ignore */ } finally {
-      setHistoryLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { loadHistory() }, [loadHistory])
-
+  // Update preview URL when file changes
   useEffect(() => {
-    if (!file) {
+    if (file) {
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
+      return () => URL.revokeObjectURL(url)
+    } else {
       setPreviewUrl(null)
-      return
     }
-    const objectUrl = URL.createObjectURL(file)
-    setPreviewUrl(objectUrl)
-    return () => URL.revokeObjectURL(objectUrl)
   }, [file])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,19 +114,96 @@ export default function VisionPage() {
     }
   }
 
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new window.Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDimension = 1024;
+
+          if (width > height) {
+            if (width > maxDimension) {
+              height *= maxDimension / width;
+              width = maxDimension;
+            }
+          } else {
+            if (height > maxDimension) {
+              width *= maxDimension / height;
+              height = maxDimension;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          }, 'image/jpeg', 0.8);
+        };
+      };
+    });
+  };
+
+  const loadHistory = useCallback(async () => {
+    setHistoryLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      
+      const { data, error } = await supabase
+        .from('food_scans')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      setScanHistory(data || [])
+    } catch (err) {
+      console.error('Error loading history:', err)
+    } finally {
+      setHistoryLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadHistory()
+  }, [loadHistory])
+
   const handleAnalyze = async () => {
     if (!file) return
 
     setScanState('analyzing')
     setError(null)
+    setIsFallback(false)
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 120000)
 
     try {
+      // Compress image before upload only if it's large (>500KB)
+      const compressedFile = file.size > 500 * 1024 
+        ? await compressImage(file)
+        : file;
+      
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       const formData = new FormData()
-      formData.append('image', file)
+      formData.append('image', compressedFile)
       if (currentUser) formData.append('userId', currentUser.id)
 
       const response = await fetch('/api/ai/analyze-food', {
@@ -154,14 +214,26 @@ export default function VisionPage() {
 
       clearTimeout(timeoutId)
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || 'Gagal menganalisis gambar Bunda. Silakan coba lagi nanti ya. 🙏')
+      const data = await response.json().catch(() => ({}))
+      
+      if (!response.ok || data.success === false) {
+        if (data.isFallback) {
+          setAnalysis(data.analysis)
+          setIsFallback(true)
+          setScanState('done')
+          toast({
+            title: "Server Sedang Padat",
+            description: "AI Sedang Sibuk. Menampilkan data estimasi sementara.",
+            variant: "default"
+          })
+          return
+        }
+        throw new Error(data.error || 'Gagal menganalisis gambar Bunda. 🙏')
       }
 
-      const data = await response.json()
       if (data.analysis) {
         setAnalysis(data.analysis)
+        setIsFallback(false)
         setScanState('done')
         if (data.scanId) setLastScanId(data.scanId)
         loadHistory()
@@ -588,29 +660,33 @@ export default function VisionPage() {
 
                     <div className="mt-auto pt-8 flex gap-4">
                        <Button 
-                         disabled={!!lastScanId || isSaving} 
-                         onClick={async () => {
-                           if (!analysis || lastScanId) return
-                           setIsSaving(true)
-                           try {
-                             const { data: { user } } = await supabase.auth.getUser()
-                             if (!user) { toast({ title: 'Error', description: 'Silakan login terlebih dahulu', variant: 'destructive' }); return }
-                             const res = await fetch('/api/ai/save-scan', {
-                               method: 'POST',
-                               headers: { 'Content-Type': 'application/json' },
-                               body: JSON.stringify({ userId: user.id, analysis })
-                             })
-                             const result = await res.json()
-                             if (!res.ok) throw new Error(result.error || 'Gagal menyimpan')
-                             if (result.scanId) setLastScanId(result.scanId)
-                             loadHistory()
-                             toast({ title: 'Tersimpan!', description: 'Laporan berhasil disimpan ke riwayat Bunda.' })
-                           } catch { toast({ title: 'Gagal Menyimpan', description: 'Tidak dapat menyimpan laporan saat ini.', variant: 'destructive' }) } finally { setIsSaving(false) }
-                         }}
-                         className="flex-1 bg-doccure-teal hover:bg-doccure-dark text-white rounded-xl h-11 font-bold disabled:opacity-50"
-                       >
-                           {lastScanId ? '✓ Tersimpan' : isSaving ? 'Menyimpan...' : 'Simpan Laporan'}
-                       </Button>
+                          disabled={!!lastScanId || isSaving || isFallback} 
+                          onClick={async () => {
+                            if (!analysis || lastScanId || isFallback) return
+                            setIsSaving(true)
+                            try {
+                              const { data: { user } } = await supabase.auth.getUser()
+                              if (!user) { toast({ title: 'Error', description: 'Silakan login terlebih dahulu', variant: 'destructive' }); return }
+                              const res = await fetch('/api/ai/save-scan', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId: user.id, analysis })
+                              })
+                              const result = await res.json()
+                              if (!res.ok) throw new Error(result.error || 'Gagal menyimpan')
+                              if (result.scanId) setLastScanId(result.scanId)
+                              loadHistory()
+                              toast({ title: 'Tersimpan!', description: 'Laporan berhasil disimpan ke riwayat Bunda.' })
+                            } catch { toast({ title: 'Gagal Menyimpan', description: 'Tidak dapat menyimpan laporan saat ini.', variant: 'destructive' }) } finally { setIsSaving(false) }
+                          }}
+                          className={`flex-1 rounded-xl h-11 font-bold transition-all ${
+                            isFallback 
+                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                              : 'bg-doccure-teal hover:bg-doccure-dark text-white'
+                          }`}
+                        >
+                            {lastScanId ? '✓ Tersimpan' : isSaving ? 'Menyimpan...' : isFallback ? 'AI Sedang Sibuk' : 'Simpan Laporan'}
+                        </Button>
                     </div>
                   </div>
                 </div>

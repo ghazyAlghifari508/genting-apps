@@ -1,0 +1,1 @@
+The `loadHistory` function in `VisionPage.tsx` was accidentally deleted during a `replace_content` operation. It is responsible for fetching scan history from Supabase for the current user. It should be restored before `handleAnalyze`.

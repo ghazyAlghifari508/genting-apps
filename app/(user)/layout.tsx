@@ -12,6 +12,7 @@ const AiChatFloating = dynamic(
 )
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname()
   const { role, loading, isProfileLoaded } = useProtectedRoute(['user', 'authenticated'])
 
   // Strict UI Guard: Only render content if confirmed as User or Authenticated (new user).
@@ -25,7 +26,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </div>
     )
   }
-  const pathname = usePathname()
   const isReplicaDashboard =
     pathname === '/dashboard' ||
     pathname === '/roadmap' ||
