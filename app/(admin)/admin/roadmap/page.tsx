@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -35,7 +35,7 @@ const categoryConfig: Record<string, { label: string; icon: typeof Dumbbell; col
 export default function RoadmapManagementPage() {
   const adminContext = useAdminContext()
   const [activities, setActivities] = useState<RoadmapActivity[]>((adminContext?.roadmapActivities || []) as RoadmapActivity[])
-  const loading = adminContext?.loading
+  const loading = adminContext?.roadmapLoading || adminContext?.loading
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -44,6 +44,7 @@ export default function RoadmapManagementPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedActivity, setSelectedActivity] = useState<RoadmapActivity | null>(null)
+  const hasInitialLoaded = useRef(false)
 
   // Sync with context if it changes and we are not filtering/searching
   useEffect(() => {
@@ -71,16 +72,27 @@ export default function RoadmapManagementPage() {
     }
   }, [searchQuery, categoryFilter, adminContext?.roadmapActivities])
 
+  // Extract loadRoadmap to avoid adminContext dependency loop
+  const loadRoadmapRef = useRef(adminContext?.loadRoadmap)
   useEffect(() => {
+    loadRoadmapRef.current = adminContext?.loadRoadmap
+  }, [adminContext?.loadRoadmap])
+
+  useEffect(() => {
+    // Only trigger load on mount or filter change
+    if (!hasInitialLoaded.current) {
+      loadRoadmapRef.current?.()
+      hasInitialLoaded.current = true
+    }
     loadData()
-  }, [categoryFilter, loadData])
+  }, [categoryFilter, loadData]) // Removed adminContext to prevent loop
 
   const handleDelete = async () => {
     if (!deleteId) return
     try {
       setDeleting(true)
       await deleteRoadmapActivity(deleteId)
-      await adminContext?.loadAdminData(true)
+      await adminContext?.loadRoadmap(true)
       setDeleteId(null)
     } catch (error) {
       console.error('Error deleting roadmap:', error)
@@ -90,7 +102,7 @@ export default function RoadmapManagementPage() {
   }
 
   const handleSuccess = async () => {
-    await adminContext?.loadAdminData(true)
+    await adminContext?.loadRoadmap(true)
     setIsModalOpen(false)
   }
 

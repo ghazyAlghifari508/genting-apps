@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useUserRole } from '@/hooks/useUserRole'
 
 export function useProtectedRoute(allowedRoles: string[]) {
-  const { role, loading, dbLoading } = useUserRole()
+  const { role, loading, dbLoading, isProfileLoaded } = useUserRole()
   const router = useRouter()
   const allowedRolesKey = useMemo(() => allowedRoles.join('|'), [allowedRoles])
 
@@ -26,10 +26,11 @@ export function useProtectedRoute(allowedRoles: string[]) {
     if (!isAllowed && !dbLoading) {
       // Redirect to appropriate dashboard if role is not allowed
       if (role === 'doctor') router.push('/doctor')
-      else if (role === 'admin') router.push('/admin/dashboard')
+      else if (role === 'admin') router.push('/admin')
+      else if (role === 'doctor-pending') router.push('/register-doctor/pending')
       else router.push('/')
     }
   }, [role, loading, dbLoading, router, allowedRolesKey])
 
-  return { role, loading }
+  return { role, loading, isProfileLoaded }
 }

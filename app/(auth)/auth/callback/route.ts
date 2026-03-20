@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       const onboardingCompleted = profile?.onboarding_completed ?? false
 
       if (userRole === 'admin') {
-        return NextResponse.redirect(`${origin}/admin/dashboard`)
+        return NextResponse.redirect(`${origin}/admin`)
       }
 
       if (userRole === 'doctor') {

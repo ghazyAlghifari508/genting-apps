@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { DoctorRegistrationButton } from '@/components/layout/DoctorRegistrationButton'
+
 import { useUserRole } from '@/hooks/useUserRole'
 import { supabase } from '@/lib/supabase'
 import {
@@ -104,7 +104,7 @@ export function TopNavbar() {
           <div className="flex items-center">
             <Link href={logoHref} className="flex items-center gap-2 group shrink-0">
               <div className="flex items-center justify-center transition-transform group-hover:scale-105 h-16 overflow-visible">
-                <Image src="/images/unsplash/logo-white.png" alt="Genting Logo" width={120} height={120} className="w-[90px] h-[90px] scale-[1.4] object-contain drop-shadow-md" />
+                <Image src="/images/unsplash/logo-white.png" alt="Genting Logo" width={120} height={120} priority={true} className="w-[90px] h-[90px] scale-[1.4] object-contain drop-shadow-md" />
               </div>
             </Link>
           </div>
@@ -144,11 +144,7 @@ export function TopNavbar() {
                 </div>
               ) : user && (
                 <div className="flex items-center gap-6">
-                  {role === 'user' && !pathname.includes('/doctor') && (
-                    <div className="hidden md:block">
-                      <DoctorRegistrationButton isLoggedIn={!!user} userRole={role} />
-                    </div>
-                  )}
+
                   
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -209,7 +205,7 @@ export function TopNavbar() {
                     <div className="flex items-center justify-between">
                       <SheetTitle className="text-left">
                         <div className="flex items-center overflow-visible">
-                          <Image src="/images/unsplash/logo-white.png" alt="Genting Logo" width={100} height={100} className="w-[80px] h-[80px] scale-[1.3] object-contain drop-shadow-md" />
+                          <Image src="/images/unsplash/logo-white.png" alt="Genting Logo" width={100} height={100} priority={true} className="w-[80px] h-[80px] scale-[1.3] object-contain drop-shadow-md" />
                         </div>
                       </SheetTitle>
                     </div>
@@ -232,11 +228,7 @@ export function TopNavbar() {
                       )
                     })}
                     
-                    {role === 'user' && !isDashboardArea && (
-                      <div className="mt-4 px-6">
-                        <DoctorRegistrationButton isLoggedIn={!!user} userRole={role} />
-                      </div>
-                    )}
+
 
                     {!user && !isDashboardArea && (
                       <div className="mt-8 px-6 flex flex-col gap-3">

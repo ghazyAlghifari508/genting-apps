@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -62,7 +62,7 @@ const categoryColors: Record<string, string> = {
 export default function EducationManagementPage() {
   const adminContext = useAdminContext()
   const [contents, setContents] = useState<EducationContent[]>((adminContext?.educationContents || []) as EducationContent[])
-  const loading = adminContext?.loading
+  const loading = adminContext?.educationLoading || adminContext?.loading
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -72,6 +72,7 @@ export default function EducationManagementPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedContent, setSelectedContent] = useState<EducationContent | null>(null)
+  const hasInitialLoaded = useRef(false)
 
   // Sync with context if it changes and we are not filtering/searching
   useEffect(() => {
@@ -100,16 +101,27 @@ export default function EducationManagementPage() {
     }
   }, [searchQuery, categoryFilter, phaseFilter, adminContext?.educationContents])
 
+  // Extract loadEducation to avoid adminContext dependency loop
+  const loadEducationRef = useRef(adminContext?.loadEducation)
   useEffect(() => {
+    loadEducationRef.current = adminContext?.loadEducation
+  }, [adminContext?.loadEducation])
+
+  useEffect(() => {
+    // Only trigger load on mount or filter change
+    if (!hasInitialLoaded.current) {
+      loadEducationRef.current?.()
+      hasInitialLoaded.current = true
+    }
     loadData()
-  }, [categoryFilter, phaseFilter, loadData])
+  }, [categoryFilter, phaseFilter, loadData]) // Removed adminContext to prevent loop
 
   const handleDelete = async () => {
     if (!deleteId) return
     try {
       setDeleting(true)
       await deleteEducationContent(deleteId)
-      await adminContext?.loadAdminData(true)
+      await adminContext?.loadEducation(true)
       setDeleteId(null)
     } catch (error) {
       console.error('Error deleting education:', error)
@@ -119,7 +131,7 @@ export default function EducationManagementPage() {
   }
 
   const handleSuccess = async () => {
-    await adminContext?.loadAdminData(true)
+    await adminContext?.loadEducation(true)
     setIsModalOpen(false)
   }
 

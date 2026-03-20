@@ -164,8 +164,7 @@ export default function DoctorPublicProfilePage() {
             <div className="space-y-3">
               <h2 className="text-sm font-bold text-slate-900">Tentang Dokter</h2>
               <p className="text-sm leading-relaxed text-slate-600">
-                {doctor.bio ||
-                  `Dokter ${doctor.full_name} berfokus pada layanan ${doctor.specialization} untuk pendampingan kesehatan ibu dan anak.`}
+                {doctor.bio || 'Informasi bio dokter belum tersedia.'}
               </p>
             </div>
 

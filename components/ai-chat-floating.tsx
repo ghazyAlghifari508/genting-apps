@@ -17,6 +17,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
 import {
   getChats,
   createChat,
@@ -47,11 +48,14 @@ export function AiChatFloating() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fetchedRef = useRef(false);
+  const { toast } = useToast();
 
   // Load chats when panel opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !fetchedRef.current) {
       loadChats();
+      fetchedRef.current = true;
     }
   }, [isOpen]);
 
@@ -59,18 +63,23 @@ export function AiChatFloating() {
   useEffect(() => {
     if (!selectedChatId) return;
     
-    const loadMessages = async () => {
-      try {
-        const data = await getMessages(selectedChatId);
-        setMessages(data.map((m: any) => ({
-          id: m.id,
-          role: m.role,
-          content: m.content
-        })));
-      } catch (err) {
-        console.error('Failed to load messages:', err);
-      }
-    };
+      const loadMessages = async () => {
+        try {
+          const data = await getMessages(selectedChatId);
+          setMessages(data.map((m: Message) => ({
+            id: m.id,
+            role: m.role,
+            content: m.content
+          })));
+        } catch (err) {
+          console.error('[AiChat] Failed to load messages:', err);
+          toast({
+            title: "Gagal memuat pesan",
+            description: "Terjadi kesalahan saat mengambil riwayat pesan.",
+            variant: "destructive"
+          });
+        }
+      };
 
     loadMessages();
   }, [selectedChatId]);
@@ -85,7 +94,12 @@ export function AiChatFloating() {
       const data = await getChats();
       setChats(data);
     } catch (err) {
-      console.error('Failed to load chats:', err);
+      console.error('[AiChat] Failed to load chats:', err);
+      toast({
+        title: "Gagal memuat riwayat",
+        description: "Tidak dapat mengambil daftar diskusi Anda.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -99,7 +113,12 @@ export function AiChatFloating() {
         setShowHistory(false);
       }
     } catch (err) {
-      console.error('Failed to create chat:', err);
+      console.error('[AiChat] Failed to create chat:', err);
+      toast({
+        title: "Gagal membuat diskusi",
+        description: "Silakan coba lagi dalam beberapa saat.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -113,7 +132,12 @@ export function AiChatFloating() {
         setMessages([]);
       }
     } catch (err) {
-      console.error('Failed to delete chat:', err);
+      console.error('[AiChat] Failed to delete chat:', err);
+      toast({
+        title: "Gagal menghapus diskusi",
+        description: "Terjadi kesalahan saat mencoba menghapus riwayat.",
+        variant: "destructive"
+      });
     }
   };
 

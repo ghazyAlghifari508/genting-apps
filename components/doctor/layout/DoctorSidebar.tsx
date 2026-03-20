@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
+import { useUserContext } from '@/components/providers/Providers'
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/doctor' },
@@ -28,6 +29,7 @@ const menuItems = [
 export function DoctorSidebar() {
   const pathname = usePathname()
   const { user, signOut } = useAuth()
+  const { profile } = useUserContext()
 
   return (
     <div className="w-64 h-screen bg-white  fixed left-0 top-0 border-r border-slate-100  flex flex-col z-50 hidden lg:flex overflow-hidden transition-colors duration-300">
@@ -65,9 +67,9 @@ export function DoctorSidebar() {
       <div className="p-6 mt-auto relative z-10">
         <div className="p-4 bg-cerulean/5  rounded-2xl flex items-center gap-3 mb-4 border border-cerulean/10 transition-colors">
            <div className="w-10 h-10 rounded-full bg-white  border-2 border-white  shadow-sm overflow-hidden relative flex items-center justify-center transition-colors">
-             {user?.user_metadata?.avatar_url ? (
+             {profile?.avatar_url ? (
                 <Image
-                  src={user.user_metadata.avatar_url}
+                  src={profile.avatar_url}
                   alt="Profile"
                   fill
                   sizes="40px"
@@ -80,7 +82,7 @@ export function DoctorSidebar() {
            </div>
            <div className="flex-1 min-w-0">
              <p className="text-sm font-bold text-slate-900  truncate transition-colors">
-               {user?.user_metadata?.full_name || 'Dokter'}
+               {profile?.full_name || 'Dokter'}
              </p>
              <p className="text-xs text-cerulean truncate">Active</p>
            </div>

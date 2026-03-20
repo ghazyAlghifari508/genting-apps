@@ -133,7 +133,13 @@ export default function DashboardPage() {
         week: currentWeek // Fallback to current week for legacy constants
       })) || []
 
-  const relevantEducation = filteredEducation.length > 0
+  interface DisplayEducation {
+    title: string;
+    day?: number;
+    href?: string;
+  }
+
+  const relevantEducation: DisplayEducation[] = filteredEducation.length > 0
     ? filteredEducation.slice(0, 2)
     : educationByTrimester[activeTrimester]?.slice(0, 2) || []
 
@@ -189,7 +195,7 @@ export default function DashboardPage() {
                     <span className="bg-doccure-teal text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full mb-3 inline-block">Materi Baru</span>
                     <h4 className="text-xl font-bold text-white leading-tight mt-1">{edu.title}</h4>
                     <Link 
-                      href={'day' in edu ? `/education/${edu.day}` : (edu as any).href} 
+                      href={'day' in edu && edu.day ? `/education/${edu.day}` : (edu.href || '#')} 
                       className="mt-4 inline-flex items-center text-white/80 text-sm font-bold hover:text-white transition-colors group/link"
                     >
                       Pelajari Sekarang <ArrowRight className="ml-2 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />

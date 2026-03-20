@@ -51,7 +51,7 @@ export function DoctorCard({ doctor, index }: DoctorCardProps) {
               <div className="mt-5 flex items-center gap-4">
                  <div className="flex items-center gap-2 rounded-xl bg-slate-50  px-3 py-1.5 border border-slate-100  shadow-sm">
                     <Clock className="h-4 w-4 text-slate-400" />
-                    <span className="text-[11px] font-black text-slate-700 ">{doctor.years_of_experience || 5} Thn Pengalaman</span>
+                    <span className="text-[11px] font-black text-slate-700 ">{doctor.years_of_experience ?? 0} Thn Pengalaman</span>
                  </div>
               </div>
             </div>

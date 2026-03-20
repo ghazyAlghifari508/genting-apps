@@ -33,11 +33,51 @@ export async function middleware(request: NextRequest) {
     )
 
     // This will refresh the session if it's expired
-    await supabase.auth.getUser()
+    const { data: { user }, error } = await supabase.auth.getUser()
+
+    if (error) {
+       // Only log critical auth errors, ignore "no session" errors usually
+    }
+
+    const role = user?.user_metadata?.role || user?.role
+    const path = request.nextUrl.pathname
+
+    // PARANOID ROUTE PROTECTION
+    // 1. Admin Protection
+    if (path.startsWith('/admin')) {
+      if (!user) return NextResponse.redirect(new URL('/login', request.url))
+      if (role !== 'admin' && role !== 'super-admin') {
+        console.warn(`Unauthorized Admin Access Attempt: [${user?.email}] [Role: ${role}] Path: ${path}`)
+        return NextResponse.redirect(new URL('/', request.url))
+      }
+    }
+
+    // 2. Doctor Protection
+    if (path.startsWith('/doctor')) {
+      if (!user) return NextResponse.redirect(new URL('/login', request.url))
+      if (role !== 'doctor' && role !== 'doctor-pending') {
+        console.warn(`Unauthorized Doctor Access Attempt: [${user?.email}] [Role: ${role}] Path: ${path}`)
+        return NextResponse.redirect(new URL('/', request.url))
+      }
+    }
+
+    // 3. User Route Protection (Home Dashboard, Profile, etc.)
+    const userOnlyPaths = ['/dashboard', '/profile', '/roadmap', '/vision', '/konsultasi-dokter']
+    const isUserPath = userOnlyPaths.some(p => path.startsWith(p))
+
+    if (isUserPath) {
+      if (!user) return NextResponse.redirect(new URL('/login', request.url))
+      if (role !== 'user') {
+        // Redirect Admin and Doctor to their own dashboards if they try to access user pages
+        if (role === 'admin') return NextResponse.redirect(new URL('/admin', request.url))
+        if (role === 'doctor' || role === 'doctor-pending') return NextResponse.redirect(new URL('/doctor', request.url))
+        return NextResponse.redirect(new URL('/', request.url))
+      }
+    }
 
     return response
   } catch (error) {
-    console.error('Middleware Error:', error)
+    console.error('Middleware Critical Error:', error)
     return NextResponse.next({
       request: {
         headers: request.headers,

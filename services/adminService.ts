@@ -17,8 +17,8 @@ export interface DashboardStats {
 // Role check handled by assertRole('admin')
 
 // ==================== DASHBOARD ====================
-export async function fetchDashboardStats(): Promise<DashboardStats> {
-  await assertRole('admin')
+/** Internal helper to fetch stats without repeated auth checks */
+async function fetchDashboardStatsInternal(): Promise<DashboardStats> {
   const supabase = await createClient()
 
   const [
@@ -44,9 +44,30 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
   }
 }
 
-// ==================== DOCTOR APPROVALS ====================
-export async function fetchPendingDoctors(): Promise<DoctorRegistration[]> {
+export async function fetchDashboardStats(): Promise<DashboardStats> {
   await assertRole('admin')
+  return fetchDashboardStatsInternal()
+}
+
+/**
+ * Super Loader: Fetches all essential dashboard data in a single Server Action.
+ * Minimizes RTT and Authentication overhead.
+ */
+export async function fetchAdminDashboardData() {
+  await assertRole('admin')
+  
+  // Run everything in parallel on the server using internal helpers to avoid redundant auth checks
+  const [stats, doctors] = await Promise.all([
+    fetchDashboardStatsInternal(),
+    fetchPendingDoctorsInternal()
+  ])
+
+  return { stats, doctors }
+}
+
+// ==================== DOCTOR APPROVALS ====================
+/** Internal helper to fetch pending doctors without repeated auth checks */
+async function fetchPendingDoctorsInternal(): Promise<DoctorRegistration[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('doctor_registrations')
@@ -56,6 +77,11 @@ export async function fetchPendingDoctors(): Promise<DoctorRegistration[]> {
 
   if (error) throw error
   return (data || []) as DoctorRegistration[]
+}
+
+export async function fetchPendingDoctors(): Promise<DoctorRegistration[]> {
+  await assertRole('admin')
+  return fetchPendingDoctorsInternal()
 }
 
 export async function approveDoctor(registrationId: string) {
@@ -72,11 +98,13 @@ export async function approveDoctor(registrationId: string) {
   if (regError || !registration) throw new Error('Registration not found')
 
   // 2. Create the actual doctor profile in the `doctors` table
-  // Generate unique email using name and short UID suffix if registration email is missing
-  const uidSuffix = registration.user_id.substring(0, 4)
-  const safeName = registration.full_name.toLowerCase().replace(/[^a-z0-9]/g, '')
-  const generatedEmail = `${safeName}.${uidSuffix}@genting.id`
-  const doctorEmail = registration.email || generatedEmail
+  // 2. Create the actual doctor profile in the `doctors` table
+  // Fetch real email from profiles if missing in registration
+  let doctorEmail = registration.email
+  if (!doctorEmail) {
+    const { data: profile } = await supabase.from('profiles').select('email').eq('id', registration.user_id).single()
+    doctorEmail = profile?.email || ''
+  }
 
   const { error: doctorError } = await supabase
     .from('doctors')
@@ -91,7 +119,7 @@ export async function approveDoctor(registrationId: string) {
       license_number: registration.license_number,
       certification_url: registration.certification_url,
       years_of_experience: registration.years_of_experience,
-      hourly_rate: registration.hourly_rate || 150000,
+      hourly_rate: registration.hourly_rate,
       is_verified: true,
       is_active: true,
       registration_status: 'approved',
@@ -125,7 +153,10 @@ export async function approveDoctor(registrationId: string) {
     const { getSupabaseAdmin } = await import('@/lib/supabase')
     const adminClient = getSupabaseAdmin()
     const { error: authError } = await adminClient.auth.admin.updateUserById(registration.user_id, {
-      user_metadata: { role: 'doctor' }
+      user_metadata: { 
+        role: 'doctor',
+        is_doctor_applicant: false // No longer an applicant, now a doctor
+      }
     })
     if (authError) throw authError
   } catch (err) {
@@ -165,7 +196,10 @@ export async function rejectDoctor(registrationId: string, userId: string, reaso
     const { getSupabaseAdmin } = await import('@/lib/supabase')
     const adminClient = getSupabaseAdmin()
     await adminClient.auth.admin.updateUserById(userId, {
-      user_metadata: { role: 'user' }
+      user_metadata: { 
+        role: 'user',
+        is_doctor_applicant: false // Clean up applicant flag
+      }
     })
   } catch (err) {
     console.error('[AdminService] Gagal sinkronisasi metadata role:', err)

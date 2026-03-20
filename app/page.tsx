@@ -1,5 +1,3 @@
-'use server'
-
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-server'
 import { TopNavbar } from '@/components/layout/top-navbar'
@@ -19,12 +17,19 @@ import Footer from '@/components/layout/footer'
 
 export default async function LandingPage() {
   const user = await getCurrentUser()
+  
   if (user) {
     if (user.role === 'doctor') redirect('/doctor')
-    if (user.role === 'admin') redirect('/admin/dashboard')
-    redirect('/dashboard')
+    if (user.role === 'admin') redirect('/admin')
+    if (user.role === 'doctor-pending') redirect('/register-doctor/pending')
+    
+    // If they are a normal user (not applicant), send to dashboard
+    if (!user.is_doctor_applicant) {
+      redirect('/dashboard')
+    }
   }
 
+  // Applicants and non-logged-in users see the landing page
   return (
     <div className="min-h-screen overflow-x-hidden bg-doccure-dark">
       <TopNavbar />

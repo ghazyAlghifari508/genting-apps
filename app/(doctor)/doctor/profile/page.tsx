@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { upsertDoctorProfile } from '@/services/doctorService'
 import { useAuth } from '@/hooks/useAuth'
 import { motion } from 'framer-motion'
@@ -27,23 +27,34 @@ export default function DoctorProfilePage() {
   const { user } = useAuth()
   const { toast } = useToast()
 
+  const initializedRef = useRef<string | null>(null)
+
   useEffect(() => {
-    if (doc) {
-      setForm({
-        full_name: doc.full_name || '',
-        email: doc.email || user?.email || '',
-        phone: doc.phone || '',
-        bio: doc.bio || '',
-        specialization: doc.specialization || 'Umum',
-        license_number: doc.license_number || '',
-        years_of_experience: doc.years_of_experience || 0,
-        hourly_rate: doc.hourly_rate || 50000,
-        profile_picture_url: doc.profile_picture_url || '',
-      })
-    } else if (user) {
-      setForm(f => ({ ...f, email: user.email || '' }))
-    }
-  }, [doc, user])
+    if (!doc && !user) return
+
+    // Track initialization with a unique key based on relevant data
+    const currentDataKey = `${user?.id || 'no-user'}_${doc?.id || 'no-doc'}_${doc?.updated_at || 'no-update'}`
+    if (initializedRef.current === currentDataKey) return
+
+    // Hallucination Guard: Prioritize user.email if doc.email is suspicious or missing
+    const rawEmail = doc?.email || user?.email || ''
+    const isSuspicious = rawEmail.includes('sakura.121b') || rawEmail.endsWith('@genting.id')
+    const finalEmail = isSuspicious ? (user?.email || rawEmail) : rawEmail
+
+    setForm({
+      full_name: doc?.full_name || '',
+      email: finalEmail,
+      phone: doc?.phone || '',
+      bio: doc?.bio || '',
+      specialization: doc?.specialization || 'Umum',
+      license_number: doc?.license_number || '',
+      years_of_experience: doc?.years_of_experience || 0,
+      hourly_rate: doc?.hourly_rate || 50000,
+      profile_picture_url: doc?.profile_picture_url || '',
+    })
+
+    initializedRef.current = currentDataKey
+  }, [doc, user?.id, user?.email])
 
   const handleSave = async () => {
     if (!user) return
@@ -123,7 +134,6 @@ export default function DoctorProfilePage() {
       </div>
 
       <main className="space-y-6">
-        {/* Completion */}
         <Card className="p-5 rounded-2xl border-0 shadow-sm bg-white">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-bold text-slate-700">Kelengkapan Profil</p>

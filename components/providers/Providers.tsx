@@ -10,7 +10,8 @@ import { getRoadmapActivities, getUserRoadmapProgress } from '@/services/roadmap
 import { getAllEducationContent, getUserProgress as getEducationProgress, getProgressStats } from '@/services/educationService'
 import { getUserConsultations, getDoctorConsultations, getDoctorEarnings } from '@/services/consultationService'
 import { getDoctorStats, getDoctorByUserId, getDoctorSchedules, getDoctors } from '@/services/doctorService'
-import { fetchDashboardStats, fetchPendingDoctors, fetchEducationContents, fetchRoadmapActivities, DashboardStats } from '@/services/adminService'
+import { getOwnRegistration } from '@/services/doctorRegistrationService'
+import { fetchDashboardStats, fetchPendingDoctors, fetchEducationContents, fetchRoadmapActivities, DashboardStats, fetchAdminDashboardData } from '@/services/adminService'
 import { RoadmapActivity, UserRoadmapProgress } from '@/types/roadmap'
 import { EducationContent, UserProgress } from '@/types/education'
 import { Consultation, DoctorEarningRecord } from '@/types/consultation'
@@ -71,14 +72,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 4. Hard redirect to login to clear all React contexts
       window.location.replace('/login')
     } catch (error) {
-      console.error('Logout error:', error)
+      console.error('[AuthProvider] Logout error:', error)
       // Fallback redirect
       window.location.replace('/login')
     }
   }
 
+  const authContextValue = useMemo(() => ({ 
+    user, 
+    session, 
+    loading, 
+    signOut 
+  }), [user, session, loading])
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   )
@@ -95,10 +103,12 @@ interface UserContextType {
   profile: UserProfile | null
   role: string | null
   loading: boolean
+  isProfileLoaded: boolean
   error: string | null
   weekNumber: number
   trimester: number
   refreshProfile: () => Promise<void>
+  // ... (rest of the fields)
   // Cached Data
   roadmap: { activities: RoadmapActivity[]; progress: UserRoadmapProgress[]; loading: boolean }
   education: { content: EducationContent[]; progress: UserProgress[]; stats: Record<string, number> | null; loading: boolean }
@@ -153,9 +163,12 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    // Success Guard: Stop if already fetching or if we already successfully synced for this userId
+    // Strict Fetch Lock: 
+    // - Prevent parallel fetches (fetchingRef)
+    // - Prevent re-fetching if we already have the profile for this user (fulfillmentMap)
+    // - Unless 'force' is true (manual refresh)
     if (!force && (fetchingRef.current['profile'] || fulfillmentMap.current['profile'] === userId)) {
-      setProfileLoading(false)
+      if (profileLoading) setProfileLoading(false)
       return
     }
 
@@ -171,20 +184,22 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
         setProfile(data)
         lastFetchedId.current = userId
       }
-      // Success Mark: Even if null, we mark it as synced for this user
-      fulfillmentMap.current['profile'] = userId || ''
+      
+      // Success Mark: Mark as fulfilled for this specific userId
+      fulfillmentMap.current['profile'] = userId
     } catch (err) {
-      console.error('Error loading pregnancy data:', err)
+      console.error('[UserDataProvider] Profile error:', err)
       setError('Gagal memuat data profil.')
     } finally {
       setProfileLoading(false)
       fetchingRef.current['profile'] = false
     }
-  }, [userId, resetState])
+  }, [userId, resetState, profileLoading, profile])
   // Note: purposefully removed 'profile' from dependencies to stabilize. 
   // We use lastFetchedId ref to check if a new fetch is needed.
 
   const role = profile?.role || user?.user_metadata?.role || null
+  const isProfileLoaded = !!profile || (!profileLoading && !!user)
   const loadRoadmap = useCallback(async (force = false) => {
     if (!userId) return
     // Success Guard: Stop if already fetching or if we already synced for this userId
@@ -196,6 +211,7 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
     }
     
     try {
+      const { getRoadmapActivities, getUserRoadmapProgress } = await import('@/services/roadmapService')
       const [acts, prog] = await Promise.all([
         getRoadmapActivities(),
         getUserRoadmapProgress(userId),
@@ -203,12 +219,12 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
       setRoadmap({ activities: acts || [], progress: prog || [], loading: false })
       fulfillmentMap.current['roadmap'] = userId
     } catch (err) {
-      console.error('Error loading roadmap context:', err)
+      console.error('[UserDataProvider] Roadmap error:', err)
       setRoadmap(prev => ({ ...prev, loading: false }))
     } finally {
       fetchingRef.current['roadmap'] = false
     }
-  }, [userId])
+  }, [userId, roadmap.activities.length])
   // Note: dependencies reduced to stabilize
 
   const loadEducation = useCallback(async (force = false) => {
@@ -222,6 +238,7 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
+      const { getAllEducationContent, getUserProgress: getEducationProgress, getProgressStats } = await import('@/services/educationService')
       const [content, progress, stats] = await Promise.all([
         getAllEducationContent(),
         getEducationProgress(userId),
@@ -230,12 +247,12 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
       setEducation({ content: content || [], progress: progress || [], stats: stats || null, loading: false })
       fulfillmentMap.current['education'] = userId
     } catch (err) {
-      console.error('Error loading education context:', err)
+      console.error('[UserDataProvider] Education error:', err)
       setEducation(prev => ({ ...prev, loading: false }))
     } finally {
       fetchingRef.current['education'] = false
     }
-  }, [userId])
+  }, [userId, education.content.length])
 
   const loadConsultations = useCallback(async (force = false) => {
     if (!userId) return
@@ -249,7 +266,7 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
       setConsultations({ data: data || [], loading: false })
       fulfillmentMap.current['consultations'] = userId
     } catch (err) {
-      console.error('Error loading consultations context:', err)
+      console.error('[UserDataProvider] Consultations error:', err)
       setConsultations(prev => ({ ...prev, loading: false }))
     } finally {
       fetchingRef.current['consultations'] = false
@@ -268,7 +285,7 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
       setDoctors({ data: data || [], loading: false })
       fulfillmentMap.current['doctors'] = 'loaded'
     } catch (err) {
-      console.error('Error loading doctors context:', err)
+      console.error('[UserDataProvider] Doctors error:', err)
       setDoctors(prev => ({ ...prev, loading: false }))
     } finally {
       fetchingRef.current['doctors'] = false
@@ -296,28 +313,32 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
   const weekNumber = profile?.pregnancy_week || 0
   const trimester = profile?.trimester || calculateTrimester(weekNumber)
 
-  const userContextValue = useMemo(() => ({ 
-    profile, 
-    role,
-    loading: authLoading || profileLoading, 
-    error, 
-    weekNumber, 
-    trimester,
-    refreshProfile,
-    roadmap,
-    education,
-    consultations,
-    doctors,
-    loadRoadmap,
-    loadEducation,
-    loadConsultations,
-    loadDoctors,
-    resetState,
-    saveDailyJournal,
-    getDailyJournal
-  }), [
-    profile, role, authLoading, profileLoading, error, weekNumber, trimester, 
-    refreshProfile, roadmap, education, consultations, doctors, 
+  const userContextValue = useMemo(() => {
+    const value: UserContextType = {
+      profile,
+      role,
+      loading: profileLoading,
+      isProfileLoaded,
+      error,
+      weekNumber,
+      trimester,
+      refreshProfile: () => loadData(true),
+      roadmap,
+      education,
+      consultations,
+      doctors,
+      loadRoadmap,
+      loadEducation,
+      loadConsultations,
+      loadDoctors,
+      resetState,
+      saveDailyJournal,
+      getDailyJournal
+    }
+    return value
+  }, [
+    profile, role, profileLoading, isProfileLoaded, error, weekNumber, trimester, 
+    loadData, roadmap, education, consultations, doctors, 
     loadRoadmap, loadEducation, loadConsultations, loadDoctors, 
     resetState, saveDailyJournal, getDailyJournal
   ])
@@ -350,17 +371,18 @@ const DoctorContext = createContext<DoctorContextType | undefined>(undefined)
 
 export function DoctorDataProvider({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuthContext()
+  const { role, loading: userLoading } = useUserContext()
   const [doctor, setDoctor] = useState<Doctor | null>(null)
   const [stats, setStats] = useState<DoctorStats | null>(null)
   const [consultations, setConsultations] = useState<Consultation[]>([])
   const [schedules, setSchedules] = useState<DoctorSchedule[]>([])
   const [earnings, setEarnings] = useState<DoctorEarningRecord[]>([])
   const [loading, setLoading] = useState(true)
-  const isDoctor = user?.user_metadata?.role === 'doctor' || user?.role === 'doctor'
-  const fetchedRef = useRef(false)
+  const isDoctor = role === 'doctor'
+  const fetchedRef = useRef<string | null>(null)
 
   useEffect(() => {
-    fetchedRef.current = false
+    fetchedRef.current = null
   }, [user?.id])
 
   const loadDoctorData = useCallback(async (force = false) => {
@@ -369,7 +391,9 @@ export function DoctorDataProvider({ children }: { children: React.ReactNode }) 
       return
     }
 
-    if (!force && fetchedRef.current) {
+    // Strict Fetch Lock for Doctor Data
+    // - Prevent fetching if already marked as fetched for this user (unless forced)
+    if (!force && fetchedRef.current === user.id) {
       setLoading(false)
       return
     }
@@ -382,7 +406,8 @@ export function DoctorDataProvider({ children }: { children: React.ReactNode }) 
         if (doc) setDoctor(doc)
       }
 
-      if (doc) {
+      if (doc && doc.is_verified) {
+        // Parallel fetch for doctor sub-data
         const [s, cons, scheds, earn] = await Promise.all([
           getDoctorStats(doc.id),
           getDoctorConsultations(doc.id),
@@ -393,14 +418,19 @@ export function DoctorDataProvider({ children }: { children: React.ReactNode }) 
         setConsultations(cons || [])
         setSchedules(scheds || [])
         setEarnings(earn || [])
-        fetchedRef.current = true
+        
+        // Mark as fulfilled for this specific user.id
+        fetchedRef.current = user.id
+      } else {
+        // Even if not verified or no doc found, we mark as check-done for this user
+        fetchedRef.current = user.id
       }
     } catch (err) {
-      console.error('Error loading doctor data:', err)
+      console.error('[DoctorDataProvider] Load error:', err)
     } finally {
       setLoading(false)
     }
-  }, [user, isDoctor, doctor])
+  }, [user?.id, isDoctor, doctor])
 
   useEffect(() => {
     if (!authLoading && isDoctor) {
@@ -416,7 +446,17 @@ export function DoctorDataProvider({ children }: { children: React.ReactNode }) 
     earnings, 
     loading: authLoading || (isDoctor && loading), 
     loadDoctorData 
-  }), [doctor, stats, consultations, schedules, earnings, authLoading, isDoctor, loading, loadDoctorData])
+  }), [
+    doctor, 
+    stats, 
+    consultations, 
+    schedules, 
+    earnings, 
+    authLoading, 
+    isDoctor, 
+    loading, 
+    loadDoctorData
+  ])
 
   return (
     <DoctorContext.Provider value={doctorContextValue}>
@@ -436,56 +476,140 @@ interface AdminContextType {
   pendingDoctors: DoctorRegistration[]
   educationContents: EducationContent[]
   roadmapActivities: RoadmapActivity[]
-  loading: boolean
+  loading: boolean // UI Global loading (Dashboard essential)
+  statsLoading: boolean
+  doctorsLoading: boolean
+  educationLoading: boolean
+  roadmapLoading: boolean
   loadAdminData: (force?: boolean) => Promise<void>
+  loadEducation: (force?: boolean) => Promise<void>
+  loadRoadmap: (force?: boolean) => Promise<void>
+  loadStats: (force?: boolean) => Promise<void>
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined)
 
 export function AdminDataProvider({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuthContext()
+  
+  // Data States
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [pendingDoctors, setPendingDoctors] = useState<DoctorRegistration[]>([])
   const [educationContents, setEducationContents] = useState<EducationContent[]>([])
   const [roadmapActivities, setRoadmapActivities] = useState<RoadmapActivity[]>([])
+  
+  // Loading States
   const [loading, setLoading] = useState(true)
+  const [statsLoading, setStatsLoading] = useState(false)
+  const [doctorsLoading, setDoctorsLoading] = useState(false)
+  const [educationLoading, setEducationLoading] = useState(false)
+  const [roadmapLoading, setRoadmapLoading] = useState(false)
+
   const isAdmin = user?.user_metadata?.role === 'admin' || user?.role === 'admin'
-  const fetchedRef = useRef(false)
+  const statsFetchedRef = useRef<string | null>(null)
+  const eduFetchedRef = useRef<string | null>(null)
+  const roadFetchedRef = useRef<string | null>(null)
+  const fetchingRef = useRef<Record<string, boolean>>({})
 
-  useEffect(() => {
-    fetchedRef.current = false
-  }, [user?.id])
+  // Sub-Loaders
+  const loadStats = useCallback(async (force = false) => {
+    if (!user || !isAdmin || (!force && statsFetchedRef.current === user.id)) return
+    if (fetchingRef.current['stats']) return
 
+    fetchingRef.current['stats'] = true
+    setStatsLoading(true)
+    try {
+      const s = await fetchDashboardStats()
+      setStats(s)
+      statsFetchedRef.current = user.id
+    } catch (err) {
+      console.error('[AdminDataProvider] Stats error:', err)
+    } finally {
+      setStatsLoading(false)
+      fetchingRef.current['stats'] = false
+    }
+  }, [user?.id, isAdmin])
+
+  const loadDoctors = useCallback(async (force = false) => {
+    if (!user || !isAdmin) return
+    if (!force && fetchingRef.current['doctors']) return
+
+    fetchingRef.current['doctors'] = true
+    setDoctorsLoading(true)
+    try {
+      const d = await fetchPendingDoctors()
+      setPendingDoctors(d || [])
+    } catch (err) {
+      console.error('[AdminDataProvider] Doctors error:', err)
+    } finally {
+      setDoctorsLoading(false)
+      fetchingRef.current['doctors'] = false
+    }
+  }, [user?.id, isAdmin])
+
+  const loadEducation = useCallback(async (force = false) => {
+    if (!user || !isAdmin || (!force && eduFetchedRef.current === user.id)) return
+    if (fetchingRef.current['education']) return
+
+    fetchingRef.current['education'] = true
+    setEducationLoading(true)
+    try {
+      const e = await fetchEducationContents()
+      setEducationContents(e || [])
+      eduFetchedRef.current = user.id
+    } catch (err) {
+      console.error('[AdminDataProvider] Education error:', err)
+    } finally {
+      setEducationLoading(false)
+      fetchingRef.current['education'] = false
+    }
+  }, [user?.id, isAdmin])
+
+  const loadRoadmap = useCallback(async (force = false) => {
+    if (!user || !isAdmin || (!force && roadFetchedRef.current === user.id)) return
+    if (fetchingRef.current['roadmap']) return
+
+    fetchingRef.current['roadmap'] = true
+    setRoadmapLoading(true)
+    try {
+      const r = await fetchRoadmapActivities()
+      setRoadmapActivities(r || [])
+      roadFetchedRef.current = user.id
+    } catch (err) {
+      console.error('[AdminDataProvider] Roadmap error:', err)
+    } finally {
+      setRoadmapLoading(false)
+      fetchingRef.current['roadmap'] = false
+    }
+  }, [user?.id, isAdmin])
+
+  // Legacy/Backwards Compatibility: Load essential data for dashboard
   const loadAdminData = useCallback(async (force = false) => {
     if (!user || !isAdmin) {
       setLoading(false)
       return
     }
 
-    if (!force && fetchedRef.current) {
+    // Success Guard
+    if (!force && (fetchingRef.current['adminMain'] || statsFetchedRef.current === user.id)) {
       setLoading(false)
       return
     }
 
+    fetchingRef.current['adminMain'] = true
     setLoading(true)
     try {
-      const [s, pendDoc, edu, road] = await Promise.all([
-        fetchDashboardStats(),
-        fetchPendingDoctors(),
-        fetchEducationContents(),
-        fetchRoadmapActivities()
-      ])
-      setStats(s)
-      setPendingDoctors(pendDoc || [])
-      setEducationContents(edu || [])
-      setRoadmapActivities(road || [])
-      fetchedRef.current = true
+      const data = await fetchAdminDashboardData()
+      setStats(data.stats)
+      setPendingDoctors(data.doctors || [])
+      statsFetchedRef.current = user.id
     } catch (err) {
-      console.error('Error loading admin data:', err)
+      console.error('[AdminDataProvider] Critical load error:', err)
     } finally {
       setLoading(false)
+      fetchingRef.current['adminMain'] = false
     }
-  }, [user, isAdmin])
+  }, [user?.id, isAdmin])
 
   useEffect(() => {
     if (!authLoading && isAdmin) {
@@ -498,9 +622,21 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
     pendingDoctors, 
     educationContents, 
     roadmapActivities, 
-    loading: authLoading || (isAdmin && loading), 
-    loadAdminData 
-  }), [stats, pendingDoctors, educationContents, roadmapActivities, authLoading, isAdmin, loading, loadAdminData])
+    loading: authLoading || (isAdmin && loading),
+    statsLoading,
+    doctorsLoading,
+    educationLoading,
+    roadmapLoading,
+    loadAdminData,
+    loadEducation,
+    loadRoadmap,
+    loadStats
+  }), [
+    stats, pendingDoctors, educationContents, roadmapActivities, 
+    authLoading, isAdmin, loading, statsLoading, doctorsLoading, 
+    educationLoading, roadmapLoading, loadAdminData, loadEducation, 
+    loadRoadmap, loadStats
+  ])
 
   return (
     <AdminContext.Provider value={adminContextValue}>

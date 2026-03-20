@@ -115,7 +115,7 @@ export function AuthSlider({ initialMode = 'login' }: AuthSliderProps) {
 
         const role = data.user?.user_metadata?.role
         if (role === 'admin') {
-          window.location.href = '/admin/dashboard'
+          window.location.href = '/admin'
           return
         } else if (role === 'doctor') {
           window.location.href = '/doctor'

@@ -43,9 +43,11 @@ export async function uploadFile(file: File, path: string): Promise<string> {
  * This inserts into `doctor_registrations` with status='pending'.
  * The user's role stays 'user' until admin approves.
  */
-export async function submitDoctorRegistration(userId: string, formData: DoctorRegistrationFormData) {
-  const user = await assertAuthenticated()
-  if (user.id !== userId) throw new Error('Akses ditolak: ID User tidak cocok')
+export async function submitDoctorRegistration(userId: string, formData: DoctorRegistrationFormData, skipAuthCheck = false) {
+  if (!skipAuthCheck) {
+    const user = await assertAuthenticated()
+    if (user.id !== userId) throw new Error('Akses ditolak: ID User tidak cocok')
+  }
 
   let profilePictureUrl = null
   if (formData.profilePicture) {
@@ -127,6 +129,7 @@ export async function submitDoctorRegistration(userId: string, formData: DoctorR
       certification_url: certificationUrl,
       years_of_experience: formData.yearsOfExperience ? parseInt(formData.yearsOfExperience) : 0,
       hourly_rate: parseFloat(formData.hourlyRate) || 0,
+      email: formData.email,
       status: 'pending',
     }])
     .select('id')
@@ -159,6 +162,53 @@ export async function getRegistrationStatus(userId: string) {
   }
 
   return data
+}
+
+/**
+ * Get registration for the currently authenticated user.
+ */
+export async function getOwnRegistration() {
+  const user = await assertAuthenticated()
+  return getRegistrationStatus(user.id)
+}
+
+/**
+ * Standalone doctor registration (Sign Up + Submit Registration).
+ */
+export async function registerDoctorStandalone(formData: DoctorRegistrationFormData) {
+  const email = formData.email?.trim()
+  const password = formData.password?.trim()
+  const { fullName } = formData
+  
+  if (!email || !password) throw new Error('Email dan password wajib diisi')
+
+  const supabase = await createClient()
+
+  // 1. Sign Up the user
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+        role: 'doctor-pending',
+        is_doctor_applicant: true
+      }
+    }
+  })
+
+  if (authError) handleServiceError(authError, 'Gagal mendaftarkan akun')
+  if (!authData.user) throw new Error('Gagal membuat akun')
+
+  // 2. Submit doctor registration
+  const result = await submitDoctorRegistration(authData.user.id, formData, true)
+  
+  // Set flag for pending page to show success even if no session yet (due to email confirmation)
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('genting_just_registered', 'true')
+  }
+  
+  return result
 }
 
 // Legacy function name kept for backward compatibility

@@ -1,8 +1,7 @@
 import { useUserContext } from '@/components/providers/Providers'
 
 export function useUserRole() {
-  const { role, loading } = useUserContext()
+  const { role, loading, isProfileLoaded } = useUserContext()
   
-  // dbLoading is no longer needed as a separate state since it's merged into the global profile loading
-  return { role, loading, dbLoading: loading }
+  return { role, loading, isProfileLoaded, dbLoading: loading }
 }

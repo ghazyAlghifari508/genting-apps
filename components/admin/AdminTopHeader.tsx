@@ -21,7 +21,7 @@ interface AdminTopHeaderProps {
 }
 
 const adminMenuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
   { icon: Stethoscope, label: 'Doctor Approvals', href: '/admin/doctor-approvals' },
   { icon: BookOpen, label: 'Manage Edukasi', href: '/admin/education' },
   { icon: Route, label: 'Manage Roadmap', href: '/admin/roadmap' },
@@ -57,7 +57,7 @@ export function AdminTopHeader({ title }: AdminTopHeaderProps) {
             </SheetHeader>
             <nav className="flex-1 px-4 space-y-2 mt-4">
               {adminMenuItems.map((item) => {
-                const isActive = pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href))
+                const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
                 return (
                   <Link key={item.href} href={item.href} className="block">
                     <div 

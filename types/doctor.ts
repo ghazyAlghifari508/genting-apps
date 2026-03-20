@@ -31,10 +31,18 @@ export interface DoctorSchedule {
 }
 
 export interface DoctorRegistrationFormData {
+  // Account Information
+  email?: string
+  password?: string
+  confirmPassword?: string
+  
+  // Personal Information
   fullName: string
   phone: string
   bio: string
   profilePicture: File | null
+  
+  // Professional Information
   specialization: string
   licenseNumber: string
   yearsOfExperience: string

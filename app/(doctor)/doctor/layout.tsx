@@ -11,10 +11,24 @@ export default function DoctorDashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Neutral Shell: Always render the structure.
-  // Protecting and checking are still called to trigger side-effects (redirects).
-  useProtectedRoute(['doctor'])
-  useCheckDoctorApproval()
+  // Protecting and checking are called to trigger side-effects (redirects).
+  const { role, loading: authLoading, isProfileLoaded } = useProtectedRoute(['doctor'])
+  const { checking: approvalChecking } = useCheckDoctorApproval()
+
+  const isLoading = authLoading || approvalChecking || !isProfileLoaded
+  const isAuthorized = role === 'doctor' || role === 'doctor-pending'
+
+  // Strict UI Guard: Only render content if confirmed as Doctor and data is ready.
+  if (isLoading || !isAuthorized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F7FA]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-doccure-teal border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-500 font-medium animate-pulse">Menyiapkan Dashboard...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F7FA]">

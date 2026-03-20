@@ -1,65 +1,67 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from './useAuth'
-import { supabase } from '@/lib/supabase'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { useAuthContext } from '@/components/providers/Providers'
+import { getOwnRegistration } from '@/services/doctorRegistrationService'
 
 /**
- * Hook that checks if the current user has a pending approval notification.
- * If `profiles.show_approval_msg` is true, redirect to the approval page.
- * Used in the doctor dashboard layout to catch newly approved doctors.
+ * Hook to check if a doctor has a pending approval message/redirect.
+ * This is used in the doctor layout to catch newly approved doctors and send 
+ * them to the "Welcome/Success" page once.
  */
 export function useCheckDoctorApproval() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const pathname = usePathname()
+  const { user, loading: authLoading } = useAuthContext()
   const [checkedUserId, setCheckedUserId] = useState<string | null>(null)
+  const isChecking = useRef(false)
+  const hasCheckedThisSession = useRef(false)
 
   useEffect(() => {
-    if (authLoading || !user) return
-    if (checkedUserId === user.id) return
-
-    // Session Guard: If user dismissed approval msg in this session, don't check/redirect
-    if (typeof window !== 'undefined' && sessionStorage.getItem('dismissed_approval_msg')) {
+    // 1. Basic guards
+    if (authLoading || !user || user.id === checkedUserId || isChecking.current) return
+    
+    // 2. Already on the target page: skip check to avoid recursion
+    if (pathname === '/onboarding/doctor-approved') {
       setCheckedUserId(user.id)
       return
     }
 
-    let mounted = true
+    // 3. Session guard: only check once per browser session to prevent any loop
+    const storageKey = `genting_approval_redirect_checked_${user.id}`
+    if (typeof window !== 'undefined' && (sessionStorage.getItem(storageKey) === 'true' || hasCheckedThisSession.current)) {
+      setCheckedUserId(user.id)
+      return
+    }
 
-    const checkFlag = async () => {
+    const checkStatus = async () => {
+      isChecking.current = true
       try {
-        // Force fetch fresh data
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('show_approval_msg')
-          .eq('id', user.id)
-          .single()
+        const registration = await getOwnRegistration()
+        
+        // Mark as checked to prevent re-triggers regardless of result
+        hasCheckedThisSession.current = true
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(storageKey, 'true')
+        }
 
-        if (!error && data?.show_approval_msg === true) {
-          // Check if we are already on the approval page to prevent loop
-          if (window.location.pathname === '/onboarding/doctor-approved') {
-            if (mounted) setCheckedUserId(user.id)
-            return
-          }
-
+        if (registration && registration.status === 'approved' && registration.show_approval_msg === true) {
+          // Redirect the user. The target page MUST clear the 'show_approval_msg' flag in DB.
           router.replace('/onboarding/doctor-approved')
         } else {
-          if (mounted) setCheckedUserId(user.id)
+          setCheckedUserId(user.id)
         }
       } catch (err) {
         console.error('[useCheckDoctorApproval] Error:', err)
-        if (mounted) setCheckedUserId(user.id)
+        setCheckedUserId(user.id)
+      } finally {
+        isChecking.current = false
       }
     }
 
-    checkFlag()
+    checkStatus()
+  }, [user, authLoading, pathname, router, checkedUserId])
 
-    return () => {
-      mounted = false
-    }
-  }, [user, authLoading, router, checkedUserId])
-
-  const checking = authLoading || (!!user && checkedUserId !== user.id)
-  return { checking }
+  return { checking: authLoading || (!!user && checkedUserId !== user.id) }
 }

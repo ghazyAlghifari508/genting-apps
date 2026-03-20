@@ -41,6 +41,7 @@ interface AnalysisResult {
   stuntingNutritionScore: number
   tip: string
   isHealthy: boolean
+  isFallback?: boolean
 }
 
 interface FoodScan {
@@ -453,7 +454,7 @@ export default function VisionPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="bg-doccure-teal text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl">Verified Analysis</span>
-                      {analysis && (analysis as any).isFallback ? (
+                      {analysis && analysis.isFallback ? (
                         <span className="bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl border border-amber-200">Local Safety</span>
                       ) : (
                         <span className="bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl border border-emerald-200">AI Powered</span>

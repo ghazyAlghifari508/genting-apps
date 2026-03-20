@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
   { icon: Stethoscope, label: 'Doctor Approvals', href: '/admin/doctor-approvals' },
   { icon: BookOpen, label: 'Manage Edukasi', href: '/admin/education' },
   { icon: Route, label: 'Manage Roadmap', href: '/admin/roadmap' },
@@ -47,7 +47,7 @@ export function AdminSidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-4 space-y-2 overflow-y-auto relative z-10">
         {menuItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href))
+          const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
           return (
             <Link key={item.href} href={item.href} className="block">
               <div 

@@ -34,9 +34,9 @@ const Footer = () => {
             </div>
 
             <div>
-              <h4 className="font-bold text-white mb-4">Perusahaan</h4>
+              <h4 className="font-bold text-white mb-4">Genting+</h4>
               <ul className="space-y-2.5">
-                {["Tentang Kami", "Karir", "Blog", "Kontak"].map((link, j) => (
+                {["Tentang Kami", "Blog", "Kontak"].map((link, j) => (
                   <li key={j}>
                     <a href="#" className="text-sm text-white/50 hover:text-[#E8C84A] transition-colors">
                       {link}
@@ -60,18 +60,10 @@ const Footer = () => {
             </div>
 
             <div>
-              <h4 className="font-bold text-white mb-4">Berlangganan</h4>
-              <p className="text-sm text-white/50 mb-4">Dapatkan tips kesehatan Bunda & Si Kecil terbaru langsung di email Anda.</p>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="Email Anda"
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#E8C84A]/30"
-                />
-                <button className="w-10 h-10 rounded-xl bg-[#E8C84A] hover:bg-[#D4B83E] flex items-center justify-center text-[#0F6856] transition-colors flex-shrink-0">
-                  <span aria-hidden="true">→</span>
-                </button>
-              </div>
+              <h4 className="font-bold text-white mb-4">Misi Kami</h4>
+              <p className="text-sm text-white/50 mb-4 leading-relaxed">
+                Menciptakan Indonesia bebas stunting melalui edukasi dan teknologi pemantauan kesehatan yang cerdas untuk setiap Bunda.
+              </p>
             </div>
           </div>
 

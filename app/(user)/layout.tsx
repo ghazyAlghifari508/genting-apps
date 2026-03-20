@@ -12,7 +12,19 @@ const AiChatFloating = dynamic(
 )
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  useProtectedRoute(['user'])
+  const { role, loading, isProfileLoaded } = useProtectedRoute(['user'])
+
+  // Strict UI Guard: Only render content if confirmed as User.
+  if (loading || !isProfileLoaded || role !== 'user') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-doccure-teal border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-500 font-medium animate-pulse">Memuat Dashboard...</p>
+        </div>
+      </div>
+    )
+  }
   const pathname = usePathname()
   const isReplicaDashboard =
     pathname === '/dashboard' ||
